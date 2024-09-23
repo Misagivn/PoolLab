@@ -19,10 +19,32 @@ import Icon from "@/assets/icons";
 import Button from "@/components/Button";
 const Login = () => {
   const axios = require("axios");
+  const [email, setEmail] = useState([]);
+  const [password, setPassword] = useState([]);
   const router = useRouter();
   const emailRef = useRef("");
   const passwordRef = useRef("");
   const [loading, setLoading] = useState(false);
+
+  function toHome() {
+    router.push("./(main)/home");
+  }
+
+  async function getUser() {
+    try {
+      const response = await axios.get(
+        "https://api.poolz.one/v1/user/getUser",
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      console.log(response.data);
+    } catch (error) {
+      console.log(error);
+    }
+  }
   const onSubmit = async () => {
     if (!emailRef.current || !passwordRef.current) {
       Alert.alert("Login", "Please fill all the fields");
@@ -57,7 +79,7 @@ const Login = () => {
             onChangeText={(value) => passwordRef.current.value}
           />
           <Text style={styles.forgotPassword}>Forgot Password?</Text>
-          <Button title="Login" loading={loading} onPress={onSubmit} />
+          <Button title="Login" loading={loading} onPress={toHome} />
         </View>
 
         {/* Footer */}

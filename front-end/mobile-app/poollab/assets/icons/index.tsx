@@ -5,12 +5,14 @@ import BackIcon from "./BackIcon";
 import EmailIcon from "./EmailIcon";
 import KeyIcon from "./KeyIcon";
 import ProfileIcon from "./ProfileIcon";
+import QrCodeIcon from "./QrIcon";
 const icons = {
   home: HomeIcon,
   back: BackIcon,
   email: EmailIcon,
   password: KeyIcon,
   profile: ProfileIcon,
+  qr: QrCodeIcon,
 };
 
 const Icon = ({ name, ...props }) => {

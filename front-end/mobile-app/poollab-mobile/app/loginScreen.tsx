@@ -7,7 +7,43 @@ import InputCustom from "@/components/inputCustom";
 import Button from "@/components/roundButton";
 import { router, useRouter } from "expo-router";
 import Icon from "@/assets/icons/icons";
+import { useState, useEffect } from "react";
+import axios from "axios";
 const LoginScreen = () => {
+  const [accEmail, setAccEmail] = useState("");
+  const [accPassword, setAccPassword] = useState([]);
+  const [loggedIn, setLoggedIn] = useState([]);
+  const loginData = {
+    email: accEmail,
+    password: accPassword,
+  };
+
+  const checkLogin = async (event) => {
+    if (!accEmail || !accPassword) {
+      alert("Email và mật khẩu không được để trống");
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        "https://poollabwebapi20241008201316.azurewebsites.net/api/Auth/Login",
+        loginData
+      );
+
+      if (response.status === 200) {
+        console.log(response.data), console.log("Login success");
+        router.push("/(home)");
+      } else {
+        throw (new Error("Login failed"), console.log(response.data));
+      }
+    } catch (error) {
+      console.error("Login error:", error.message);
+      setAccEmail("");
+      setAccPassword("");
+      alert("Email hoặc mật khẩu không đúng");
+    }
+  };
+
   return (
     <View style={styles.container}>
       <StatusBar hidden={true} />
@@ -24,12 +60,19 @@ const LoginScreen = () => {
           icon={
             <Icon name="emailIcon" size={25} strokeWidth={1} color="black" />
           }
+          onChangeText={(text) => {
+            setAccEmail(text);
+          }}
         />
         <InputCustom
           placeholder="Mật khẩu"
+          secureTextEntry={true}
           icon={
             <Icon name="passwordIcon" size={25} strokeWidth={1} color="black" />
           }
+          onChangeText={(text) => {
+            setAccPassword(text);
+          }}
         />
       </View>
       {/* Link quên mật khẩu */}
@@ -62,7 +105,7 @@ const LoginScreen = () => {
           buttonStyles={styles.customButton1}
           textStyles={styles.customButtonText1}
           onPress={() => {
-            router.push("./(home)");
+            checkLogin();
           }}
         />
       </View>

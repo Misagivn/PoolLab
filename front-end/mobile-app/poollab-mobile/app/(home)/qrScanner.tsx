@@ -1,15 +1,22 @@
-import { StyleSheet, Text, View } from "react-native";
 import React from "react";
-import { useCameraPermissions } from "expo-camera";
+import { router, useRouter } from "expo-router";
+import { View, Text } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 const qrScanner = () => {
-  const [permission, requestPermission] = useCameraPermissions();
-  return (
-    <View>
-      <Text>qrScanner</Text>
-    </View>
-  );
+  router.push("../(qrScanner)");
+  // return (
+  //   <SafeAreaView>
+  //     <View>
+  //       <Text
+  //         onPress={() => {
+  //           router.push("../(qrScanner)");
+  //         }}
+  //       >
+  //         Gayyy
+  //       </Text>
+  //     </View>
+  //   </SafeAreaView>
+  // );
 };
 
 export default qrScanner;
-
-const styles = StyleSheet.create({});

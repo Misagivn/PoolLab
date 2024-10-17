@@ -1,4 +1,6 @@
+// File: /app/table/layout.tsx
 import React from 'react';
+import { Flex } from '@chakra-ui/react';
 
 export default function TableLayout({
   children,
@@ -6,8 +8,8 @@ export default function TableLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className="flex h-screen">
+    <Flex h="100vh">
       {children}
-    </div>
+    </Flex>
   );
 }

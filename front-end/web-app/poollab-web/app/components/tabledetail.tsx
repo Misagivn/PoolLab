@@ -1,7 +1,7 @@
+// File: /app/table/components/TableDetails.tsx
 'use client';
 import React, { useState } from 'react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
+import { Box, Heading, Button, Grid, Alert, AlertIcon, VStack, Text } from '@chakra-ui/react';
 
 interface Drink {
   id: number;
@@ -36,44 +36,45 @@ export default function TableDetails() {
   };
 
   return (
-    <div className="w-1/2 p-4 bg-white overflow-y-auto">
+    <Box w="50%" p={4} bg="white" overflowY="auto">
       {selectedTable ? (
         <>
-          <h2 className="text-2xl font-bold mb-4">{selectedTable.name}</h2>
-          <div className="mb-4">
-            <p className="text-xl">Thời gian: {Math.floor(timer / 60)}:{timer % 60 < 10 ? '0' : ''}{timer % 60}</p>
-            <Button onClick={toggleTimer} className="mt-2">
+          <Heading as="h2" size="xl" mb={4}>{selectedTable.name}</Heading>
+          <Box mb={4}>
+            <Text fontSize="xl">
+              Thời gian: {Math.floor(timer / 60)}:{timer % 60 < 10 ? '0' : ''}{timer % 60}
+            </Text>
+            <Button onClick={toggleTimer} mt={2} colorScheme="teal">
               {isTimerRunning ? 'Dừng' : 'Bắt đầu'}
             </Button>
-          </div>
-          <div className="mb-4">
-            <h3 className="text-xl font-bold mb-2">Đồ uống</h3>
-            <div className="grid grid-cols-2 gap-2">
+          </Box>
+          <Box mb={4}>
+            <Heading as="h3" size="lg" mb={2}>Đồ uống</Heading>
+            <Grid templateColumns="repeat(2, 1fr)" gap={2}>
               {drinks.map((drink) => (
                 <Button key={drink.id} onClick={() => addDrink(drink)} variant="outline">
                   {drink.name} - {drink.price}đ
                 </Button>
               ))}
-            </div>
-          </div>
+            </Grid>
+          </Box>
           {selectedDrinks.length > 0 && (
-            <div>
-              <h3 className="text-xl font-bold mb-2">Đồ uống đã chọn</h3>
-              <ul>
+            <Box>
+              <Heading as="h3" size="lg" mb={2}>Đồ uống đã chọn</Heading>
+              <VStack align="start">
                 {selectedDrinks.map((drink, index) => (
-                  <li key={index}>{drink.name} - {drink.price}đ</li>
+                  <Text key={index}>{drink.name} - {drink.price}đ</Text>
                 ))}
-              </ul>
-            </div>
+              </VStack>
+            </Box>
           )}
         </>
       ) : (
-        <Alert>
-          <AlertDescription>
-            Vui lòng chọn một bàn từ danh sách bên trái để xem thông tin và quản lý.
-          </AlertDescription>
+        <Alert status="info">
+          <AlertIcon />
+          <Text>Vui lòng chọn một bàn từ danh sách bên trái để xem thông tin và quản lý.</Text>
         </Alert>
       )}
-    </div>
+    </Box>
   );
 }

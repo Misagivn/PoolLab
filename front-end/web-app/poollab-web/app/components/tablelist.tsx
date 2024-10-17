@@ -1,6 +1,7 @@
+// File: /app/table/components/TableList.tsx
 'use client';
 import React from 'react';
-import { Button } from '@/components/ui/button';
+import { Button, Box, Grid, Heading } from '@chakra-ui/react';
 
 interface Table {
   id: number;
@@ -26,20 +27,21 @@ export default function TableList() {
   };
 
   return (
-    <div className="w-1/2 p-4 bg-gray-100 overflow-y-auto">
-      <h2 className="text-2xl font-bold mb-4">Danh sách bàn</h2>
-      <div className="grid grid-cols-3 gap-4">
+    <Box w="50%" p={4} bg="gray.100" overflowY="auto">
+      <Heading as="h2" size="xl" mb={4}>Danh sách bàn</Heading>
+      <Grid templateColumns="repeat(3, 1fr)" gap={4}>
         {tables.map((table) => (
           <Button
             key={table.id}
             onClick={() => handleTableClick(table)}
-            variant={table.available ? 'default' : 'secondary'}
-            className="h-20 text-lg"
+            colorScheme={table.available ? 'blue' : 'gray'}
+            size="lg"
+            height="20"
           >
             {table.name}
           </Button>
         ))}
-      </div>
-    </div>
+      </Grid>
+    </Box>
   );
 }

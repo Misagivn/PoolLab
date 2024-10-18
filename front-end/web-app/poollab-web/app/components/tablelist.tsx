@@ -1,47 +1,43 @@
-// File: /app/table/components/TableList.tsx
+// File: /app/components/tablelist.tsx
 'use client';
 import React from 'react';
-import { Button, Box, Grid, Heading } from '@chakra-ui/react';
+import { Box, Image, Text, SimpleGrid, VStack } from '@chakra-ui/react';
+import { Table } from '../table/page';
 
-interface Table {
-  id: number;
-  name: string;
-  available: boolean;
+interface TableListProps {
+  onSelectTable: (table: Table) => void;
 }
 
 const tables: Table[] = [
-  { id: 1, name: 'Bàn 1', available: true },
-  { id: 2, name: 'Bàn 2', available: false },
-  { id: 3, name: 'Bàn 3', available: true },
-  // Thêm các bàn khác ở đây
+  { id: 1, name: 'Bàn 1', status: 'available', imageUrl: '/pool-table (1).png' },
+  { id: 2, name: 'Bàn 2', status: 'occupied', imageUrl: '/pool-table (1).png' },
+  { id: 3, name: 'Bàn 3', status: 'reserved', imageUrl: '/pool-table (1).png' },
+  // Thêm các bàn khác nếu cần
 ];
 
-export default function TableList() {
-  const handleTableClick = (table: Table) => {
-    if (table.available) {
-      // Xử lý logic khi chọn bàn
-      console.log(`Bàn ${table.name} được chọn`);
-    } else {
-      alert('Bàn này hiện không khả dụng');
-    }
-  };
-
+export default function TableList({ onSelectTable }: TableListProps) {
   return (
-    <Box w="50%" p={4} bg="gray.100" overflowY="auto">
-      <Heading as="h2" size="xl" mb={4}>Danh sách bàn</Heading>
-      <Grid templateColumns="repeat(3, 1fr)" gap={4}>
+    <Box w="70%" p={4} bg="gray.100" overflowY="auto" maxH="100vh">
+      <SimpleGrid columns={3} spacing={4}>
         {tables.map((table) => (
-          <Button
+          <VStack
             key={table.id}
-            onClick={() => handleTableClick(table)}
-            colorScheme={table.available ? 'blue' : 'gray'}
-            size="lg"
-            height="20"
+            bg="white"
+            p={4}
+            borderRadius="md"
+            boxShadow="md"
+            onClick={() => onSelectTable(table)}
+            cursor="pointer"
+            _hover={{ boxShadow: 'lg' }}
           >
-            {table.name}
-          </Button>
+            <Image src={table.imageUrl} alt={table.name} borderRadius="md" />
+            <Text fontWeight="bold">{table.name}</Text>
+            <Text color={table.status === 'available' ? 'green.500' : table.status === 'occupied' ? 'red.500' : 'orange.500'}>
+              {table.status === 'available' ? 'Trống' : table.status === 'occupied' ? 'Đã đặt' : 'Đã đặt trước'}
+            </Text>
+          </VStack>
         ))}
-      </Grid>
+      </SimpleGrid>
     </Box>
   );
 }

@@ -1,7 +1,8 @@
-// File: /app/table/components/TableDetails.tsx
+// File: /app/components/tabledetail.tsx
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Heading, Button, Grid, Alert, AlertIcon, VStack, Text } from '@chakra-ui/react';
+import { Table } from '../table/page';
 
 interface Drink {
   id: number;
@@ -9,23 +10,30 @@ interface Drink {
   price: number;
 }
 
-interface Table {
-  id: number;
-  name: string;
+interface TableDetailsProps {
+  selectedTable: Table | null;
 }
 
 const drinks: Drink[] = [
   { id: 1, name: 'Coca Cola', price: 15000 },
   { id: 2, name: 'Pepsi', price: 15000 },
   { id: 3, name: 'Bia', price: 20000 },
-  // Thêm các đồ uống khác ở đây
 ];
 
-export default function TableDetails() {
-  const [selectedTable, setSelectedTable] = useState<Table | null>(null);
+export default function TableDetails({ selectedTable }: TableDetailsProps) {
   const [timer, setTimer] = useState<number>(0);
   const [isTimerRunning, setIsTimerRunning] = useState<boolean>(false);
   const [selectedDrinks, setSelectedDrinks] = useState<Drink[]>([]);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isTimerRunning) {
+      interval = setInterval(() => {
+        setTimer((prevTimer) => prevTimer + 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [isTimerRunning]);
 
   const toggleTimer = () => {
     setIsTimerRunning(!isTimerRunning);
@@ -36,10 +44,11 @@ export default function TableDetails() {
   };
 
   return (
-    <Box w="50%" p={4} bg="white" overflowY="auto">
+    <Box w="30%" p={4} bg="white" overflowY="auto" maxH="100vh">
       {selectedTable ? (
         <>
           <Heading as="h2" size="xl" mb={4}>{selectedTable.name}</Heading>
+          <Text mb={2}>Trạng thái: {selectedTable.status === 'available' ? 'Trống' : selectedTable.status === 'occupied' ? 'Đã đặt' : 'Đã đặt trước'}</Text>
           <Box mb={4}>
             <Text fontSize="xl">
               Thời gian: {Math.floor(timer / 60)}:{timer % 60 < 10 ? '0' : ''}{timer % 60}

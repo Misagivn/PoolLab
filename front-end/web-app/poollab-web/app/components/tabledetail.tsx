@@ -43,17 +43,26 @@ export default function TableDetails({ selectedTable }: TableDetailsProps) {
     setSelectedDrinks([...selectedDrinks, drink]);
   };
 
+  const getStatusText = (status: Table['status']) => {
+    switch (status) {
+      case 'available': return 'Trống';
+      case 'occupied': return 'Đã đặt';
+      case 'reserved': return 'Đã đặt trước';
+      case 'maintenance': return 'Đang sửa chữa';
+    }
+  };
+
   return (
     <Box w="30%" p={4} bg="white" overflowY="auto" maxH="100vh">
       {selectedTable ? (
         <>
           <Heading as="h2" size="xl" mb={4}>{selectedTable.name}</Heading>
-          <Text mb={2}>Trạng thái: {selectedTable.status === 'available' ? 'Trống' : selectedTable.status === 'occupied' ? 'Đã đặt' : 'Đã đặt trước'}</Text>
+          <Text mb={2}>Trạng thái: {getStatusText(selectedTable.status)}</Text>
           <Box mb={4}>
             <Text fontSize="xl">
               Thời gian: {Math.floor(timer / 60)}:{timer % 60 < 10 ? '0' : ''}{timer % 60}
             </Text>
-            <Button onClick={toggleTimer} mt={2} colorScheme="teal">
+            <Button onClick={toggleTimer} mt={2} colorScheme="teal" isDisabled={selectedTable.status === 'maintenance'}>
               {isTimerRunning ? 'Dừng' : 'Bắt đầu'}
             </Button>
           </Box>
@@ -61,7 +70,7 @@ export default function TableDetails({ selectedTable }: TableDetailsProps) {
             <Heading as="h3" size="lg" mb={2}>Đồ uống</Heading>
             <Grid templateColumns="repeat(2, 1fr)" gap={2}>
               {drinks.map((drink) => (
-                <Button key={drink.id} onClick={() => addDrink(drink)} variant="outline">
+                <Button key={drink.id} onClick={() => addDrink(drink)} variant="outline" isDisabled={selectedTable.status === 'maintenance'}>
                   {drink.name} - {drink.price}đ
                 </Button>
               ))}

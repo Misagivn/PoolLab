@@ -17,11 +17,14 @@ interface TableListProps {
 }
 
 const tables: Table[] = [
-  { id: 1, name: 'Bàn 1', status: 'available', type: 'phang', imageUrl: '/table.png' },
-  { id: 2, name: 'Bàn 2', status: 'occupied', type: 'lo', imageUrl: '/table.png' },
-  { id: 3, name: 'Bàn 3', status: 'reserved', type: 'lip', imageUrl: '/table.png' },
-  { id: 4, name: 'Bàn 4', status: 'available', type: 'phang', imageUrl: '/table.png' },
-  { id: 5, name: 'Bàn 5', status: 'occupied', type: 'lo', imageUrl: '/table.png' },
+  { id: 1, name: 'Bàn 1', status: 'available', type: 'phang', imageUrl: '/assets/phang.png' },
+  { id: 2, name: 'Bàn 2', status: 'occupied', type: 'lo', imageUrl: '/assets/lo.png' },
+  { id: 3, name: 'Bàn 3', status: 'reserved', type: 'lip', imageUrl: '/assets/lip.png' },
+  { id: 4, name: 'Bàn 4', status: 'available', type: 'phang', imageUrl: '/assets/phang.png' },
+  { id: 5, name: 'Bàn 5', status: 'occupied', type: 'lo', imageUrl: '/assets/lo.png' },
+  { id: 6, name: 'Bàn 6', status: 'occupied', type: 'lip', imageUrl: '/assets/lip.png' },
+  { id: 7, name: 'Bàn 7', status: 'occupied', type: 'phang', imageUrl: '/assets/phang.png' },
+  { id: 8, name: 'Bàn 8', status: 'occupied', type: 'lo', imageUrl: '/assets/lo.png' },
   // Add more tables as needed
 ];
 

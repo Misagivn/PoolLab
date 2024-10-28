@@ -1,134 +1,125 @@
-import React, { useState, useMemo } from 'react';
-import {
-  Box,
-  Flex,
-  VStack,
-  Text,
-  Button,
-  Input,
-  SimpleGrid,
-  Image,
-  HStack,
-  Select,
-} from '@chakra-ui/react';
-import { Table } from '../(staff)/booktable/page';
+"use client"
+import React from 'react';
+import { Box, SimpleGrid, Text, Button, Image, Heading, Flex } from '@chakra-ui/react';
+
+interface Table {
+  id: number;
+  name: string;
+  status: 'available' | 'occupied' | 'reserved';
+  type: string;
+}
 
 interface MenuItem {
   id: number;
   name: string;
-  type: 'food' | 'drink';
   price: number;
+  quantity: number;
   imageUrl: string;
 }
 
-const menuItems: MenuItem[] = [
-  { id: 1, name: 'Mỳ', type: 'food', price: 50000, imageUrl: '/noodle.jpg' },
-  { id: 2, name: 'Pizza', type: 'food', price: 100000, imageUrl: '/pizza.jpg' },
-  { id: 3, name: 'Coca Cola', type: 'drink', price: 15000, imageUrl: '/coca.jpg' },
-  { id: 4, name: 'Iced Tea', type: 'drink', price: 20000, imageUrl: '/milktea.jpg' },
-  // Add more items as needed
+interface OrderProps {
+  selectedTable: Table | null;
+  tableState: {
+    orderItems: MenuItem[];
+  };
+  onAddItem: (tableId: number, item: MenuItem) => void;
+}
+
+const menuItems = [
+  { id: 1, name: 'Mỳ', price: 50000, imageUrl: '/assets/noodle.jpg', quantity: 0 },
+  { id: 2, name: 'Pizza', price: 100000, imageUrl: '/assets/pizza.jpg', quantity: 0 },
+  { id: 3, name: 'Coca Cola', price: 15000, imageUrl: '/assets/coca.jpg', quantity: 0 },
+  { id: 4, name: 'Iced Tea', price: 20000, imageUrl: '/assets/milktea.jpg', quantity: 0 },
 ];
 
-interface OrderTabProps {
-  selectedTable: Table | null;
-}
-
-export default function OrderTab({ selectedTable }: OrderTabProps) {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterType, setFilterType] = useState<'all' | 'food' | 'drink'>('all');
-  const [orderItems, setOrderItems] = useState<Array<MenuItem & { quantity: number }>>([]);
-
-  const filteredItems = useMemo(() => 
-    menuItems.filter(item => 
-      (filterType === 'all' || item.type === filterType) &&
-      item.name.toLowerCase().includes(searchTerm.toLowerCase())
-    ),
-    [searchTerm, filterType]
-  );
-
-  const addToOrder = (item: MenuItem) => {
-    setOrderItems(prev => {
-      const existingItem = prev.find(i => i.id === item.id);
-      if (existingItem) {
-        return prev.map(i => i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i);
-      } else {
-        return [...prev, { ...item, quantity: 1 }];
-      }
-    });
-  };
-
-  const updateQuantity = (id: number, change: number) => {
-    setOrderItems(prev => 
-      prev.map(item => 
-        item.id === id 
-          ? { ...item, quantity: Math.max(0, item.quantity + change) }
-          : item
-      ).filter(item => item.quantity > 0)
+const Order: React.FC<OrderProps> = ({ selectedTable, tableState, onAddItem }) => {
+  if (!selectedTable) {
+    return (
+      <Box p={4}>
+        <Text fontSize="xl" fontWeight="bold" color="gray.500">
+          Vui lòng chọn bàn
+        </Text>
+      </Box>
     );
-  };
+  }
 
-  const calculateTotal = () => 
-    orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const statusColor = 
+    selectedTable.status === 'available' ? 'green.500' :
+    selectedTable.status === 'occupied' ? 'blue.500' : 
+    'orange.500';
 
-  const handlePayment = () => {
-    console.log('Processing payment for:', orderItems);
-    setOrderItems([]);
-  };
+  const statusText = 
+    selectedTable.status === 'available' ? 'Trống' :
+    selectedTable.status === 'occupied' ? 'Đang hoạt động' :
+    'Đã đặt trước';
 
   return (
-    <Flex h="100%">
-      <Box flex={1} borderRight="1px" borderColor="gray.200" p={4}>
-        <VStack spacing={4} align="stretch">
-          <HStack>
-            <Input
-              placeholder="Tìm kiếm món..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <Select
-              value={filterType}
-              onChange={(e) => setFilterType(e.target.value as 'all' | 'food' | 'drink')}
-            >
-              <option value="all">Tất cả</option>
-              <option value="food">Đồ ăn</option>
-              <option value="drink">Đồ uống</option>
-            </Select>
-          </HStack>
-          <SimpleGrid columns={3} spacing={4} overflowY="auto">
-            {filteredItems.map((item) => (
-              <Box key={item.id} borderWidth={1} borderRadius="lg" p={4}>
-                <Image src={item.imageUrl} alt={item.name} mb={2} />
-                <Text fontWeight="bold">{item.name}</Text>
-                <Text>{item.price.toLocaleString()}đ</Text>
-                <Button mt={2} size="sm" onClick={() => addToOrder(item)}>Thêm</Button>
+    <Box p={4} h="100%" overflowY="auto">
+      <Flex direction="column" minH="100%">
+        <Box mb={6}>
+          <Heading size="md" mb={2}>
+            Gọi món cho {selectedTable.name}
+          </Heading>
+          <Text color={statusColor} fontWeight="medium">
+            Trạng thái: {statusText}
+          </Text>
+          {selectedTable.status !== 'occupied' && (
+            <Text color="gray.600" fontSize="sm">
+              * Cần kích hoạt bàn để gọi món
+            </Text>
+          )}
+        </Box>
+
+        <SimpleGrid columns={3} spacing={4} flex="1">
+          {menuItems.map((item) => {
+            const existingItem = tableState.orderItems.find(i => i.id === item.id);
+            
+            return (
+              <Box 
+                key={item.id} 
+                borderWidth={1} 
+                borderRadius="lg" 
+                p={4}
+                bg="white"
+                shadow="sm"
+                _hover={{ shadow: 'md' }}
+                transition="all 0.2s"
+              >
+                <Image 
+                  src={item.imageUrl} 
+                  alt={item.name} 
+                  mb={3}
+                  borderRadius="md"
+                  height="160px"
+                  width="100%"
+                  objectFit="cover"
+                />
+                <Text fontWeight="bold" mb={1}>{item.name}</Text>
+                <Text color="gray.600" mb={3}>{item.price.toLocaleString()}đ</Text>
+                
+                {existingItem && (
+                  <Text mb={2} color="blue.500">
+                    Đã chọn: {existingItem.quantity}
+                  </Text>
+                )}
+                
+                <Button
+                  w="full"
+                  colorScheme="blue"
+                  onClick={() => onAddItem(selectedTable.id, item)}
+                  size="sm"
+                  isDisabled={selectedTable.status !== 'occupied'}
+                  _hover={{ transform: selectedTable.status === 'occupied' ? 'translateY(-1px)' : 'none' }}
+                >
+                  Thêm món
+                </Button>
               </Box>
-            ))}
-          </SimpleGrid>
-        </VStack>
-      </Box>
-      <Box flex={1} p={4}>
-        <VStack align="stretch" spacing={4}>
-          <Text fontSize="xl" fontWeight="bold">Bàn: {selectedTable?.name || 'Chưa chọn'}</Text>
-          <VStack align="stretch" spacing={2}>
-            {orderItems.map(item => (
-              <HStack key={item.id} justify="space-between">
-                <Text>{item.name}</Text>
-                <HStack>
-                  <Button size="xs" onClick={() => updateQuantity(item.id, -1)}>-</Button>
-                  <Text>{item.quantity}</Text>
-                  <Button size="xs" onClick={() => updateQuantity(item.id, 1)}>+</Button>
-                  <Text>{(item.price * item.quantity).toLocaleString()}đ</Text>
-                </HStack>
-              </HStack>
-            ))}
-          </VStack>
-          <HStack justify="space-between" fontWeight="bold">
-            <Text>Tổng cộng:</Text>
-            <Text>{calculateTotal().toLocaleString()}đ</Text>
-          </HStack>
-          <Button colorScheme="blue" onClick={handlePayment}>Thanh toán</Button>
-        </VStack>
-      </Box>
-    </Flex>
+            );
+          })}
+        </SimpleGrid>
+      </Flex>
+    </Box>
   );
-}
+};
+
+export default Order;

@@ -74,7 +74,7 @@ const LoginSignupCard = () => {
 
       if (isLogin) {
         // Redirect to home page after successful login
-        router.push("/home");
+        router.push("/booktable");
       } else {
         // For signup, you might want to automatically log the user in,
         // or redirect them to the login page, or keep them on the current page

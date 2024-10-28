@@ -1,3 +1,4 @@
+// File: /app/table/page.tsx
 "use client"
 import React, { useState } from 'react';
 import { Flex, Box, Tabs, TabList, Tab, TabPanels, TabPanel } from '@chakra-ui/react';
@@ -18,18 +19,12 @@ const TablePage = () => {
   const [activeTab, setActiveTab] = useState(0);
 
   const currentTableState = selectedTable 
-    ? (tableStates[selectedTable.id] || { orderItems: [], isActive: false, startTime: 0, elapsedTime: 0 })
+    ? tableStates[selectedTable.id] || { orderItems: [], isActive: false, startTime: 0, elapsedTime: 0 }
     : { orderItems: [], isActive: false, startTime: 0, elapsedTime: 0 };
 
   const handleAddOrderItem = (tableId: number, item: MenuItem) => {
     setTableStates(prev => {
-      const currentState = prev[tableId] || {
-        orderItems: [],
-        isActive: false,
-        startTime: 0,
-        elapsedTime: 0
-      };
-
+      const currentState = prev[tableId] || { orderItems: [], isActive: false, startTime: 0, elapsedTime: 0 };
       const existingItem = currentState.orderItems.find(i => i.id === item.id);
       
       return {
@@ -50,6 +45,51 @@ const TablePage = () => {
 
   const handleUpdateTableStatus = (tableId: number, status: string) => {
     setSelectedTable(prev => prev ? { ...prev, status } : null);
+  };
+
+  // Activate table and start the timer for the specific table
+  const handleActivateTable = (tableId: number) => {
+    setTableStates(prev => ({
+      ...prev,
+      [tableId]: {
+        ...prev[tableId],
+        isActive: true,
+        startTime: Date.now(),
+        elapsedTime: 0
+      }
+    }));
+    setSelectedTable({ ...selectedTable, status: 'occupied' });
+  };
+
+  // Update quantity and remove item if quantity is zero
+  const handleUpdateQuantity = (tableId: number, itemId: number, change: number) => {
+    setTableStates(prev => {
+      const currentState = prev[tableId];
+      const updatedItems = currentState.orderItems
+        .map(item => item.id === itemId ? { ...item, quantity: item.quantity + change } : item)
+        .filter(item => item.quantity > 0); // Remove items with quantity 0
+
+      return {
+        ...prev,
+        [tableId]: {
+          ...currentState,
+          orderItems: updatedItems
+        }
+      };
+    });
+  };
+
+  const handlePayment = (tableId: number) => {
+    setTableStates(prev => ({
+      ...prev,
+      [tableId]: {
+        ...prev[tableId],
+        orderItems: [],
+        isActive: false,
+        startTime: 0,
+        elapsedTime: 0
+      }
+    }));
   };
 
   return (
@@ -78,8 +118,10 @@ const TablePage = () => {
         <TableDetail 
           selectedTable={selectedTable}
           tableState={currentTableState}
+          onUpdateQuantity={handleUpdateQuantity}
+          onPayment={handlePayment}
+          onActivateTable={handleActivateTable}
           onUpdateTableStatus={handleUpdateTableStatus}
-          setTableStates={setTableStates}
         />
       </Box>
     </Flex>

@@ -10,10 +10,10 @@ import {
   VStack,
   useToast,
 } from '@chakra-ui/react';
-import SelectStore from '@/app/components/ui/SelectStore';
-import SelectCompany from '@/app/components/ui/SelectCompany';
+import SelectStore from '@/app/components/login/SelectStore';
+import SelectCompany from '@/app/components/login/SelectCompany';
 import { authApi } from '../lib/auth';
-import { Button } from './components/button';
+import { Button } from './components/ui/button';
 // import { UserRole } from '../lib/types';
 
 export default function LoginPage() {

@@ -1,15 +1,30 @@
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
-import React from 'react'
+import {React, useState, useEffect} from 'react'
 import {theme} from '@/constants/theme'
 import Icon from '@/assets/icons/icons'
+import { getStoredUser } from '@/api/tokenDecode'
 const CustomHeader = () => {
+  const [userName, setUserName] = useState('');
+  useEffect(() => {
+    const loadStoredUser = async () => {
+      try {
+        const storedUser = await getStoredUser();
+        if (storedUser) {
+          setUserName(storedUser.Username); // Assuming the stored user data has a 'name' property
+        }
+      } catch (error) {
+        console.error('Error loading stored user:', error);
+      }
+    };
+    loadStoredUser();
+  }, []);
   const number = 12345;
   const formattedNumber = number.toLocaleString();
   return (
     <View style={{paddingTop: 10, justifyContent: "center", alignItems: "center", backgroundColor: theme.colors.background}}>
     <View style={styles.container}>
       <View style={styles.userInfo}>
-        <Text style={{fontSize: 17, fontWeight: 'condensedBold'}}>Lương Minh Nhật</Text>
+        <Text style={{fontSize: 15, fontWeight: 'condensedBold'}}>{userName}</Text>
       </View>
       <View style={styles.quickInfo}>
         <View style={styles.walletCount}>
@@ -34,7 +49,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         backgroundColor: "white",
         height: 70,
-        paddingHorizontal: 25,
+        paddingHorizontal: 35,
         borderCurve: "continuous",
         borderRadius: 20,
         shadowColor: "black",
@@ -49,11 +64,11 @@ const styles = StyleSheet.create({
     userInfo:{
 
       paddingRight: 5,
-      paddingHorizontal: 5,
+      paddingHorizontal: 3,
       flexDirection: 'row',
       justifyContent: 'flex-start',
       alignItems: 'center',
-      gap: 10,
+      gap: 8,
     },
     quickInfo:{
       flexDirection: 'row',

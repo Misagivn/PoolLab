@@ -1,5 +1,5 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import React from "react";
+import React, { useRef } from "react";
 import { theme } from "@/constants/theme";
 import BackButton from "@/components/backButton";
 import { StatusBar } from "expo-status-bar";
@@ -8,39 +8,98 @@ import Button from "@/components/roundButton";
 import { router, useRouter } from "expo-router";
 import Icon from "@/assets/icons/icons";
 import { useState, useEffect } from "react";
-import axios from "axios";
+import { user_login } from "@/api/user_api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { jwtDecode } from "jwt-decode";
+
 const LoginScreen = () => {
   const [accEmail, setAccEmail] = useState("");
-  const [accPassword, setAccPassword] = useState([]);
+  // const [isChecking, setIsChecking] = useState(false);
+  // const [validation, setValidation] = useState(null);
+  const [accPassword, setAccPassword] = useState("");
   const [loggedIn, setLoggedIn] = useState([]);
+  // const emailRef = useRef("");
+  // const passwordRef = useRef("");
   const loginData = {
     email: accEmail,
     password: accPassword,
   };
+  // const loginData = {
+  //   email: emailRef.current,
+  //   password: passwordRef.current,
+  // };
+  // const checkEmailAvailability = async (text) => {
+  //   // Simulate API call to check email availability
+  //   check_email_availability({
+  //     email: text,
+  //     password: "string",
+  //     userName: "string",
+  //     fullName: "string",
+  //   }).then((response) => {
+  //     if (response.isAvailable) {
+  //       console.log("Email is available");
+  //     } else {
+  //       console.log("Email is not available");
+  //     }
+  //   });
+  //   return new Promise((resolve) => {
+  //     setTimeout(() => {
+  //       resolve(true); // Simulate API response
+  //     }, 1000);
+  //   });
+  // };
+  // const handleEmailChange = async (text) => {
+  //   setAccEmail(text);
+  //   const result = validateEmail(text);
 
-  const checkLogin = async (event) => {
-    if (!accEmail || !accPassword) {
-      alert("Email và mật khẩu không được để trống");
+  //   if (result.isValid) {
+  //     setIsChecking(true);
+  //     try {
+  //       const isAvailable = await checkEmailAvailability(text);
+  //       result.isAvailable = isAvailable;
+  //       if (!isAvailable) {
+  //         result.error = "Email is already taken";
+  //         result.isValid = false;
+  //       }
+  //     } catch (error) {
+  //       result.error = "Error checking email availability";
+  //       result.isValid = false;
+  //     } finally {
+  //       setIsChecking(false);
+  //     }
+  //   }
+
+  //   setValidation(result);
+  //   if (onValidation) {
+  //     onValidation(result);
+  //   }
+  // };
+  const checkLogin = async () => {
+    if (accEmail === "" || accPassword === "") {
+      alert("Please enter your email and password");
       return;
     }
-
     try {
-      const response = await axios.post(
-        "https://poollabwebapi20241008201316.azurewebsites.net/api/Auth/Login",
-        loginData
-      );
-
-      if (response.status === 200) {
-        console.log(response.data), console.log("Login success");
-        router.push("/(home)");
-      } else {
-        throw (new Error("Login failed"), console.log(response.data));
-      }
+      user_login(loginData).then((response) => {
+        if (response.data.status === 200) {
+          const token = JSON.stringify(response?.data.data);
+          const decodedToken = jwtDecode(token);
+          // const userName = decodedToken.Username;
+          // const userId = decodedToken.AccountId
+          AsyncStorage.multiSet([
+            ["userToken", token],
+            ["userData", JSON.stringify(decodedToken)],
+            //["userName", JSON.stringify(userName)],
+          ]);
+          console.log("======");
+          console.log(decodedToken);
+          router.push("(home)");
+        } else {
+          alert("Invalid email or password");
+        }
+      });
     } catch (error) {
-      console.error("Login error:", error.message);
-      setAccEmail("");
-      setAccPassword("");
-      alert("Email hoặc mật khẩu không đúng");
+      console.log(error);
     }
   };
 
@@ -60,9 +119,10 @@ const LoginScreen = () => {
           icon={
             <Icon name="emailIcon" size={25} strokeWidth={1} color="black" />
           }
-          onChangeText={(text) => {
-            setAccEmail(text);
+          onChangeText={(emailRef) => {
+            setAccEmail(emailRef.toLowerCase());
           }}
+          //onChangeText={(value) => (emailRef.current = value)}
         />
         <InputCustom
           placeholder="Mật khẩu"
@@ -73,6 +133,7 @@ const LoginScreen = () => {
           onChangeText={(text) => {
             setAccPassword(text);
           }}
+          //onChangeText={(value) => (passwordRef.current = value)}
         />
       </View>
       {/* Link quên mật khẩu */}

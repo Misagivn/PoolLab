@@ -27,6 +27,12 @@ const SignUpScreen = () => {
           }
         />
         <InputCustom
+          placeholder="Tên người dùng"
+          icon={
+            <Icon name="userIcon" size={25} strokeWidth={1} color="black" />
+          }
+        />
+        <InputCustom
           placeholder="Email"
           icon={
             <Icon name="emailIcon" size={25} strokeWidth={1} color="black" />

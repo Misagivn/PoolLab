@@ -9,6 +9,7 @@ import LockPasswordIcon from "./passwordIcon";
 import UserIcon from "./userIcon";
 import AddIcon from "./plusIcon";
 import { theme } from "@/constants/theme";
+import ArrowRight from "./arrowRight";
 const icons = {
   fbIcon: FacebookIcon,
   ggIcon: GoogleIcon,
@@ -18,6 +19,7 @@ const icons = {
   passwordIcon: LockPasswordIcon,
   userIcon: UserIcon,
   addIcon: AddIcon,
+  arrowRight: ArrowRight,
 };
 
 const Icon = ({ name, ...props }) => {

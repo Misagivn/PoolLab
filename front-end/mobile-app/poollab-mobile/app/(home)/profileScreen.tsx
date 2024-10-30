@@ -1,11 +1,46 @@
-import { StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import React from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-
+import { Image } from "react-native";
+import { theme } from "@/constants/theme";
+import Icon from "@/assets/icons/icons";
+import ArrowRight from "@/assets/icons/arrowRight";
+import { router } from "expo-router";
 const ProfileScreen = () => {
   return (
     <SafeAreaView>
-      <Text style={styles.screenTitle}>Profile</Text>
+      <Text style={styles.screenTitle}>My Profile</Text>
+      <View style={styles.header}>
+        <Image
+          style={styles.headerImage}
+          source={require("../../assets/images/eda492de2906a8827a6266e32bcd3ffb.webp")}
+        />
+        <View style={styles.basicInfo}>
+          <Text style={styles.infoName}>Luong Minh Nhat</Text>
+          <Text style={styles.infoEmail}>nhatasdasd@asdasdc.coasdas</Text>
+        </View>
+      </View>
+      <View style={styles.quickFunction}>
+        <Pressable
+          style={styles.functionBox}
+          onPress={() => router.push("../Profile/profile")}
+        >
+          <Text style={styles.functionName}>Quản lý tài khoản</Text>
+          <Icon name="arrowRight" size={20} strokeWidth={3} color="black" />
+        </Pressable>
+        <View style={styles.functionBox}>
+          <Text style={styles.functionName}>Quản lý ví tiền</Text>
+          <Icon name="arrowRight" size={20} strokeWidth={3} color="black" />
+        </View>
+        <View style={styles.functionBox}>
+          <Text style={styles.functionName}>Quản lý khóa học</Text>
+          <Icon name="arrowRight" size={20} strokeWidth={3} color="black" />
+        </View>
+        <View style={styles.functionBox}>
+          <Text style={styles.functionName}>Ví voucher</Text>
+          <Icon name="arrowRight" size={20} strokeWidth={3} color="black" />
+        </View>
+      </View>
     </SafeAreaView>
   );
 };
@@ -18,5 +53,71 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     textAlign: "center",
     marginTop: 20,
+  },
+  header: {
+    gap: 10,
+    flexDirection: "row",
+    backgroundColor: theme.colors.background,
+    justifyContent: "center",
+    marginHorizontal: 10,
+    marginVertical: 10,
+    padding: 10,
+    shadowColor: "black",
+    shadowOffset: {
+      width: 5,
+      height: 10,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 6,
+    borderRadius: 20,
+    borderCurve: "continuous",
+  },
+  headerImage: {
+    width: 70,
+    height: 70,
+    borderRadius: 50,
+    borderWidth: 2,
+    borderColor: "black",
+  },
+  basicInfo: {
+    justifyContent: "center",
+    alignItems: "flex-start",
+    gap: 5,
+  },
+  infoName: {
+    fontSize: 23,
+    fontWeight: "bold",
+  },
+  infoEmail: {
+    fontSize: 14,
+  },
+  quickFunction: {
+    backgroundColor: theme.colors.background,
+    justifyContent: "center",
+    marginHorizontal: 10,
+    marginVertical: 5,
+    padding: 15,
+    shadowColor: "black",
+    shadowOffset: {
+      width: 5,
+      height: 10,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 6,
+    borderRadius: 20,
+    borderCurve: "continuous",
+  },
+  functionBox: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: 15,
+    paddingVertical: 20,
+    borderBottomWidth: 0.7,
+    borderBottomColor: "gray",
+  },
+  functionName: {
+    fontSize: 20,
   },
 });

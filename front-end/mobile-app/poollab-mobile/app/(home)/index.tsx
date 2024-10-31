@@ -6,7 +6,6 @@ import { StatusBar } from "expo-status-bar";
 import { theme } from "@/constants/theme";
 import InputCustom from "@/components/inputCustom";
 import Icon from "@/assets/icons/icons";
-
 const index = () => {
   return (
     <SafeAreaView>

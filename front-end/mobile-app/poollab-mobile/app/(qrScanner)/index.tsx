@@ -2,7 +2,7 @@ import { StyleSheet, Text, View } from "react-native";
 import React, { useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import BackButton from "@/components/backButton";
-import { BarcodeScanner } from "expo-barcode-scanner";
+import { BarCodeScanner } from "expo-barcode-scanner";
 import { StatusBar } from "expo-status-bar";
 const index = () => {
   const [hasPermission, setHasPermission] = React.useState(false);
@@ -10,7 +10,7 @@ const index = () => {
 
   useEffect(() => {
     async () => {
-      const { status } = await BarcodeScanner.requestCameraPermissionsAsync();
+      const { status } = await BarCodeScanner.requestPermissionsAsync();
       setHasPermission(status === "granted");
     };
   }, []);

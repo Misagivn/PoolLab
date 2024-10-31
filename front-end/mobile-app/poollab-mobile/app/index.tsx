@@ -34,6 +34,7 @@ const index = () => {
               textStyles={styles.customButtonText1}
               onPress={() => {
                 router.push("loginScreen");
+                //router.push("./(userProfile)");
               }}
             />
             {/* <IconButton

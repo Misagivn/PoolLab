@@ -1,29 +1,54 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Image } from "react-native";
 import { theme } from "@/constants/theme";
 import Icon from "@/assets/icons/icons";
 import ArrowRight from "@/assets/icons/arrowRight";
 import { router } from "expo-router";
+import { get_user_details } from "@/api/user_api";
+import { getStoredUser } from "@/api/tokenDecode";
 const ProfileScreen = () => {
+  //Get userId from AsyncStorage
+  const [userFullName, setUserFullName] = useState("");
+  const [userEmail, setUserEmail] = useState("");
+  useEffect(() => {
+    const loadStat = async () => {
+      try {
+        const storedUser = await getStoredUser();
+        if (storedUser) {
+          get_user_details(storedUser.AccountId).then((response) => {
+            if (response.data.status === 200) {
+              const userFullName = response.data.data.fullName;
+              const userEmail = response.data.data.email;
+              setUserFullName(userFullName);
+              setUserEmail(userEmail);
+            }
+          });
+        }
+      } catch (error) {
+        console.error("Error loading stored user:", error);
+      }
+    };
+    loadStat();
+  }, []);
   return (
     <SafeAreaView>
-      <Text style={styles.screenTitle}>My Profile</Text>
+      <Text style={styles.screenTitle}>Hồ sơ cá nhân</Text>
       <View style={styles.header}>
         <Image
           style={styles.headerImage}
           source={require("../../assets/images/eda492de2906a8827a6266e32bcd3ffb.webp")}
         />
         <View style={styles.basicInfo}>
-          <Text style={styles.infoName}>Luong Minh Nhat</Text>
-          <Text style={styles.infoEmail}>nhatasdasd@asdasdc.coasdas</Text>
+          <Text style={styles.infoName}>{userFullName}</Text>
+          <Text style={styles.infoEmail}>{userEmail}</Text>
         </View>
       </View>
       <View style={styles.quickFunction}>
         <Pressable
           style={styles.functionBox}
-          onPress={() => router.push("../Profile/profile")}
+          onPress={() => router.push("../(userProfile)")}
         >
           <Text style={styles.functionName}>Quản lý tài khoản</Text>
           <Icon name="arrowRight" size={20} strokeWidth={3} color="black" />
@@ -58,7 +83,7 @@ const styles = StyleSheet.create({
     gap: 10,
     flexDirection: "row",
     backgroundColor: theme.colors.background,
-    justifyContent: "center",
+    justifyContent: "flex-start",
     marginHorizontal: 10,
     marginVertical: 10,
     padding: 10,
@@ -74,23 +99,25 @@ const styles = StyleSheet.create({
     borderCurve: "continuous",
   },
   headerImage: {
-    width: 70,
-    height: 70,
-    borderRadius: 50,
-    borderWidth: 2,
-    borderColor: "black",
+    marginLeft: 10,
+    width: 100,
+    height: 100,
+    borderRadius: 100,
+    borderWidth: 5,
+    borderColor: theme.colors.primary,
   },
   basicInfo: {
     justifyContent: "center",
     alignItems: "flex-start",
-    gap: 5,
+    gap: 0,
   },
   infoName: {
-    fontSize: 23,
+    fontSize: 22,
     fontWeight: "bold",
+    color: theme.colors.primary,
   },
   infoEmail: {
-    fontSize: 14,
+    fontSize: 15,
   },
   quickFunction: {
     backgroundColor: theme.colors.background,

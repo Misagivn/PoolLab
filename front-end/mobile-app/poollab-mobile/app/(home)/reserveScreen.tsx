@@ -12,7 +12,7 @@ const ReserveScreen = () => {
       <View style={styles.container}>
         <CustomHeader />
         <View style={styles.searchBox}>
-          <View styles={styles.searchRow}>
+          <View style={styles.searchRow}>
             <InputCustom
               placeholder="Address"
               icon={
@@ -91,7 +91,6 @@ const styles = StyleSheet.create({
     borderCurve: "continuous",
   },
   searchRow: {
-    flexDirection: "row",
     gap: 10,
     paddingVertical: 10,
   },

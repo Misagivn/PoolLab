@@ -1,96 +1,94 @@
-"use client";
-import React, { useState } from "react";
-import axios from "axios";
-import { useRouter } from "next/navigation";
+"use client"
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Box,
-  Button,
+  Container,
   FormControl,
   FormLabel,
   Input,
   VStack,
-  Heading,
-  Text,
-  Link,
-  Flex,
   useToast,
-  FormErrorMessage,
-} from "@chakra-ui/react";
+} from '@chakra-ui/react';
+import SelectStore from '@/app/components/ui/SelectStore';
+import SelectCompany from '@/app/components/ui/SelectCompany';
+import { authApi } from '../lib/auth';
+import { Button } from './components/button';
+// import { UserRole } from '../lib/types';
 
-const LoginSignupCard = () => {
-  const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [username, setUsername] = useState("");
-  const [fullName, setFullName] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [emailError, setEmailError] = useState("");
-  const toast = useToast();
+export default function LoginPage() {
   const router = useRouter();
+  const toast = useToast();
+  const [isLoading, setIsLoading] = useState(false);
+  
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    storeId: '',
+    companyId: ''
+  });
 
-  const validateEmail = (email) => {
-    const re =
-      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    return re.test(String(email).toLowerCase());
-  };
-
-  const handleEmailChange = (e) => {
-    const newEmail = e.target.value;
-    setEmail(newEmail);
-    if (newEmail && !validateEmail(newEmail)) {
-      setEmailError("Please enter a valid email address");
-    } else {
-      setEmailError("");
+  const handleRouteByRole = (role: string) => {
+    switch (role) {
+      case 'staff':
+        router.push('/booktable');
+        break;
+      case 'manager':
+        router.push('/table');
+        break;
+      case 'supermanager':
+      case 'admin':
+        router.push('/DashBoard');
+        break;
+      default:
+        // Fallback route nếu không match role nào
+        router.push('/');
+        break;
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!validateEmail(email)) {
-      setEmailError("Please enter a valid email address");
-      return;
-    }
-
     setIsLoading(true);
-
+    
     try {
-      const endpoint = isLogin
-        ? "https://poollabwebapi20241008201316.azurewebsites.net/api/Auth/Login"
-        : "https://poollabwebapi20241008201316.azurewebsites.net/api/Auth/Register";
-      const payload = isLogin
-        ? { email, password }
-        : { email, password, username, fullName };
+      if (!formData.email || !formData.password || !formData.storeId) {
+        throw new Error('Please fill in all required fields');
+      }
 
-      const response = await axios.post(endpoint, payload);
+      const loginPayload = {
+        email: formData.email,
+        password: formData.password,
+        storeId: formData.storeId,
+        companyId: formData.companyId || null
+      };
+
+      const response = await authApi.login(loginPayload);
+      const data = response.data as LoginResponse;
+
+      // Lưu thông tin vào localStorage
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('role', data.role);
+      localStorage.setItem('storeId', formData.storeId);
+      if (formData.companyId) {
+        localStorage.setItem('companyId', formData.companyId);
+      }
 
       toast({
-        title: isLogin ? "Login Successful" : "Signup Successful",
-        description: response.data.message,
-        status: "success",
-        duration: 3000,
-        isClosable: true,
+        title: 'Login successful',
+        status: 'success',
+        duration: 3000
       });
 
-      if (isLogin) {
-        // Redirect to home page after successful login
-        router.push("/booktable");
-      } else {
-        // For signup, you might want to automatically log the user in,
-        // or redirect them to the login page, or keep them on the current page
-        setIsLogin(true);
-        setEmail("");
-        setPassword("");
-        setUsername("");
-        setFullName("");
-      }
+      // Điều hướng dựa trên role
+      handleRouteByRole(data.role);
+
     } catch (error) {
       toast({
-        title: "Error",
-        description: error.response?.data?.message || "An error occurred",
-        status: "error",
-        duration: 3000,
-        isClosable: true,
+        title: 'Login failed',
+        description: error instanceof Error ? error.message : 'An error occurred',
+        status: 'error',
+        duration: 3000
       });
     } finally {
       setIsLoading(false);
@@ -98,82 +96,62 @@ const LoginSignupCard = () => {
   };
 
   return (
-    <Flex minHeight="100vh" width="full" align="center" justifyContent="center">
-      <Box
-        borderWidth={1}
-        px={4}
-        width="full"
-        maxWidth="500px"
-        borderRadius={4}
-        textAlign="center"
-        boxShadow="lg"
-      >
-        <Box p={4}>
-          <VStack spacing={8} align="stretch">
-            <Heading>{isLogin ? "Login" : "Sign Up"}</Heading>
-            <form onSubmit={handleSubmit}>
-              <VStack spacing={4} align="stretch">
-                <FormControl isRequired isInvalid={!!emailError}>
-                  <FormLabel>Email</FormLabel>
-                  <Input
-                    type="email"
-                    value={email}
-                    onChange={handleEmailChange}
-                  />
-                  <FormErrorMessage>{emailError}</FormErrorMessage>
-                </FormControl>
-                <FormControl isRequired>
-                  <FormLabel>Password</FormLabel>
-                  <Input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                </FormControl>
-                {!isLogin && (
-                  <>
-                    <FormControl isRequired>
-                      <FormLabel>Username</FormLabel>
-                      <Input
-                        type="text"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                      />
-                    </FormControl>
-                    <FormControl isRequired>
-                      <FormLabel>Full Name</FormLabel>
-                      <Input
-                        type="text"
-                        value={fullName}
-                        onChange={(e) => setFullName(e.target.value)}
-                      />
-                    </FormControl>
-                  </>
-                )}
-                <Button
-                  type="submit"
-                  colorScheme="blue"
-                  isLoading={isLoading}
-                  loadingText={isLogin ? "Logging in" : "Signing up"}
-                  isDisabled={!!emailError}
-                >
-                  {isLogin ? "Login" : "Sign Up"}
-                </Button>
-              </VStack>
-            </form>
-            <Text>
-              {isLogin
-                ? "Don't have an account? "
-                : "Already have an account? "}
-              <Link color="blue.500" onClick={() => setIsLogin(!isLogin)}>
-                {isLogin ? "Sign Up" : "Login"}
-              </Link>
-            </Text>
-          </VStack>
-        </Box>
-      </Box>
-    </Flex>
-  );
-};
+    <Container maxW="container.sm" py={10}>
+      <Box p={8} borderWidth={1} borderRadius="lg" boxShadow="lg">
+        <form onSubmit={handleLogin}>
+          <VStack spacing={4}>
+            <FormControl isRequired>
+              <FormLabel>Email</FormLabel>
+              <Input
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData(prev => ({
+                  ...prev,
+                  email: e.target.value
+                }))}
+              />
+            </FormControl>
 
-export default LoginSignupCard;
+            <FormControl isRequired>
+              <FormLabel>Password</FormLabel>
+              <Input
+                type="password"
+                value={formData.password}
+                onChange={(e) => setFormData(prev => ({
+                  ...prev,
+                  password: e.target.value
+                }))}
+              />
+            </FormControl>
+
+            <FormControl isRequired>
+              <FormLabel>Store</FormLabel>
+              <SelectStore
+                value={formData.storeId}
+                onChange={(value) => setFormData(prev => ({
+                  ...prev,
+                  storeId: value
+                }))}
+              />
+            </FormControl>
+
+            <FormControl>
+              <FormLabel>Company (Optional)</FormLabel>
+              <SelectCompany
+                value={formData.companyId}
+                onChange={(value) => setFormData(prev => ({
+                  ...prev,
+                  companyId: value
+                }))}
+              />
+            </FormControl>
+
+            <Button isLoading={isLoading}>
+              Login
+            </Button>
+          </VStack>
+        </form>
+      </Box>
+    </Container>
+  );
+}

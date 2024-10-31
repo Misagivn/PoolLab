@@ -1,4 +1,3 @@
-// File: /app/table/layout.tsx
 import React from 'react';
 import { Flex } from '@chakra-ui/react';
 

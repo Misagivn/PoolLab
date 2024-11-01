@@ -1,5 +1,5 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import React from "react";
+import React, { useState } from "react";
 import { theme } from "@/constants/theme";
 import BackButton from "@/components/backButton";
 import { StatusBar } from "expo-status-bar";
@@ -7,7 +7,75 @@ import InputCustom from "@/components/inputCustom";
 import Button from "@/components/roundButton";
 import { router } from "expo-router";
 import Icon from "@/assets/icons/icons";
+import { register_user } from "@/api/user_api";
 const SignUpScreen = () => {
+  const [userName, setUserName] = useState("");
+  const [userFullName, setUserFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [errorMessage1, setErrorMessage1] = useState("");
+  const [emailFormat, setEmailFormat] = useState(true);
+  const [passwordFormat, setPasswordFormat] = useState(true);
+  const validateEmail = () => {
+    const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+    if (!emailRegex.test(email)) {
+      setErrorMessage("Xin hãy nhập địa chỉ email hợp lệ");
+      setEmailFormat(false);
+    } else {
+      setErrorMessage("");
+      setEmailFormat(true);
+    }
+  };
+  const validatePassword = () => {
+    // Yêu cầu mật khẩu phải tối thiểu 8 ký tự, bao gồm ít nhất 1 chữ hoa, 1 chữ thường và 1 số
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
+    if (!passwordRegex.test(password)) {
+      setErrorMessage1(
+        "Mật khẩu phải tối thiểu 8 ký tự, bao gồm ít nhất 1 chữ hoa, 1 chữ thường và 1 số"
+      );
+      setPasswordFormat(false);
+    } else {
+      setErrorMessage1("");
+      setPasswordFormat(true);
+    }
+  };
+  const signupData = {
+    email: email,
+    password: password,
+    userName: userName,
+    fullName: userFullName,
+  };
+  const checkSignUp = async () => {
+    if (
+      email === "" ||
+      password === "" ||
+      userName === "" ||
+      userFullName === "" ||
+      !emailFormat ||
+      !passwordFormat
+    ) {
+      if (!emailFormat) {
+        alert(errorMessage);
+      } else if (!passwordFormat) {
+        alert(errorMessage1);
+      } else {
+        alert("Please enter the required fields");
+      }
+    } else {
+      try {
+        register_user(signupData).then((response) => {
+          if (response?.data.status === 200) {
+            router.push("loginScreen");
+          } else {
+            alert(response.data.message);
+          }
+        });
+      } catch (error) {
+        console.log("Error: ", error);
+      }
+    }
+  };
   return (
     <View style={styles.container}>
       <StatusBar hidden={true} />
@@ -25,25 +93,47 @@ const SignUpScreen = () => {
           icon={
             <Icon name="userIcon" size={25} strokeWidth={1} color="black" />
           }
+          onChangeText={(text) => {
+            setUserFullName(text);
+          }}
         />
         <InputCustom
           placeholder="Tên người dùng"
           icon={
             <Icon name="userIcon" size={25} strokeWidth={1} color="black" />
           }
+          onChangeText={(text) => {
+            setUserName(text);
+          }}
         />
         <InputCustom
+          value={email}
           placeholder="Email"
           icon={
             <Icon name="emailIcon" size={25} strokeWidth={1} color="black" />
           }
-        ></InputCustom>
+          onChangeText={(text) => {
+            setEmail(text.toLowerCase());
+          }}
+          onEndEditing={validateEmail}
+        />
+        {errorMessage ? (
+          <Text style={styles.errorText}>{errorMessage}</Text>
+        ) : null}
         <InputCustom
           placeholder="Mật khẩu"
+          secureTextEntry={true}
           icon={
             <Icon name="passwordIcon" size={25} strokeWidth={1} color="black" />
           }
-        ></InputCustom>
+          onChangeText={(text) => {
+            setPassword(text);
+          }}
+          onEndEditing={validatePassword}
+        />
+        {errorMessage1 ? (
+          <Text style={styles.errorText}>{errorMessage1}</Text>
+        ) : null}
       </View>
       {/* Button đăng ký */}
       <View style={styles.button}>
@@ -51,7 +141,7 @@ const SignUpScreen = () => {
           title="Đăng ký"
           buttonStyles={styles.customButton1}
           textStyles={styles.customButtonText1}
-          onPress={() => {}}
+          onPress={() => checkSignUp()}
         />
       </View>
       {/* Footer */}
@@ -96,9 +186,15 @@ const styles = StyleSheet.create({
     gap: 20,
     paddingHorizontal: 10,
   },
+  passwordText: {
+    color: "black",
+    fontSize: 14,
+    alignSelf: "flex-end",
+    textAlign: "right",
+  },
   button: {
     paddingHorizontal: 10,
-    paddingTop: 40,
+    paddingTop: 30,
   },
   customButton1: {
     backgroundColor: theme.colors.secondary,
@@ -113,7 +209,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingTop: 50,
+    paddingTop: 20,
     gap: 5,
   },
   footerText: {
@@ -125,5 +221,9 @@ const styles = StyleSheet.create({
     color: theme.colors.primary,
     fontSize: 15,
     fontWeight: "bold",
+  },
+  errorText: {
+    color: "red",
+    fontSize: 14,
   },
 });

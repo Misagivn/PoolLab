@@ -14,66 +14,12 @@ import { jwtDecode } from "jwt-decode";
 
 const LoginScreen = () => {
   const [accEmail, setAccEmail] = useState("");
-  // const [isChecking, setIsChecking] = useState(false);
-  // const [validation, setValidation] = useState(null);
   const [accPassword, setAccPassword] = useState("");
   const [loggedIn, setLoggedIn] = useState([]);
-  // const emailRef = useRef("");
-  // const passwordRef = useRef("");
   const loginData = {
     email: accEmail,
     password: accPassword,
   };
-  // const loginData = {
-  //   email: emailRef.current,
-  //   password: passwordRef.current,
-  // };
-  // const checkEmailAvailability = async (text) => {
-  //   // Simulate API call to check email availability
-  //   check_email_availability({
-  //     email: text,
-  //     password: "string",
-  //     userName: "string",
-  //     fullName: "string",
-  //   }).then((response) => {
-  //     if (response.isAvailable) {
-  //       console.log("Email is available");
-  //     } else {
-  //       console.log("Email is not available");
-  //     }
-  //   });
-  //   return new Promise((resolve) => {
-  //     setTimeout(() => {
-  //       resolve(true); // Simulate API response
-  //     }, 1000);
-  //   });
-  // };
-  // const handleEmailChange = async (text) => {
-  //   setAccEmail(text);
-  //   const result = validateEmail(text);
-
-  //   if (result.isValid) {
-  //     setIsChecking(true);
-  //     try {
-  //       const isAvailable = await checkEmailAvailability(text);
-  //       result.isAvailable = isAvailable;
-  //       if (!isAvailable) {
-  //         result.error = "Email is already taken";
-  //         result.isValid = false;
-  //       }
-  //     } catch (error) {
-  //       result.error = "Error checking email availability";
-  //       result.isValid = false;
-  //     } finally {
-  //       setIsChecking(false);
-  //     }
-  //   }
-
-  //   setValidation(result);
-  //   if (onValidation) {
-  //     onValidation(result);
-  //   }
-  // };
   const checkLogin = async () => {
     if (accEmail === "" || accPassword === "") {
       alert("Please enter your email and password");
@@ -85,17 +31,14 @@ const LoginScreen = () => {
           const token = JSON.stringify(response?.data.data);
           const decodedToken = jwtDecode(token);
           // const userName = decodedToken.Username;
-          // const userId = decodedToken.AccountId
+          const userId = decodedToken.AccountId;
           AsyncStorage.multiSet([
             ["userToken", token],
             ["userData", JSON.stringify(decodedToken)],
-            //["userName", JSON.stringify(userName)],
           ]);
-          console.log("======");
-          console.log(decodedToken);
           router.push("(home)");
         } else {
-          alert("Invalid email or password");
+          alert(response.data.message);
         }
       });
     } catch (error) {

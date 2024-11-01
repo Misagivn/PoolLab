@@ -26,7 +26,7 @@ import {
   FiUsers, 
   FiBarChart 
 } from 'react-icons/fi';
-import Sidebar from '../components/sideBar';
+import Sidebar from '@/app/components/shared/sidebar';
 
 // Các component phụ nên được tách ra file riêng
 interface StatCardProps {

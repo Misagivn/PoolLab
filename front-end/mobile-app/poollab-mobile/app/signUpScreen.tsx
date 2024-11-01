@@ -8,6 +8,15 @@ import Button from "@/components/roundButton";
 import { router } from "expo-router";
 import Icon from "@/assets/icons/icons";
 import { register_user } from "@/api/user_api";
+/**
+ * SignUpScreen: màn hình đăng ký
+ *
+ * - Nhận vào email, password, tên người dùng và họ tên
+ * - Kiểm tra hợp lệ của email và password
+ * - Gửi request đăng ký đến API
+ * - Nếu thành công, chuyển đến màn hình đăng nhập
+ * - Nếu thất bại, hiện thông báo lỗi
+ */
 const SignUpScreen = () => {
   const [userName, setUserName] = useState("");
   const [userFullName, setUserFullName] = useState("");
@@ -17,6 +26,13 @@ const SignUpScreen = () => {
   const [errorMessage1, setErrorMessage1] = useState("");
   const [emailFormat, setEmailFormat] = useState(true);
   const [passwordFormat, setPasswordFormat] = useState(true);
+
+  /**
+   * Validate email format
+   *
+   * - Kiểm tra email có hợp lệ hay không
+   * - Nếu không hợp lệ, hiện thông báo lỗi
+   */
   const validateEmail = () => {
     const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
     if (!emailRegex.test(email)) {
@@ -27,6 +43,13 @@ const SignUpScreen = () => {
       setEmailFormat(true);
     }
   };
+
+  /**
+   * Validate password format
+   *
+   * - Kiểm tra password có hợp lệ hay không
+   * - Nếu không hợp lệ, hiện thông báo lỗi
+   */
   const validatePassword = () => {
     // Yêu cầu mật khẩu phải tối thiểu 8 ký tự, bao gồm ít nhất 1 chữ hoa, 1 chữ thường và 1 số
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
@@ -40,12 +63,23 @@ const SignUpScreen = () => {
       setPasswordFormat(true);
     }
   };
+
   const signupData = {
     email: email,
     password: password,
     userName: userName,
     fullName: userFullName,
   };
+
+  /**
+   * Check sign up
+   *
+   * - Kiểm tra email, password, tên người dùng và họ tên có hợp lệ hay không
+   * - Nếu không hợp lệ, hiện thông báo lỗi
+   * - Nếu hợp lệ, gửi request đăng ký đến API
+   * - Nếu thành công, chuyển đến màn hình đăng nhập
+   * - Nếu thất bại, hiện thông báo lỗi
+   */
   const checkSignUp = async () => {
     if (
       email === "" ||

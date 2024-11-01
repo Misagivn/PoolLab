@@ -11,38 +11,110 @@ import { useState, useEffect } from "react";
 import { user_login } from "@/api/user_api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { jwtDecode } from "jwt-decode";
+import CustomDropdown from "@/components/customDropdown";
 
+/**
+ * LoginScreen: màn hình đăng nhập
+ *
+ * - Nhận vào email, mật khẩu
+ * - Kiểm tra hợp lệ của email và mật khẩu
+ * - Gửi request đăng nhập đến API
+ * - Nếu thành công, chuyển đến màn hình home
+ * - Nếu thất bại, hiện thông báo lỗi
+ */
 const LoginScreen = () => {
   const [accEmail, setAccEmail] = useState("");
   const [accPassword, setAccPassword] = useState("");
   const [loggedIn, setLoggedIn] = useState([]);
+  const [emailFormat, setEmailFormat] = useState(true);
+  const [passwordFormat, setPasswordFormat] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [errorMessage1, setErrorMessage1] = useState("");
   const loginData = {
     email: accEmail,
     password: accPassword,
   };
-  const checkLogin = async () => {
-    if (accEmail === "" || accPassword === "") {
-      alert("Please enter your email and password");
-      return;
+
+  /**
+   * Validate email format
+   *
+   * - Kiểm tra email có hợp lệ hay không
+   * - Nếu không hợp lệ, hiện thông báo lỗi
+   */
+  const validateEmail = () => {
+    const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+    if (!emailRegex.test(accEmail)) {
+      setErrorMessage("Xin hãy nhập địa chỉ email hợp lệ");
+      setEmailFormat(false);
+    } else {
+      setErrorMessage("");
+      setEmailFormat(true);
     }
-    try {
-      user_login(loginData).then((response) => {
-        if (response.data.status === 200) {
-          const token = JSON.stringify(response?.data.data);
-          const decodedToken = jwtDecode(token);
-          // const userName = decodedToken.Username;
-          const userId = decodedToken.AccountId;
-          AsyncStorage.multiSet([
-            ["userToken", token],
-            ["userData", JSON.stringify(decodedToken)],
-          ]);
-          router.push("(home)");
-        } else {
-          alert(response.data.message);
-        }
-      });
-    } catch (error) {
-      console.log(error);
+  };
+
+  /**
+   * Validate password format
+   *
+   * - Kiểm tra mật khẩu có hợp lệ hay không
+   * - Nếu không hợp lệ, hiện thông báo lỗi
+   */
+  const validatePassword = () => {
+    // Yêu cầu mật khẩu phải tối thiểu 8 ký tự, bao gồm ít nhất 1 chữ hoa, 1 chữ thường và 1 số
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
+    if (!passwordRegex.test(accPassword)) {
+      setErrorMessage1(
+        "Mật khẩu phải tối thiểu 8 ký tự, bao gồm ít nhất 1 chữ hoa, 1 chữ thường và 1 số"
+      );
+      setPasswordFormat(false);
+    } else {
+      setErrorMessage1("");
+      setPasswordFormat(true);
+    }
+  };
+
+  /**
+   * Check login
+   *
+   * - Kiểm tra email, mật khẩu, và trạng thái của 2 trường trên
+   * - Nếu không hợp lệ, hiện thông báo lỗi
+   * - Nếu hợp lệ, gửi request đăng nhập đến API
+   * - Nếu thành công, chuyển đến màn hình home
+   * - Nếu thất bại, hiện thông báo lỗi
+   */
+  const checkLogin = async () => {
+    if (
+      accEmail === "" ||
+      accPassword === "" ||
+      !emailFormat ||
+      !passwordFormat
+    ) {
+      if (!emailFormat) {
+        alert(errorMessage);
+      } else if (!passwordFormat) {
+        alert(errorMessage1);
+      } else {
+        alert("Please enter the required fields");
+      }
+    } else {
+      try {
+        user_login(loginData).then((response) => {
+          if (response.data.status === 200) {
+            const token = response?.data.data;
+            const decodedToken = jwtDecode(token);
+            // const userName = decodedToken.Username;
+            const userId = decodedToken.AccountId;
+            AsyncStorage.multiSet([
+              ["userToken", JSON.stringify(token)],
+              ["userData", JSON.stringify(decodedToken)],
+            ]);
+            router.push("(home)");
+          } else {
+            alert(response.data.message);
+          }
+        });
+      } catch (error) {
+        console.log(error);
+      }
     }
   };
 
@@ -62,22 +134,29 @@ const LoginScreen = () => {
           icon={
             <Icon name="emailIcon" size={25} strokeWidth={1} color="black" />
           }
+          onEndEditing={validateEmail}
           onChangeText={(emailRef) => {
             setAccEmail(emailRef.toLowerCase());
           }}
           //onChangeText={(value) => (emailRef.current = value)}
         />
+        {errorMessage ? (
+          <Text style={styles.errorText}>{errorMessage}</Text>
+        ) : null}
         <InputCustom
           placeholder="Mật khẩu"
           secureTextEntry={true}
           icon={
             <Icon name="passwordIcon" size={25} strokeWidth={1} color="black" />
           }
+          onEndEditing={validatePassword}
           onChangeText={(text) => {
             setAccPassword(text);
           }}
-          //onChangeText={(value) => (passwordRef.current = value)}
         />
+        {errorMessage1 ? (
+          <Text style={styles.errorText}>{errorMessage1}</Text>
+        ) : null}
       </View>
       {/* Link quên mật khẩu */}
       <View
@@ -184,5 +263,9 @@ const styles = StyleSheet.create({
     color: theme.colors.primary,
     fontSize: 15,
     fontWeight: "bold",
+  },
+  errorText: {
+    color: "red",
+    fontSize: 14,
   },
 });

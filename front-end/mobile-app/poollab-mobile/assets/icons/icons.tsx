@@ -10,6 +10,9 @@ import UserIcon from "./userIcon";
 import AddIcon from "./plusIcon";
 import { theme } from "@/constants/theme";
 import ArrowRight from "./arrowRight";
+import InformationIcon from "./informationIcon";
+import PhoneIcon from "./phoneIcon";
+import LocationIcon from "./locationIcon";
 const icons = {
   fbIcon: FacebookIcon,
   ggIcon: GoogleIcon,
@@ -20,6 +23,9 @@ const icons = {
   userIcon: UserIcon,
   addIcon: AddIcon,
   arrowRight: ArrowRight,
+  infoIcon: InformationIcon,
+  phoneIcon: PhoneIcon,
+  locationIcon: LocationIcon,
 };
 
 const Icon = ({ name, ...props }) => {

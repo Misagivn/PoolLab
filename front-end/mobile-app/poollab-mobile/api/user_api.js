@@ -65,9 +65,17 @@ export const get_user_details = async (userId) => {
   }
 };
 
-export const update_user = async (data, userId) => {
+export const update_user = async (data, userId, token) => {
   try {
-    const response = await ApiManager.put(`/Account/UpdateInfoUser/${userId}`, data);
+    const response = await ApiManager.put(
+      `/Account/UpdateInfoUser/${userId}`, 
+      data, 
+      {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      }
+    );
     return response;
   } catch (error) {
     if (error.response) {

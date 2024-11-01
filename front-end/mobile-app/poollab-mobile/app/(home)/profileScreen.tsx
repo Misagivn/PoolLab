@@ -4,10 +4,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Image } from "react-native";
 import { theme } from "@/constants/theme";
 import Icon from "@/assets/icons/icons";
-import ArrowRight from "@/assets/icons/arrowRight";
 import { router } from "expo-router";
 import { get_user_details } from "@/api/user_api";
 import { getStoredUser } from "@/api/tokenDecode";
+import CustomHeader from "@/components/customHeader";
 const ProfileScreen = () => {
   //Get userId from AsyncStorage
   const [userFullName, setUserFullName] = useState("");
@@ -34,7 +34,7 @@ const ProfileScreen = () => {
   }, []);
   return (
     <SafeAreaView>
-      <Text style={styles.screenTitle}>Hồ sơ cá nhân</Text>
+      <CustomHeader />
       <View style={styles.header}>
         <Image
           style={styles.headerImage}
@@ -71,16 +71,9 @@ const ProfileScreen = () => {
 };
 
 export default ProfileScreen;
-
 const styles = StyleSheet.create({
-  screenTitle: {
-    fontSize: 30,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginTop: 20,
-  },
   header: {
-    gap: 10,
+    gap: 2,
     flexDirection: "row",
     backgroundColor: theme.colors.background,
     justifyContent: "flex-start",
@@ -100,8 +93,8 @@ const styles = StyleSheet.create({
   },
   headerImage: {
     marginLeft: 10,
-    width: 100,
-    height: 100,
+    width: 80,
+    height: 80,
     borderRadius: 100,
     borderWidth: 5,
     borderColor: theme.colors.primary,

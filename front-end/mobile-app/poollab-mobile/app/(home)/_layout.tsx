@@ -9,14 +9,14 @@ const _layout = () => {
       <Tabs.Screen
         name="index"
         options={{
-          title: "Home",
+          title: "Nhà",
           headerShown: false,
         }}
       />
       <Tabs.Screen
         name="reserveScreen"
         options={{
-          title: "Reserve",
+          title: "Đặt bàn",
           headerShown: false,
         }}
       />
@@ -30,14 +30,14 @@ const _layout = () => {
       <Tabs.Screen
         name="courseScreen"
         options={{
-          title: "Course",
+          title: "Khóa học",
           headerShown: false,
         }}
       />
       <Tabs.Screen
         name="profileScreen"
         options={{
-          title: "Profile",
+          title: "Hồ sơ",
           headerShown: false,
         }}
       />

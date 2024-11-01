@@ -8,14 +8,14 @@ export const login = async (email, password) => {
         password,
       });
   
-      const { token } = response.data;
+      const { token } = response.data.data;
       
       // Decode token to get user info
       const decodedToken = jwt_decode(token);
       
       // Save token and user info to AsyncStorage
       await AsyncStorage.multiSet([
-        ['userToken', token],
+        ['userToken', JSON.stringify(token)],
         ['userData', JSON.stringify(decodedToken)],
       ]);
   
@@ -43,7 +43,8 @@ export const login = async (email, password) => {
   
   export const getStoredToken = async () => {
     try {
-      return await AsyncStorage.getItem('userToken');
+      const userToken = await AsyncStorage.getItem('userToken');
+      return userToken ? JSON.parse(userToken) : null;
     } catch (error) {
       console.error('Error getting stored token:', error);
       return null;

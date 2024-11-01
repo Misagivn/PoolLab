@@ -33,8 +33,8 @@ const index = () => {
               buttonStyles={styles.customButton1}
               textStyles={styles.customButtonText1}
               onPress={() => {
-                router.push("loginScreen");
-                //router.push("./(userProfile)");
+                //router.push("loginScreen");
+                router.push("./(home)");
               }}
             />
             {/* <IconButton

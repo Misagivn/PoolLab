@@ -7,7 +7,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import BackButton from "@/components/backButton";
 import InputCustom from "@/components/inputCustom";
 import Icon from "@/assets/icons/icons";
-import { getStoredUser } from "@/api/tokenDecode";
+import { getStoredUser, getStoredToken } from "@/api/tokenDecode";
 import { get_user_details, update_user } from "@/api/user_api";
 
 const index = () => {
@@ -17,11 +17,15 @@ const index = () => {
   const [userName, setUserName] = useState("");
   const [userEmail, setUserEmail] = useState("");
   const [userNumber, setUserNumber] = useState(0);
+  const [userToken, setUserToken] = useState("");
   useEffect(() => {
     const loadStat = async () => {
       try {
         const storedUser = await getStoredUser();
-        if (storedUser) {
+        const storedToken = await getStoredToken();
+        if (storedUser && storedToken) {
+          const token = storedToken;
+          setUserToken(token);
           get_user_details(storedUser.AccountId).then((response) => {
             if (response.data.status === 200) {
               const userId = response.data.data.id;
@@ -59,11 +63,13 @@ const index = () => {
       alert("Xin hãy nhập tất cả các trường");
     } else {
       try {
-        update_user(updateData, userId).then((response) => {
+        console.log(updateData);
+        update_user(updateData, userId, userToken).then((response) => {
           if (response.data.status === 200) {
             alert("Cập nhật thành công");
             router.push("/(home)/profileScreen");
           } else {
+            console.log(response.data.message);
             alert(response.data.message);
           }
         });
@@ -116,12 +122,7 @@ const index = () => {
             <InputCustom
               placeholder="Họ và Tên"
               icon={
-                <Icon
-                  name="emailIcon"
-                  size={25}
-                  strokeWidth={1}
-                  color="black"
-                />
+                <Icon name="infoIcon" size={25} strokeWidth={1} color="black" />
               }
               value={userFullName}
               onChangeText={(text) => {
@@ -132,7 +133,7 @@ const index = () => {
               placeholder="Số điện thoại"
               icon={
                 <Icon
-                  name="emailIcon"
+                  name="phoneIcon"
                   size={25}
                   strokeWidth={1}
                   color="black"
@@ -207,26 +208,27 @@ const styles = StyleSheet.create({
   imageBox: {
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 35,
+    marginTop: 10,
   },
   image: {
-    width: 200,
-    height: 200,
+    width: 150,
+    height: 150,
     borderRadius: 100,
     borderWidth: 5,
     borderColor: theme.colors.primary,
   },
   detailsRow: {
+    marginTop: 10,
     gap: 15,
     paddingVertical: 10,
   },
   updateButton: {
     backgroundColor: theme.colors.secondary,
-    borderRadius: 5,
+    borderRadius: 10,
   },
   updateButtonText: {
     color: "white",
-    fontSize: 25,
+    fontSize: 20,
     fontWeight: "bold",
   },
   footer: {

@@ -35,6 +35,7 @@ const CustomHeader = () => {
         justifyContent: "center",
         alignItems: "center",
         backgroundColor: theme.colors.background,
+        marginHorizontal: 10,
       }}
     >
       <View style={styles.container}>
@@ -63,6 +64,7 @@ const CustomHeader = () => {
               placeholder="0"
               value={Number(JSON.parse(userBalance)).toLocaleString("en-US")}
             />
+            <Text>VND</Text>
           </View>
           <Icon name="notiIcon" size={25} strokeWidth={2} color="black" />
         </View>
@@ -80,7 +82,8 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     backgroundColor: "white",
     height: 70,
-    paddingHorizontal: 35,
+    width: "100%",
+    paddingHorizontal: 15,
     borderCurve: "continuous",
     borderRadius: 20,
     shadowColor: "black",
@@ -115,7 +118,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 15,
     paddingVertical: 5,
-    gap: 10,
+    gap: 5,
     borderColor: theme.colors.primary,
     borderCurve: "continuous",
     borderColor: theme.colors.primary,

@@ -15,6 +15,8 @@ import PhoneIcon from "./phoneIcon";
 import LocationIcon from "./locationIcon";
 import FromAtoZIcon from "./AtoZIcon";
 import AreaIcon from "./pinPointAreaIcon";
+import AddCircleIcon from "./addCircleIcon";
+import MinusSignCircleIcon from "./minusCircleIcon";
 const icons = {
   fbIcon: FacebookIcon,
   ggIcon: GoogleIcon,
@@ -30,6 +32,8 @@ const icons = {
   locationIcon: LocationIcon,
   fromAtoZIcon: FromAtoZIcon,
   areaIcon: AreaIcon,
+  addCircleIcon: AddCircleIcon,
+  minusCircleIcon: MinusSignCircleIcon,
 };
 
 const Icon = ({ name, ...props }) => {

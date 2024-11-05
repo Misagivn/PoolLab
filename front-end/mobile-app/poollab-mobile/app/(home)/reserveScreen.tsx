@@ -15,6 +15,7 @@ import { get_all_billard_type } from "@/api/billard_type";
 import { getStoredUser } from "@/api/tokenDecode";
 import { get_all_billard_type_area } from "@/api/area_api";
 import { create_booking } from "@/api/booking_api";
+import DeviceInfo from "react-native-device-info";
 import { router } from "expo-router";
 //demo data
 const ReserveScreen = () => {
@@ -50,9 +51,10 @@ const ReserveScreen = () => {
   };
   const bookingData = {
     customerId: customerId,
+    billiardTypeId: billardtypeId,
     storeId: storeId,
-    billardtypeId: billardtypeId,
     areaId: areaId,
+    message: "nhat dep trai",
     bookingDate: bookingDate,
     timeStart: selectedStartTime,
     timeEnd: selectedEndTime,
@@ -67,9 +69,9 @@ const ReserveScreen = () => {
       if (storedArea && storeId && billardtypeId) {
         const rawdata = storedArea.data.data;
         const transformData = rawdata.map(
-          (item: { typeName: any; id: any; areaName: any }) => ({
+          (item: { typeName: any; areaID: any; areaName: any }) => ({
             label: "Tên: " + item.typeName,
-            value: item.id,
+            value: item.areaID,
             address: "Địa chỉ: " + item.areaName,
           })
         );
@@ -215,7 +217,11 @@ const ReserveScreen = () => {
         create_booking(bookingData).then((response) => {
           if (response?.data.status === 200) {
             console.log("Booking created successfully!");
-            console.log(response.data);
+            console.log("Data sau khi dat ", response.data);
+            // Refresh the screen after 2 seconds
+            setTimeout(() => {
+              window.location.reload();
+            }, 2000);
           } else {
             alert(response.data.message);
           }
@@ -319,9 +325,6 @@ const ReserveScreen = () => {
                 modalStyles={{
                   backgroundColor: "#fff",
                 }}
-                buttonStyles={{
-                  backgroundColor: "#e0e0e0",
-                }}
                 textStyles={{
                   color: "#333",
                 }}
@@ -339,9 +342,6 @@ const ReserveScreen = () => {
                 }}
                 modalStyles={{
                   backgroundColor: "#fff",
-                }}
-                buttonStyles={{
-                  backgroundColor: "#e0e0e0",
                 }}
                 textStyles={{
                   color: "#333",
@@ -394,7 +394,7 @@ const styles = StyleSheet.create({
   },
   titleBox: {},
   title: {
-    fontSize: 35,
+    fontSize: 40,
     fontWeight: "bold",
     color: theme.colors.primary,
   },

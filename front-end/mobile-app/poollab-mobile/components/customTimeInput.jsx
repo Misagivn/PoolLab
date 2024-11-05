@@ -1,6 +1,7 @@
 import React, { useState, memo } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Modal, Pressable } from 'react-native';
 import { theme } from '@/constants/theme';
+import Icon from '@/assets/icons/icons';
 //import { ChevronUp, ChevronDown } from 'lucide-react';
 
 const DemoCustomTimeInput = memo((props) => {
@@ -87,7 +88,7 @@ const DemoCustomTimeInput = memo((props) => {
         setVisible(false);
         setError('');
       } else {
-        setError('End time must be greater than start time');
+        setError('Thời gian kết thúc phải lớn hơn bắt đầu');
       }
     } else {
       const formattedTime = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
@@ -123,21 +124,24 @@ const DemoCustomTimeInput = memo((props) => {
           <View style={[styles.modalContent, modalStyles]}>
             <View style={styles.timePickerContainer}>
               <Pressable style={[styles.timePickerButton, buttonStyles]} onPress={onHourIncrement}>
-                {/* <ChevronUp size={24} /> */}
+                <Icon name="addCircleIcon" size={24} strokeWidth={1.5} color="black" />
               </Pressable>
               <Text style={[styles.timePickerText, textStyles]}>{hour.toString().padStart(2, '0')}</Text>
               <Pressable style={[styles.timePickerButton, buttonStyles]} onPress={onHourDecrement}>
                 {/* <ChevronDown size={24} /> */}
+                <Icon name="minusCircleIcon" size={24} strokeWidth={1.5} color="black" />
               </Pressable>
             </View>
             <Text style={styles.separator}>:</Text>
             <View style={styles.timePickerContainer}>
               <Pressable style={[styles.timePickerButton, buttonStyles]} onPress={onMinuteIncrement}>
                 {/* <ChevronUp size={24} /> */}
+                <Icon name="addCircleIcon" size={24} strokeWidth={1.5} color="black" />
               </Pressable>
               <Text style={[styles.timePickerText, textStyles]}>{minute.toString().padStart(2, '0')}</Text>
               <Pressable style={[styles.timePickerButton, buttonStyles]} onPress={onMinuteDecrement}>
                 {/* <ChevronDown size={24} /> */}
+                <Icon name="minusCircleIcon" size={24} strokeWidth={1.5} color="black" />
               </Pressable>
             </View>
             {!is24Hour && (

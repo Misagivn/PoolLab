@@ -2,6 +2,7 @@ import ApiManager from "./ApiManager";
 
 export const create_booking = async (data) => {
     try {
+      console.log("Co chay: ", data);
       const response = await ApiManager.post("/Booking/CreateNewBooking", data);
       return response;
     } catch (error) {

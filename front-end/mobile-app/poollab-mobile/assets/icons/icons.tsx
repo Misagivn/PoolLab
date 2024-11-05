@@ -13,6 +13,8 @@ import ArrowRight from "./arrowRight";
 import InformationIcon from "./informationIcon";
 import PhoneIcon from "./phoneIcon";
 import LocationIcon from "./locationIcon";
+import FromAtoZIcon from "./AtoZIcon";
+import AreaIcon from "./pinPointAreaIcon";
 const icons = {
   fbIcon: FacebookIcon,
   ggIcon: GoogleIcon,
@@ -26,6 +28,8 @@ const icons = {
   infoIcon: InformationIcon,
   phoneIcon: PhoneIcon,
   locationIcon: LocationIcon,
+  fromAtoZIcon: FromAtoZIcon,
+  areaIcon: AreaIcon,
 };
 
 const Icon = ({ name, ...props }) => {

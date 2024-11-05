@@ -1,10 +1,6 @@
-import apiManagerWithToken from "./ApiManager";
+
 import ApiManager from "./ApiManager";
-import { getStoredToken } from "./tokenDecode";
-// const loginData = {
-//   email: "nhat@gmail.com",
-//   password: "12345",
-// };
+
 export const user_login = async (data) => {
   try {
     const response = await ApiManager.post("/Auth/Login", data);

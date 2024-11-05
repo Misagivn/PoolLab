@@ -134,8 +134,8 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 15,
     paddingVertical: 20,
-    borderBottomWidth: 0.7,
-    borderBottomColor: "gray",
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
   },
   functionName: {
     fontSize: 20,

@@ -12,6 +12,7 @@ const CustomDropdown = (props) => {
     textStyles,
     modalStyles,
     itemStyles,
+    subLabelStyles,
   } = props;
 
   const [visible, setVisible] = useState(false);
@@ -61,8 +62,8 @@ const CustomDropdown = (props) => {
                   style={[styles.dropdownItem, itemStyles]}
                   onPress={() => onItemSelect(item)}
                 >
-                  <Text>Tên: {item.label}</Text>
-                  <Text>Địa chỉ: {item.address}</Text>
+                  <Text>{item.label}</Text>
+                  <Text>{item.address}</Text>
                 </TouchableOpacity>
               )}
             />

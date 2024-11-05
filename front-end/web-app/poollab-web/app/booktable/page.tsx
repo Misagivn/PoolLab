@@ -2,9 +2,9 @@
 "use client"
 import React, { useState } from 'react';
 import { Flex, Box, Tabs, TabList, Tab, TabPanels, TabPanel } from '@chakra-ui/react';
-import TableList from '../../components/tablelist';
-import Order from '../../components/order';
-import TableDetail from '../../components/tabledetail';
+import TableList from '../components/staff/tablelist';
+import Order from '../components/staff/order';
+import TableDetail from '../components/staff/tabledetail';
 
 interface TableState {
   orderItems: MenuItem[];

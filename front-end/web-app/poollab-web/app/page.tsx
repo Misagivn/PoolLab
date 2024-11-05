@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import {
   Box,
   Container,
@@ -10,6 +11,8 @@ import {
   Input,
   VStack,
   useToast,
+  Flex,
+  Text,
 } from '@chakra-ui/react';
 import { authService } from '@/services/authService';
 import { Button } from '@/app/components/ui/button';
@@ -73,46 +76,89 @@ export default function LoginPage() {
   };
 
   return (
-    <Container maxW="container.sm" py={10}>
-      <Box p={8} borderWidth={1} borderRadius="lg" boxShadow="lg">
-        <form onSubmit={handleLogin}>
-          <VStack spacing={4}>
-            <FormControl isRequired>
-              <FormLabel>Email</FormLabel>
-              <Input
-                type="email"
-                placeholder="Enter your email"
-                value={formData.email}
-                onChange={(e) => setFormData(prev => ({
-                  ...prev,
-                  email: e.target.value
-                }))}
+    <Box
+      minH="100vh"
+      w="100%"
+      position="relative"
+      bgImage="url('/logo/bg.jpg')"
+      bgSize="cover"
+      bgPosition="center"
+      bgRepeat="no-repeat"
+    >
+      <Box position="absolute" inset="0" bg="blackAlpha.600" />
+      
+      {/* Centered Container */}
+      <Flex 
+        position="relative" 
+        minH="100vh" 
+        alignItems="center" 
+        justifyContent="center"
+      >
+        <Box 
+          w="100%" 
+          maxW="400px" 
+          mx={4}
+          p={8} 
+          borderWidth={1} 
+          borderRadius="lg" 
+          boxShadow="lg"
+          bg="white"
+        >
+          {/* Logo Section */}
+          <Flex direction="column" alignItems="center" mb={6}>
+            <Box position="relative" w="120px" h="120px" mb={4}>
+              <Image
+                src="/logo/logo01.png"
+                alt="PoolLab Logo"
+                layout="fill"
+                objectFit="contain"
+                priority
               />
-            </FormControl>
+            </Box>
+            <Text fontSize="2xl" fontWeight="bold" mb={2}>
+              Chào mừng đến với PoolLab
+            </Text>
+          </Flex>
 
-            <FormControl isRequired>
-              <FormLabel>Password</FormLabel>
-              <Input
-                type="password"
-                placeholder="Enter your password"
-                value={formData.password}
-                onChange={(e) => setFormData(prev => ({
-                  ...prev,
-                  password: e.target.value
-                }))}
-              />
-            </FormControl>
+          <form onSubmit={handleLogin}>
+            <VStack spacing={4}>
+              <FormControl isRequired>
+                <FormLabel>Email</FormLabel>
+                <Input
+                  type="email"
+                  placeholder="Enter your email"
+                  value={formData.email}
+                  onChange={(e) => setFormData(prev => ({
+                    ...prev,
+                    email: e.target.value
+                  }))}
+                />
+              </FormControl>
 
-            <Button 
-              className="w-full"
-              type="submit"
-              disabled={isLoading}
-            >
-              {isLoading ? 'Logging in...' : 'Login'}
-            </Button>
-          </VStack>
-        </form>
-      </Box>
-    </Container>
+              <FormControl isRequired>
+                <FormLabel>Password</FormLabel>
+                <Input
+                  type="password"
+                  placeholder="Enter your password"
+                  value={formData.password}
+                  onChange={(e) => setFormData(prev => ({
+                    ...prev,
+                    password: e.target.value
+                  }))}
+                />
+              </FormControl>
+
+              <Button 
+                className="w-full"
+                type="submit"
+                disabled={isLoading}
+              >
+                {isLoading ? 'Logging in...' : 'Login'}
+              </Button>
+            </VStack>
+          </form>
+        </Box>
+      </Flex>
+    </Box>
   );
 }

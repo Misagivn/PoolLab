@@ -44,7 +44,7 @@ export const routes: RouteConfig[] = [
   },
   {
     path: '/manager/info',
-    label: 'Thông tin',
+    label: 'Tài khoản',
     icon: FiMessageSquare,
   },
   {

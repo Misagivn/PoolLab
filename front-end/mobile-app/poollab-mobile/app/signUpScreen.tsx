@@ -26,7 +26,7 @@ const SignUpScreen = () => {
   const [errorMessage1, setErrorMessage1] = useState("");
   const [emailFormat, setEmailFormat] = useState(true);
   const [passwordFormat, setPasswordFormat] = useState(true);
-
+  const [isLoading, setIsLoading] = useState(false);
   /**
    * Validate email format
    *
@@ -97,12 +97,16 @@ const SignUpScreen = () => {
         alert("Please enter the required fields");
       }
     } else {
+      setIsLoading(true);
       try {
         register_user(signupData).then((response) => {
           if (response?.data.status === 200) {
+            alert("Đăng ký thành công, xin hãy đăng nhập.");
             router.push("loginScreen");
+            setIsLoading(false);
           } else {
             alert(response.data.message);
+            setIsLoading(false);
           }
         });
       } catch (error) {
@@ -112,7 +116,7 @@ const SignUpScreen = () => {
   };
   return (
     <View style={styles.container}>
-      <StatusBar hidden={true} />
+      <StatusBar hidden={false} style="dark" />
       {/* Back button import từ backButton.jsx */}
       <BackButton />
       <View style={styles.header}>
@@ -176,6 +180,7 @@ const SignUpScreen = () => {
           buttonStyles={styles.customButton1}
           textStyles={styles.customButtonText1}
           onPress={() => checkSignUp()}
+          loading={isLoading}
         />
       </View>
       {/* Footer */}
@@ -197,6 +202,7 @@ export default SignUpScreen;
 
 const styles = StyleSheet.create({
   container: {
+    marginTop: 30,
     flex: 1,
     backgroundColor: theme.colors.background,
     padding: 5,

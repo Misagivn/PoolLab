@@ -2,15 +2,13 @@ import { Pressable, StyleSheet, Text, View } from 'react-native'
 import React from 'react'
 import Icon from '@/assets/icons/icons'
 import { theme } from '@/constants/theme'
-import FacebookIcon from '@/assets/icons/fbIcon'
-
 const IconButton = (
     {
         iconName,
         onPress,
         textStyles,
         buttonStyles,
-        title
+        title,
     }
 ) => {
   return (

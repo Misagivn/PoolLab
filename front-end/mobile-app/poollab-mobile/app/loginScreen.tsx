@@ -11,7 +11,6 @@ import { useState, useEffect } from "react";
 import { user_login } from "@/api/user_api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { jwtDecode } from "jwt-decode";
-import CustomDropdown from "@/components/customDropdown";
 
 /**
  * LoginScreen: màn hình đăng nhập
@@ -25,7 +24,7 @@ import CustomDropdown from "@/components/customDropdown";
 const LoginScreen = () => {
   const [accEmail, setAccEmail] = useState("");
   const [accPassword, setAccPassword] = useState("");
-  const [loggedIn, setLoggedIn] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [emailFormat, setEmailFormat] = useState(true);
   const [passwordFormat, setPasswordFormat] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
@@ -96,6 +95,7 @@ const LoginScreen = () => {
         alert("Please enter the required fields");
       }
     } else {
+      setIsLoading(true);
       try {
         user_login(loginData).then((response) => {
           if (response.data.status === 200) {
@@ -107,20 +107,25 @@ const LoginScreen = () => {
               ["userToken", JSON.stringify(token)],
               ["userData", JSON.stringify(decodedToken)],
             ]);
+            setIsLoading(false);
             router.push("(home)");
           } else {
             alert(response.data.message);
+            setIsLoading(false);
           }
         });
       } catch (error) {
+        setIsLoading(false);
         console.log(error);
       }
     }
   };
-
+  useEffect(() => {
+    console.log("Is loading: ", isLoading);
+  }, []);
   return (
     <View style={styles.container}>
-      <StatusBar hidden={true} />
+      <StatusBar hidden={false} style="dark" />
       {/* Back button import từ backButton.jsx */}
       <BackButton />
       <View style={styles.header}>
@@ -190,6 +195,7 @@ const LoginScreen = () => {
           onPress={() => {
             checkLogin();
           }}
+          loading={isLoading}
         />
       </View>
       {/* Footer */}
@@ -211,6 +217,7 @@ export default LoginScreen;
 
 const styles = StyleSheet.create({
   container: {
+    paddingTop: 30,
     flex: 1,
     backgroundColor: theme.colors.background,
     padding: 5,
@@ -220,12 +227,12 @@ const styles = StyleSheet.create({
     paddingTop: 15,
   },
   headerText: {
-    fontSize: 70,
+    fontSize: 50,
     fontWeight: "bold",
   },
   headerText2: {
     color: theme.colors.primary,
-    fontSize: 60,
+    fontSize: 70,
     fontWeight: "bold",
   },
   form: {

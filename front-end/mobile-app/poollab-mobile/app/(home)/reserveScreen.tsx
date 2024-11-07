@@ -15,7 +15,6 @@ import { get_all_billard_type } from "@/api/billard_type";
 import { getStoredUser } from "@/api/tokenDecode";
 import { get_all_billard_type_area } from "@/api/area_api";
 import { create_booking } from "@/api/booking_api";
-import DeviceInfo from "react-native-device-info";
 import { router } from "expo-router";
 //demo data
 const ReserveScreen = () => {

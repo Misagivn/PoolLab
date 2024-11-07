@@ -18,6 +18,7 @@ const index = () => {
   const [userEmail, setUserEmail] = useState("");
   const [userNumber, setUserNumber] = useState(0);
   const [userToken, setUserToken] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   useEffect(() => {
     const loadStat = async () => {
       try {
@@ -62,15 +63,18 @@ const index = () => {
     ) {
       alert("Xin hãy nhập tất cả các trường");
     } else {
+      setIsLoading(true);
       try {
         console.log(updateData);
         update_user(updateData, userId, userToken).then((response) => {
           if (response.data.status === 200) {
             alert("Cập nhật thành công");
             router.push("/(home)/profileScreen");
+            setIsLoading(false);
           } else {
             console.log(response.data.message);
             alert(response.data.message);
+            setIsLoading(false);
           }
         });
       } catch (error) {
@@ -151,6 +155,7 @@ const index = () => {
               onPress={() => {
                 updateUser();
               }}
+              loading={isLoading}
             />
             <View style={styles.footer}>
               <Text style={styles.footerText}>Cần thay đổi mật khẩu?</Text>

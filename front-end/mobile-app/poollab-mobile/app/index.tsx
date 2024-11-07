@@ -33,17 +33,10 @@ const index = () => {
               buttonStyles={styles.customButton1}
               textStyles={styles.customButtonText1}
               onPress={() => {
-                //router.push("loginScreen");
-                router.push("./(home)");
+                router.push("loginScreen");
+                //router.push("./(home)");
               }}
             />
-            {/* <IconButton
-            iconName="fbIcon"
-            title="Đăng nhập qua Facebook"
-            buttonStyles={styles.customButton2}
-            textStyles={styles.customButtonText2}
-            onPress={() => {}}
-          /> */}
             <IconButton
               iconName="ggIcon"
               title="Đăng nhập với Google "

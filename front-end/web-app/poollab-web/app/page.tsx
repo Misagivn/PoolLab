@@ -1,25 +1,20 @@
 'use client';
 
+import { useState } from 'react';
 import {
   Box,
   Button,
-  Container,
   FormControl,
   FormLabel,
   Input,
-  Stack,
-  Alert,
-  AlertIcon,
-  AlertDescription,
-  useToast,
-  Heading,
-  Flex,
-  Image,
+  VStack,
   Text,
+  useToast,
+  Container,
+  Image,
+  FormErrorMessage,
 } from '@chakra-ui/react';
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { jwtDecode } from 'jwt-decode';
 
 interface LoginResponse {
   status: number;
@@ -33,81 +28,111 @@ interface JWTPayload {
   companyId?: string;
 }
 
+function decodeJWT(token: string): JWTPayload {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map(function (c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        })
+        .join('')
+    );
+    return JSON.parse(jsonPayload);
+  } catch (error) {
+    throw new Error('Invalid token format');
+  }
+}
+
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
   const router = useRouter();
   const toast = useToast();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
     setIsLoading(true);
+    setError('');
 
     try {
-      const response = await fetch('https://poollabwebapi20241008201316.azurewebsites.net/api/Auth/LoginStaff', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
-      });
+      const response = await fetch(
+        'https://poollabwebapi20241008201316.azurewebsites.net/api/Auth/LoginStaff',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email,
+            password,
+          }),
+        }
+      );
 
       const data: LoginResponse = await response.json();
 
-      if (data.status === 200 && data.data) {
+      if (data.status === 200) {
         localStorage.setItem('token', data.data);
-        const decoded = jwtDecode(data.data) as JWTPayload;
-        const role = decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+        
+        try {
+          const decodedToken = decodeJWT(data.data);
+          const role = decodedToken['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
 
-        toast({
-          title: 'Login Successful',
-          description: `Welcome back!`,
-          status: 'success',
-          duration: 3000,
-          isClosable: true,
-        });
+          switch (role) {
+            case 'Staff':
+              if (decodedToken.storeId) {
+                router.push('/booktable');
+              } else {
+                setError('Invalid store ID for staff');
+              }
+              break;
+            case 'Manager':
+              if (decodedToken.storeId) {
+                router.push('/manager');
+              } else {
+                setError('Invalid store ID for manager');
+              }
+              break;
+            case 'SuperManager':
+              if (decodedToken.companyId) {
+                router.push('/supermanager');
+              } else {
+                setError('Invalid company ID for super manager');
+              }
+              break;
+            case 'Admin':
+              if (decodedToken.companyId) {
+                router.push('/dashboard');
+              } else {
+                setError('Invalid company ID for admin');
+              }
+              break;
+            default:
+              setError('Invalid role');
+          }
 
-        // Route based on role
-        switch (role) {
-          case 'Staff':
-            router.push('/booktable');
-            break;
-          case 'Manager':
-            if (decoded.storeId) {
-              router.push('/manager');
-            } else {
-              setError('Invalid store ID for manager');
-            }
-            break;
-          case 'Super Manager':
-            if (decoded.companyId) {
-              router.push('/supermanager');
-            } else {
-              setError('Invalid company ID for super manager');
-            }
-            break;
-          case 'Admin':
-            if (decoded.companyId) {
-              router.push('/dashboard');
-            } else {
-              setError('Invalid company ID for admin');
-            }
-            break;
-          default:
-            setError('Invalid role');
+          toast({
+            title: 'Đăng nhập thành công',
+            description: data.message,
+            status: 'success',
+            duration: 3000,
+            isClosable: true,
+          });
+        } catch (decodeError) {
+          console.error('Token decode error:', decodeError);
+          setError('Invalid token format');
         }
       } else {
-        setError(data.message || 'Login failed');
+        setError(data.message || 'Đăng nhập thất bại');
       }
     } catch (err) {
-      setError('An error occurred during login');
-      console.error(err);
+      console.error('Login error:', err);
+      setError('Đã xảy ra lỗi trong quá trình đăng nhập');
     } finally {
       setIsLoading(false);
     }
@@ -115,118 +140,93 @@ export default function LoginPage() {
 
   return (
     <Box
-      minH="100vh"
-      w="100%"
-      bgImage="url('/logo/imgbg.jpg')"
+      w="100vw"
+      h="100vh"
+      bgImage="url('/logo/bg.jpg')"
       bgPosition="center"
       bgRepeat="no-repeat"
       bgSize="cover"
-      position="relative"
+      display="flex"
+      alignItems="center"
+      justifyContent="center"
     >
-      <Flex
-        minH="100vh"
-        align="center"
-        justify="center"
-        p={4}
+      <Box
+        p={8}
+        maxWidth="md"
+        borderRadius="lg"
+        bg="rgba(255, 255, 255, 0.9)"
+        backdropFilter="blur(10px)"
+        boxShadow="lg"
       >
-        <Box
-          bg="rgba(255, 255, 255, 0.1)"
-          backdropFilter="blur(10px)"
-          p={8}
-          borderRadius="xl"
-          boxShadow="lg"
-          border="1px solid rgba(255, 255, 255, 0.2)"
-          w={{ base: "90%", sm: "400px" }}
-          maxW="450px"
-        >
-          <Stack spacing={6} align="center" mb={8}>
+        <VStack spacing={4} align="stretch">
+          <Box textAlign="center" mb={4}>
             <Image
               src="/logo/logo01.png"
               alt="PoolLab Logo"
-              w="200px"
-              h="auto"
+              width="180px"
+              height="auto"
+              margin="0 auto"
+              mb={6}
             />
-            <Heading
-              color="white"
+            <Text
               fontSize="2xl"
               fontWeight="bold"
-              textAlign="center"
+              color="#2D3748"
             >
               Chào mừng đến với PoolLab
-            </Heading>
-          </Stack>
+            </Text>
+          </Box>
 
           <form onSubmit={handleLogin}>
-            <Stack spacing={4}>
-              <FormControl isRequired>
-                <FormLabel color="white">Email</FormLabel>
+            <VStack spacing={6}>
+              <FormControl isRequired isInvalid={!!error}>
+                <FormLabel color="#4A5568">Email</FormLabel>
                 <Input
                   type="email"
+                  placeholder="Email của bạn"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Nhập email của bạn"
-                  bg="rgba(255, 255, 255, 0.1)"
-                  border="1px solid rgba(255, 255, 255, 0.2)"
-                  color="white"
-                  _placeholder={{ color: "whiteAlpha.700" }}
-                  _hover={{ borderColor: "whiteAlpha.400" }}
-                  _focus={{ 
-                    borderColor: "whiteAlpha.500",
-                    bg: "rgba(255, 255, 255, 0.15)"
-                  }}
+                  bg="white"
+                  size="lg"
+                  borderRadius="md"
+                  _placeholder={{ color: 'gray.400' }}
                 />
               </FormControl>
 
-              <FormControl isRequired>
-                <FormLabel color="white">Mật khẩu</FormLabel>
+              <FormControl isRequired isInvalid={!!error}>
+                <FormLabel color="#4A5568">Mật khẩu</FormLabel>
                 <Input
                   type="password"
+                  placeholder="Mật khẩu của bạn"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Nhập mật khẩu của bạn"
-                  bg="rgba(255, 255, 255, 0.1)"
-                  border="1px solid rgba(255, 255, 255, 0.2)"
-                  color="white"
-                  _placeholder={{ color: "whiteAlpha.700" }}
-                  _hover={{ borderColor: "whiteAlpha.400" }}
-                  _focus={{ 
-                    borderColor: "whiteAlpha.500",
-                    bg: "rgba(255, 255, 255, 0.15)"
-                  }}
+                  bg="white"
+                  size="lg"
+                  borderRadius="md"
+                  _placeholder={{ color: 'gray.400' }}
                 />
+                {error && <FormErrorMessage>{error}</FormErrorMessage>}
               </FormControl>
-
-              {error && (
-                <Alert status="error" borderRadius="md" bg="rgba(255, 0, 0, 0.2)">
-                  <AlertIcon />
-                  <AlertDescription color="white">{error}</AlertDescription>
-                </Alert>
-              )}
 
               <Button
                 type="submit"
-                bg="rgba(255, 255, 255, 0.15)"
-                color="white"
+                width="100%"
                 size="lg"
-                fontSize="md"
+                bg="#3182CE"
+                color="white"
+                _hover={{ bg: '#2B6CB0' }}
+                _active={{ bg: '#00FFA9' }}
                 isLoading={isLoading}
                 loadingText="Đang đăng nhập..."
-                w="100%"
+                borderRadius="md"
                 mt={4}
-                _hover={{
-                  bg: "rgba(255, 255, 255, 0.25)"
-                }}
-                _active={{
-                  bg: "rgba(255, 255, 255, 0.3)"
-                }}
-                backdropFilter="blur(5px)"
               >
                 Đăng nhập
               </Button>
-            </Stack>
+            </VStack>
           </form>
-        </Box>
-      </Flex>
+        </VStack>
+      </Box>
     </Box>
   );
 }

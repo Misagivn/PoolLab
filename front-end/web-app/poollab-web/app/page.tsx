@@ -113,17 +113,17 @@
 //               />
 //             </FormControl>
 
-//             <FormControl isRequired>
-//               <FormLabel>Password</FormLabel>
-//               <Input
-//                 type="password"
-//                 value={formData.password}
-//                 onChange={(e) => setFormData(prev => ({
-//                   ...prev,
-//                   password: e.target.value
-//                 }))}
-//               />
-//             </FormControl>
+            // <FormControl isRequired>
+            //   <FormLabel>Password</FormLabel>
+            //   <Input
+            //     type="password"
+            //     value={formData.password}
+            //     onChange={(e) => setFormData(prev => ({
+            //       ...prev,
+            //       password: e.target.value
+            //     }))}
+            //   />
+            // </FormControl>
 
 //             <FormControl isRequired>
 //               <FormLabel>Store</FormLabel>
@@ -156,24 +156,61 @@
 //     </Container>
 //   );
 // }
-// import Image from "next/image";
 
+
+import { useRouter } from "next/navigation";
 import styles from "./LoginPage.module.css";
+import { useState } from "react";
+import jwt_decode from 'jwt-decode';  
+import toast from 'react-hot-toast';
 
 export default function LoginPage() {
+
+  const router = useRouter()
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const api_url = process.env.NEXT_PUBLIC_API_URL
+
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    try {
+      const response = await fetch('${api_url}/Auth/LoginStaff', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin!')
+      }
+
+      const data = await response.json()
+      const token = data.token
+      
+      // Giải mã token để lấy thông tin
+      const decoded: { role: string; id: string } = jwt_decode(token)
+      
+      // Lưu thông tin vào session storage
+      sessionStorage.setItem('token', token)
+      sessionStorage.setItem('role', decoded.role)
+      sessionStorage.setItem('id', decoded.id)
+      
+      // Điều hướng đến trang chính sau khi đăng nhập thành công
+      router.push('/dashboard')
+    } catch (error: any) {
+      // Hiển thị thông báo lỗi bằng toast
+      toast.error(error.message || 'Đã xảy ra lỗi khi đăng nhập!')
+    }
+  }
+
   return (
-    <div className={styles.backgroundContainer}>
-      {/* <Image
-        src="/assets/background.png"
-        alt="Background Image"
-        layout="fill" // Lấp đầy toàn bộ container
-        objectFit="cover" // Đảm bảo ảnh phủ đầy màn hình mà không méo
-        quality={100} // Chất lượng cao
-        priority
-      /> */}
+
+    <div className={styles.backgroundContainer}>  
 
       <div className={styles.wrapper}>
-        <form action="">
+        <form onSubmit={handleLogin}>
           <h1>Đăng Nhập</h1>
 
           <div className={styles.input_box}>

@@ -8,13 +8,14 @@ import CustomDropdown from "@/components/customDropdown";
 import CustomDateInput from "@/components/customDateInput";
 import DemoCustomTimeInput from "@/components/customTimeInput";
 import Icon from "@/assets/icons/icons";
-import IconButton from "@/components/iconButton";
 import { get_all_Store } from "@/api/store_api";
 import Button from "@/components/roundButton";
 import { get_all_billard_type } from "@/api/billard_type";
 import { getStoredUser } from "@/api/tokenDecode";
 import { get_all_billard_type_area } from "@/api/area_api";
 import { create_booking } from "@/api/booking_api";
+import CustomPopup from "@/components/popupCustom";
+import CustomAlert from "@/components/alertCustom";
 import { router } from "expo-router";
 //demo data
 const ReserveScreen = () => {
@@ -28,7 +29,23 @@ const ReserveScreen = () => {
   const [bookingDate, setBookingDate] = useState("");
   const [selectedStartTime, setSelectedStartTime] = useState("01:00");
   const [selectedEndTime, setSelectedEndTime] = useState("00:00");
-
+  const [userMessage, setUserMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [areaError, setAreaError] = useState("");
+  const [errorResponse, setErrorResponse] = useState("");
+  const [successResponse, setSuccessResponse] = useState("");
+  //const [popupVisible, setPopupVisible] = useState(false);
+  // const [tableData, setTableData] = useState({
+  //   Address: "",
+  //   Store_Name: "",
+  //   Area_Name: "",
+  //   Billard_Type_Name: "",
+  //   Booking_Date: "",
+  //   Time_Start: "",
+  //   Time_End: "",
+  //   Price: "",
+  // });
   const handleStartTimeSelect = (time) => {
     setSelectedStartTime(time);
     console.log("Selected start time:", time);
@@ -53,11 +70,40 @@ const ReserveScreen = () => {
     billiardTypeId: billardtypeId,
     storeId: storeId,
     areaId: areaId,
-    message: "nhat dep trai",
+    message: userMessage,
     bookingDate: bookingDate,
     timeStart: selectedStartTime,
     timeEnd: selectedEndTime,
   };
+  const alertPopup = (
+    title,
+    message,
+    confirmText,
+    cancelText,
+    successConfirm
+  ) => {
+    return (
+      <CustomAlert
+        visible={alertVisible}
+        title={title}
+        message={message}
+        confirmText={confirmText}
+        cancelText={cancelText}
+        onConfirm={() => {
+          if (successConfirm) {
+            setAlertVisible(false);
+            router.navigate("../(reserveTable)");
+          } else {
+            setAlertVisible(false);
+          }
+        }}
+        onCancel={() => {
+          setAlertVisible(false);
+        }}
+      />
+    );
+  };
+
   const getArea = async (storeId: string, billardtypeId: any) => {
     try {
       const getAreaData = {
@@ -79,9 +125,13 @@ const ReserveScreen = () => {
         console.log(transformData);
       }
     } catch (error) {
-      alert(
+      setAlertVisible(true);
+      setAreaError(
         "Không thể tải dữ liệu của Area!. Hãy thử đổi địa chỉ hoặc loại bàn."
       );
+      // alert(
+      //   "Không thể tải dữ liệu của Area!. Hãy thử đổi địa chỉ hoặc loại bàn."
+      // );
     }
   };
   useEffect(() => {
@@ -176,20 +226,26 @@ const ReserveScreen = () => {
 
     // Check if end time is greater than start time
     if (endMinutes <= startMinutes) {
-      alert("End time must be greater than start time.");
+      setAlertVisible(true);
+      setErrorResponse("End time must be greater than start time.");
+      //alert("End time must be greater than start time.");
       return false;
     }
 
     // Check if the time range is valid (e.g., not more than 24 hours)
     const maxMinutes = 24 * 60;
     if (endMinutes - startMinutes > maxMinutes) {
-      alert("Time range cannot exceed 24 hours.");
+      setAlertVisible(true);
+      setErrorResponse("Time range cannot exceed 24 hours.");
+      //alert("Time range cannot exceed 24 hours.");
+      //alert("Time range cannot exceed 24 hours.");
       return false;
     }
 
     // Time range is valid
     return true;
   };
+
   const onSubmit = () => {
     if (checkTimeRange(selectedStartTime, selectedEndTime)) {
       console.log("Time range is valid!");
@@ -210,19 +266,37 @@ const ReserveScreen = () => {
       selectedEndTime === "" ||
       bookingDate === ""
     ) {
-      alert("Vui lòng nhập tất cả các thông tin!");
+      setAlertVisible(true);
+      setErrorResponse("Vui lòng nhập tất cả các thông tin!");
+      //alert("Vui lòng nhập tất cả các thông tin!");
     } else {
+      setIsLoading(true);
       try {
         create_booking(bookingData).then((response) => {
           if (response?.data.status === 200) {
             console.log("Booking created successfully!");
-            console.log("Data sau khi dat ", response.data);
-            // Refresh the screen after 2 seconds
-            setTimeout(() => {
-              window.location.reload();
-            }, 2000);
+            console.log("Data sau khi dat ", response.data.data);
+            // setTableData({
+            //   Address: response.data.data.address,
+            //   Store_Name: response.data.data.storeName,
+            //   Area_Name: response.data.data.areaName,
+            //   Billard_Type_Name: response.data.data.billiardTypeName,
+            //   Booking_Date: response.data.data.bookingDate,
+            //   Time_Start: response.data.data.timeStart,
+            //   Time_End: response.data.data.timeEnd,
+            //   Price: response.data.data.price,
+            // });
+            //setPopupVisible(true);
+            setAlertVisible(true);
+            setSuccessResponse("Đã tạo bàn thành công!");
+            //alert("Đã tạo bàn thành công!");
+            setIsLoading(false);
           } else {
-            alert(response.data.message);
+            setIsLoading(false);
+            setAlertVisible(true);
+            setErrorResponse(response.data.message);
+            //alert(response.data.message);
+            //alert(response.data.message);
           }
         });
       } catch (error) {
@@ -230,6 +304,16 @@ const ReserveScreen = () => {
       }
     }
   };
+  if (alertVisible) {
+    if (areaError) {
+      return alertPopup("Lỗi", areaError, "OK", "Hủy");
+    } else if (errorResponse) {
+      return alertPopup("Lỗi", errorResponse, "OK", "Hủy");
+    } else if (successResponse) {
+      const successConfirm = true;
+      return alertPopup("Lỗi", successResponse, "OK", "Hủy", successConfirm);
+    }
+  }
   return (
     <SafeAreaView>
       <ScrollView>
@@ -290,7 +374,7 @@ const ReserveScreen = () => {
                     color="black"
                   />
                 }
-                placeholder="Chọn loại bàn"
+                placeholder="Chọn khu vực chơi"
                 data={areaData}
                 onSelect={async (item) => {
                   setAreaId(item.value);
@@ -318,7 +402,7 @@ const ReserveScreen = () => {
                 onSelect={handleStartTimeSelect}
                 placeholder="Select a time"
                 containerStyles={{
-                  backgroundColor: "#f0f0f0",
+                  backgroundColor: "white",
                   paddingHorizontal: 16,
                 }}
                 modalStyles={{
@@ -336,7 +420,7 @@ const ReserveScreen = () => {
                 onSelect={handleEndTimeSelect}
                 placeholder="Select a time"
                 containerStyles={{
-                  backgroundColor: "#f0f0f0",
+                  backgroundColor: "white",
                   paddingHorizontal: 16,
                 }}
                 modalStyles={{
@@ -350,6 +434,16 @@ const ReserveScreen = () => {
                 is24Hour={true}
                 minTime={selectedStartTime}
               />
+              <Text style={styles.inputTitle}>Lời nhắn cho quán</Text>
+              <InputCustom
+                placeholder="Thêm lời nhắn cho quán"
+                multiline
+                numberOfLines={4}
+                maxLength={100}
+                onChangeText={(text) => {
+                  setUserMessage(text);
+                }}
+              />
               <Button
                 title="TÌM KIẾM & ĐẶT BÀN"
                 buttonStyles={styles.updateButton}
@@ -357,6 +451,7 @@ const ReserveScreen = () => {
                 onPress={() => {
                   onSubmit();
                 }}
+                loading={isLoading}
               />
             </View>
           </View>
@@ -412,6 +507,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   updateButton: {
+    marginTop: 10,
     backgroundColor: theme.colors.secondary,
     borderRadius: 10,
   },

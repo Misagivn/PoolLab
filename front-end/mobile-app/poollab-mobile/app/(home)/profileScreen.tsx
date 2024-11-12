@@ -57,6 +57,13 @@ const ProfileScreen = () => {
           <Text style={styles.functionName}>Quản lý ví tiền</Text>
           <Icon name="arrowRight" size={20} strokeWidth={3} color="black" />
         </View>
+        <Pressable
+          style={styles.functionBox}
+          onPress={() => router.push("../(reserveTable)")}
+        >
+          <Text style={styles.functionName}>Quản lý đặt bàn</Text>
+          <Icon name="arrowRight" size={20} strokeWidth={3} color="black" />
+        </Pressable>
         <View style={styles.functionBox}>
           <Text style={styles.functionName}>Quản lý khóa học</Text>
           <Icon name="arrowRight" size={20} strokeWidth={3} color="black" />

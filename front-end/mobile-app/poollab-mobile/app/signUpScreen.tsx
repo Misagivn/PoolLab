@@ -8,6 +8,8 @@ import Button from "@/components/roundButton";
 import { router } from "expo-router";
 import Icon from "@/assets/icons/icons";
 import { register_user } from "@/api/user_api";
+import CustomAlert from "@/components/alertCustom";
+
 /**
  * SignUpScreen: màn hình đăng ký
  *
@@ -27,6 +29,10 @@ const SignUpScreen = () => {
   const [emailFormat, setEmailFormat] = useState(true);
   const [passwordFormat, setPasswordFormat] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [errorResponse, setErrorResponse] = useState("");
+  const [successResponse, setSuccessResponse] = useState("");
+  const [showPassword, setShowPassword] = useState(true);
   /**
    * Validate email format
    *
@@ -71,6 +77,24 @@ const SignUpScreen = () => {
     fullName: userFullName,
   };
 
+  const alertPopup = (title, message, confirmText, cancelText) => {
+    return (
+      <CustomAlert
+        visible={alertVisible}
+        title={title}
+        message={message}
+        confirmText={confirmText}
+        cancelText={cancelText}
+        onConfirm={() => {
+          setAlertVisible(false);
+        }}
+        onCancel={() => {
+          setAlertVisible(false);
+        }}
+      />
+    );
+  };
+
   /**
    * Check sign up
    *
@@ -90,22 +114,25 @@ const SignUpScreen = () => {
       !passwordFormat
     ) {
       if (!emailFormat) {
-        alert(errorMessage);
+        setAlertVisible(true);
       } else if (!passwordFormat) {
-        alert(errorMessage1);
+        setAlertVisible(true);
       } else {
-        alert("Please enter the required fields");
+        setAlertVisible(true);
       }
     } else {
       setIsLoading(true);
       try {
         register_user(signupData).then((response) => {
           if (response?.data.status === 200) {
-            alert("Đăng ký thành công, xin hãy đăng nhập.");
+            setAlertVisible(true);
+            setSuccessResponse("Đăng ký thành công, xin hãy đăng nhập.");
+            //alert("Đăng ký thành công, xin hãy đăng nhập.");
             router.push("loginScreen");
             setIsLoading(false);
           } else {
-            alert(response.data.message);
+            setAlertVisible(true);
+            setErrorResponse(response.data.message);
             setIsLoading(false);
           }
         });
@@ -114,6 +141,26 @@ const SignUpScreen = () => {
       }
     }
   };
+  if (alertVisible) {
+    if (!errorMessage && !errorMessage1 && !errorResponse && !successResponse) {
+      return alertPopup("Lỗi", "Vui lòng nhập tất cả các trường", "OK", "Hủy");
+    } else if (!errorMessage && !errorResponse && !successResponse) {
+      return alertPopup("Lỗi", errorMessage1, "OK", "Hủy");
+    } else if (!errorMessage1 && !errorResponse && !successResponse) {
+      return alertPopup("Lỗi", errorMessage, "OK", "Hủy");
+    } else if (
+      errorMessage &&
+      errorMessage1 &&
+      !errorResponse &&
+      !successResponse
+    ) {
+      return alertPopup("Lỗi", "Vui lòng nhập tất cả đúng format", "OK", "Hủy");
+    } else if (errorResponse && !successResponse) {
+      return alertPopup("Lỗi", errorResponse, "OK", "Hủy");
+    } else if (successResponse) {
+      return alertPopup("Lỗi", successResponse, "OK", "Hủy");
+    }
+  }
   return (
     <View style={styles.container}>
       <StatusBar hidden={false} style="dark" />
@@ -131,6 +178,7 @@ const SignUpScreen = () => {
           icon={
             <Icon name="userIcon" size={25} strokeWidth={1} color="black" />
           }
+          value={userFullName}
           onChangeText={(text) => {
             setUserFullName(text);
           }}
@@ -140,6 +188,7 @@ const SignUpScreen = () => {
           icon={
             <Icon name="userIcon" size={25} strokeWidth={1} color="black" />
           }
+          value={userName}
           onChangeText={(text) => {
             setUserName(text);
           }}
@@ -150,6 +199,7 @@ const SignUpScreen = () => {
           icon={
             <Icon name="emailIcon" size={25} strokeWidth={1} color="black" />
           }
+          value={email}
           onChangeText={(text) => {
             setEmail(text.toLowerCase());
           }}
@@ -160,14 +210,26 @@ const SignUpScreen = () => {
         ) : null}
         <InputCustom
           placeholder="Mật khẩu"
-          secureTextEntry={true}
+          secureTextEntry={showPassword}
           icon={
             <Icon name="passwordIcon" size={25} strokeWidth={1} color="black" />
           }
+          value={password}
           onChangeText={(text) => {
             setPassword(text);
           }}
           onEndEditing={validatePassword}
+          iconRight={
+            <Icon
+              name="showPasswordIcon"
+              size={25}
+              strokeWidth={1}
+              color="black"
+              onPress={() => {
+                setShowPassword(!showPassword);
+              }}
+            />
+          }
         />
         {errorMessage1 ? (
           <Text style={styles.errorText}>{errorMessage1}</Text>

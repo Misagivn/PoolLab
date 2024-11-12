@@ -9,7 +9,7 @@ import InputCustom from "@/components/inputCustom";
 import Icon from "@/assets/icons/icons";
 import { getStoredUser, getStoredToken } from "@/api/tokenDecode";
 import { get_user_details, update_user } from "@/api/user_api";
-
+import CustomAlert from "@/components/alertCustom";
 const index = () => {
   //Get userId from AsyncStorage
   const [userId, setUserId] = useState("");
@@ -19,6 +19,38 @@ const index = () => {
   const [userNumber, setUserNumber] = useState(0);
   const [userToken, setUserToken] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [emailFormat, setEmailFormat] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [errorResponse, setErrorResponse] = useState("");
+  const [successResponse, setSuccessResponse] = useState("");
+  const validateEmail = () => {
+    const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+    if (!emailRegex.test(accEmail)) {
+      setErrorMessage("Xin hãy nhập địa chỉ email hợp lệ");
+      setEmailFormat(false);
+    } else {
+      setErrorMessage("");
+      setEmailFormat(true);
+    }
+  };
+  const alertPopup = (title, message, confirmText, cancelText) => {
+    return (
+      <CustomAlert
+        visible={alertVisible}
+        title={title}
+        message={message}
+        confirmText={confirmText}
+        cancelText={cancelText}
+        onConfirm={() => {
+          setAlertVisible(false);
+        }}
+        onCancel={() => {
+          setAlertVisible(false);
+        }}
+      />
+    );
+  };
   useEffect(() => {
     const loadStat = async () => {
       try {
@@ -61,19 +93,28 @@ const index = () => {
       userEmail === "" ||
       userNumber === null
     ) {
-      alert("Xin hãy nhập tất cả các trường");
+      if (!emailFormat) {
+        setAlertVisible(true);
+        // alertPopup("Lỗi", errorMessage, "OK", "Hủy");
+      } else {
+        alert("Xin hãy nhập tất cả các trường");
+      }
     } else {
       setIsLoading(true);
       try {
         console.log(updateData);
         update_user(updateData, userId, userToken).then((response) => {
           if (response.data.status === 200) {
-            alert("Cập nhật thành công");
-            router.push("/(home)/profileScreen");
+            setAlertVisible(true);
+            setSuccessResponse("Cập nhật thành công");
+            //alert("Cập nhật thành công");
+            //router.push("/(home)/profileScreen");
             setIsLoading(false);
           } else {
             console.log(response.data.message);
-            alert(response.data.message);
+            setAlertVisible(true);
+            setErrorResponse(response.data.message);
+            //alert(response.data.message);
             setIsLoading(false);
           }
         });
@@ -82,6 +123,17 @@ const index = () => {
       }
     }
   };
+  if (alertVisible) {
+    if (!errorMessage && !errorResponse && !successResponse) {
+      return alertPopup("Lỗi", "Vui lòng nhập tất cả các trường", "OK", "Hủy");
+    } else if (errorMessage && !errorResponse && !successResponse) {
+      return alertPopup("Lỗi", errorMessage, "OK", "Hủy");
+    } else if (errorResponse && !successResponse) {
+      return alertPopup("Lỗi", errorResponse, "OK", "Hủy");
+    } else if (successResponse) {
+      return alertPopup("Lỗi", successResponse, "OK", "Hủy");
+    }
+  }
   return (
     <SafeAreaView>
       <View style={styles.container}>
@@ -109,10 +161,14 @@ const index = () => {
                 />
               }
               value={userEmail}
+              onEndEditing={validateEmail}
               onChangeText={(text) => {
                 setUserEmail(text);
               }}
             />
+            {errorMessage ? (
+              <Text style={styles.errorText}>{errorMessage}</Text>
+            ) : null}
             <InputCustom
               placeholder="Tên người dùng"
               icon={
@@ -251,5 +307,9 @@ const styles = StyleSheet.create({
     color: theme.colors.primary,
     fontSize: 15,
     fontWeight: "bold",
+  },
+  errorText: {
+    color: "red",
+    fontSize: 14,
   },
 });

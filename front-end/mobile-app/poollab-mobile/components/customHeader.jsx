@@ -4,7 +4,6 @@ import { theme } from "@/constants/theme";
 import Icon from "@/assets/icons/icons";
 import { getStoredUser } from "@/api/tokenDecode";
 import { get_user_details } from "@/api/user_api";
-import { store } from "expo-router/build/global-state/router-store";
 const CustomHeader = () => {
   //Get username from AsyncStorage
   const [userName, setUserName] = useState("");

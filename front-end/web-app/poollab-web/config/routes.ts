@@ -9,6 +9,8 @@ import {
   FiMessageSquare,
   FiLogOut
 } from 'react-icons/fi';
+import { PiMapPinAreaBold } from "react-icons/pi";
+import { VscAccount } from "react-icons/vsc";
 
 export interface RouteConfig {
   path: string;
@@ -23,6 +25,11 @@ export const routes: RouteConfig[] = [
     icon: FiHome,
   },
   {
+    path: '/manager/area',
+    label: 'Khu vực',
+    icon: PiMapPinAreaBold,
+  },
+  {
     path: '/manager/staff',
     label: 'Nhân viên',
     icon: FiUsers,
@@ -34,7 +41,7 @@ export const routes: RouteConfig[] = [
   },
   {
     path: '/manager/drinks',
-    label: 'Đồ uống',
+    label: 'Hàng hóa',
     icon: FiShoppingCart,
   },
   {
@@ -45,7 +52,7 @@ export const routes: RouteConfig[] = [
   {
     path: '/manager/info',
     label: 'Tài khoản',
-    icon: FiMessageSquare,
+    icon: VscAccount,
   },
   {
     path: '/',

@@ -1,19 +1,14 @@
 "use client";
 
-import { Box, Flex } from '@chakra-ui/react';
-import Sidebar from '@/app/components/shared/sidebar';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return (
-    <Flex minH="100vh">
-      <Sidebar />
-      <Box flex="1" ml="64" p="6">
-        {children}
-      </Box>
-    </Flex>
-  );
+export default function ManagerPage() {
+  const router = useRouter();
+
+  useEffect(() => {
+    router.push('/manager/dashpage');
+  }, [router]);
+
+  return null;
 }

@@ -1,30 +1,41 @@
-// app/tables/page.tsx
-"use client";
+'use client';
 
-import React, { useState, useEffect } from 'react';
 import {
   Box,
-  Container,
   Flex,
+  Text,
   Heading,
+  Badge,
+  useToast,
+  Spinner,
+  Input,
+  InputGroup,
+  InputLeftElement,
+  Stack,
   Table,
   Thead,
   Tbody,
   Tr,
   Th,
   Td,
-  Image,
-  Badge,
+  Select,
+  HStack,
   IconButton,
   Button,
-  useColorModeValue,
-  Skeleton,
-  useToast,
-  Text,
+  Icon,
+  Card,
+  CardBody,
 } from '@chakra-ui/react';
-import { FiArrowLeft, FiEdit2, FiEye } from 'react-icons/fi';
-import axios from '@/config/axios';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { jwtDecode } from 'jwt-decode';
+import { 
+  FiSearch, 
+  FiRefreshCcw,
+  FiEdit2,
+  FiTrash2,
+  FiInfo,
+  FiPlusSquare,
+} from 'react-icons/fi';
 
 interface BilliardTable {
   id: string;
@@ -41,32 +52,36 @@ interface BilliardTable {
   status: string;
 }
 
-interface ApiResponse {
-  data: {
-    items: BilliardTable[];
-    totalItem: number;
-    pageSize: number;
-    totalPages: number;
-    pageNumber: number;
-  };
-}
-
-export default function TablesListPage() {
+export default function TablesPage() {
   const [tables, setTables] = useState<BilliardTable[]>([]);
   const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const toast = useToast();
-  const router = useRouter();
-  const bgColor = useColorModeValue('white', 'gray.800');
-  const borderColor = useColorModeValue('gray.200', 'gray.700');
 
   useEffect(() => {
     const fetchTables = async () => {
       try {
-        const response = await axios.get<ApiResponse>('/BilliardTable/GetAllBilliardTable');
-        setTables(response.data.data.items);
-      } catch (error) {
+        const token = localStorage.getItem('token');
+        if (!token) throw new Error('No token found');
+
+        const decoded = jwtDecode(token) as any;
+        const storeId = decoded.storeId;
+
+        const response = await fetch(
+          `https://poollabwebapi20241008201316.azurewebsites.net/api/BilliardTable/GetAllBilliardTable?StroreID=${storeId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        const data = await response.json();
+        if (data.status === 200) {
+          setTables(data.data.items);
+        }
+      } catch (err) {
         toast({
-          title: 'Error',
+          title: 'Lỗi',
           description: 'Không thể tải danh sách bàn',
           status: 'error',
           duration: 3000,
@@ -80,115 +95,167 @@ export default function TablesListPage() {
     fetchTables();
   }, [toast]);
 
-  const handleBack = () => {
-    router.back();
-  };
+  const filteredTables = tables.filter(table => {
+    const matchesSearch = table.name.toLowerCase().includes(searchQuery.toLowerCase());
+    if (filter === 'all') return matchesSearch;
+    return matchesSearch && table.status.toLowerCase() === filter.toLowerCase();
+  });
+
+  if (loading) {
+    return (
+      <Flex h="100%" align="center" justify="center" p={6}>
+        <Spinner size="xl" color="blue.500" />
+      </Flex>
+    );
+  }
 
   return (
-    <Box minH="100vh" bg={useColorModeValue('gray.50', 'gray.900')} p="4">
-      <Container maxW="container.xl">
-        {/* Header with Back Button */}
-        <Flex direction="column" gap="4" mb="6">
+    <Box p={6} bg="gray.50" minH="100vh">
+      <Stack spacing={6}>
+        {/* Header with Add Button */}
+        <Flex justify="space-between" align="center">
+          <Heading size="lg">Quản lý bàn Billiard</Heading>
           <Button
-            leftIcon={<FiArrowLeft />}
-            onClick={handleBack}
-            alignSelf="flex-start"
-            variant="ghost"
-            size="md"
+            leftIcon={<Icon as={FiPlusSquare} />}
+            colorScheme="blue"
+            onClick={() => {
+              toast({
+                title: "Thông báo",
+                description: "Tính năng sẽ sớm được cập nhật",
+                status: "info",
+                duration: 3000,
+                isClosable: true,
+              });
+            }}
           >
-            Quay lại
+            Thêm bàn mới
           </Button>
-          
-          <Flex justify="space-between" align="center">
-            <Heading size="lg">Danh Sách Bàn Bi-a</Heading>
-            <Text color="gray.500">
-              Tổng số bàn: {tables.length}
-            </Text>
-          </Flex>
         </Flex>
 
-        {/* Table */}
-        <Box 
-          bg={bgColor} 
-          borderRadius="lg" 
-          shadow="sm"
-          overflow="hidden"
-          border="1px"
-          borderColor={borderColor}
-        >
-          <Table variant="simple">
-            <Thead>
-              <Tr>
-                <Th>Hình ảnh</Th>
-                <Th>Tên bàn</Th>
-                <Th>Loại bàn</Th>
-                <Th>Trạng thái</Th>
-                <Th>Khu vực</Th>
-                <Th>Ngày tạo</Th>
-                <Th>Thao tác</Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {loading ? (
-                [...Array(5)].map((_, index) => (
-                  <Tr key={index}>
-                    {[...Array(7)].map((_, cellIndex) => (
-                      <Td key={cellIndex}>
-                        <Skeleton height="20px" />
-                      </Td>
-                    ))}
-                  </Tr>
-                ))
-              ) : (
-                tables.map((table) => (
+        {/* Search Bar and Actions */}
+        <Flex gap={4} wrap="wrap">
+          <InputGroup maxW={{ base: "100%", md: "320px" }}>
+            <InputLeftElement>
+              <Icon as={FiSearch} color="gray.400" />
+            </InputLeftElement>
+            <Input
+              bg="white"
+              placeholder="Tìm kiếm bàn..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </InputGroup>
+
+          <Select
+            w={{ base: "100%", md: "200px" }}
+            bg="white"
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+          >
+            <option value="all">Tất cả trạng thái</option>
+            <option value="bàn trống">Bàn trống</option>
+            <option value="đang sử dụng">Đang sử dụng</option>
+            <option value="đang bảo trì">Đang bảo trì</option>
+          </Select>
+
+          <IconButton
+            aria-label="Refresh"
+            icon={<Icon as={FiRefreshCcw} />}
+            onClick={() => window.location.reload()}
+          />
+        </Flex>
+
+        {/* Status Legend */}
+        <HStack spacing={4} bg="white" p={4} borderRadius="lg" flexWrap="wrap">
+          <HStack>
+            <Badge colorScheme="green">BÀN TRỐNG</Badge>
+            <Text fontSize="sm">Sẵn sàng</Text>
+          </HStack>
+          <HStack>
+            <Badge colorScheme="red">ĐANG SỬ DỤNG</Badge>
+            <Text fontSize="sm">Có khách</Text>
+          </HStack>
+          <HStack>
+            <Badge colorScheme="yellow">ĐANG BẢO TRÌ</Badge>
+            <Text fontSize="sm">Bảo trì</Text>
+          </HStack>
+        </HStack>
+
+        {/* Table Card */}
+        <Card>
+          <CardBody p={0}>
+            <Table variant="simple">
+              <Thead bg="gray.50">
+                <Tr>
+                  <Th>TÊN BÀN</Th>
+                  <Th>TRẠNG THÁI</Th>
+                  <Th>KHU VỰC</Th>
+                  <Th>LOẠI BÀN</Th>
+                  <Th>GIÁ</Th>
+                  <Th width="100px" textAlign="right">THAO TÁC</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {filteredTables.map((table) => (
                   <Tr key={table.id}>
+                    <Td>{table.name}</Td>
                     <Td>
-                      <Image
-                        src={table.image !== "string" ? table.image : "/assets/table.png"}
-                        alt={table.name}
-                        boxSize="50px"
-                        objectFit="cover"
-                        borderRadius="md"
-                      />
-                    </Td>
-                    <Td fontWeight="medium">{table.name}</Td>
-                    <Td>Bàn Pool</Td>
-                    <Td>
-                      <Badge 
-                        colorScheme={table.status === "Bàn trống" ? "green" : "red"}
-                        borderRadius="full"
-                        px="2"
+                      <Badge
+                        colorScheme={
+                          table.status.toLowerCase() === 'bàn trống' ? 'green' :
+                          table.status.toLowerCase() === 'đang sử dụng' ? 'red' :
+                          'yellow'
+                        }
                       >
                         {table.status}
                       </Badge>
                     </Td>
-                    <Td>Khu A</Td>
-                    <Td>{new Date(table.createdDate).toLocaleDateString('vi-VN')}</Td>
+                    <Td maxW="200px" isTruncated>{table.areaId}</Td>
+                    <Td maxW="200px" isTruncated>{table.billiardTypeId}</Td>
+                    <Td maxW="200px" isTruncated>{table.priceId}</Td>
                     <Td>
-                      <Flex gap="2">
+                      <HStack spacing={2} justify="flex-end">
                         <IconButton
                           aria-label="View details"
-                          icon={<FiEye />}
+                          icon={<Icon as={FiInfo} />}
                           size="sm"
-                          colorScheme="blue"
                           variant="ghost"
                         />
                         <IconButton
                           aria-label="Edit table"
-                          icon={<FiEdit2 />}
+                          icon={<Icon as={FiEdit2} />}
                           size="sm"
-                          colorScheme="green"
                           variant="ghost"
                         />
-                      </Flex>
+                        <IconButton
+                          aria-label="Delete table"
+                          icon={<Icon as={FiTrash2} />}
+                          size="sm"
+                          variant="ghost"
+                          colorScheme="red"
+                        />
+                      </HStack>
                     </Td>
                   </Tr>
-                ))
-              )}
-            </Tbody>
-          </Table>
-        </Box>
-      </Container>
+                ))}
+              </Tbody>
+            </Table>
+
+            {filteredTables.length === 0 && (
+              <Flex 
+                direction="column" 
+                align="center" 
+                justify="center" 
+                py={10}
+              >
+                <Text color="gray.500">
+                  Không tìm thấy bàn nào
+                </Text>
+              </Flex>
+            )}
+          </CardBody>
+        </Card>
+      </Stack>
     </Box>
   );
 }

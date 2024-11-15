@@ -98,7 +98,7 @@ export default function LoginPage() {
                 setError('Invalid store ID for manager');
               }
               break;
-            case 'SuperManager':
+            case 'Super Manager':
               if (decodedToken.companyId) {
                 router.push('/supermanager');
               } else {
@@ -120,7 +120,7 @@ export default function LoginPage() {
             title: 'Đăng nhập thành công',
             description: data.message,
             status: 'success',
-            duration: 3000,
+            duration: 1000,
             isClosable: true,
           });
         } catch (decodeError) {

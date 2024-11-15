@@ -25,6 +25,7 @@ import {
   Icon,
   Card,
   CardBody,
+  Image,
 } from '@chakra-ui/react';
 import { useState, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
@@ -100,6 +101,10 @@ export default function TablesPage() {
     if (filter === 'all') return matchesSearch;
     return matchesSearch && table.status.toLowerCase() === filter.toLowerCase();
   });
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('vi-VN');
+  };
 
   if (loading) {
     return (
@@ -187,18 +192,33 @@ export default function TablesPage() {
             <Table variant="simple">
               <Thead bg="gray.50">
                 <Tr>
+                  <Th width="50px">STT</Th>
+                  <Th width="100px">HÌNH ẢNH</Th>
                   <Th>TÊN BÀN</Th>
-                  <Th>TRẠNG THÁI</Th>
-                  <Th>KHU VỰC</Th>
                   <Th>LOẠI BÀN</Th>
-                  <Th>GIÁ</Th>
+                  <Th>NGÀY TẠO</Th>
+                  <Th>NGÀY CẬP NHẬT</Th>
+                  <Th>TRẠNG THÁI</Th>
                   <Th width="100px" textAlign="right">THAO TÁC</Th>
                 </Tr>
               </Thead>
               <Tbody>
-                {filteredTables.map((table) => (
+                {filteredTables.map((table, index) => (
                   <Tr key={table.id}>
+                    <Td>{index + 1}</Td>
+                    <Td>
+                      <Image
+                        src={table.image || '/api/placeholder/100/100'}
+                        alt={table.name}
+                        boxSize="50px"
+                        objectFit="cover"
+                        borderRadius="md"
+                      />
+                    </Td>
                     <Td>{table.name}</Td>
+                    <Td>{table.billiardTypeId}</Td>
+                    <Td>{formatDate(table.createdDate)}</Td>
+                    <Td>{table.updatedDate ? formatDate(table.updatedDate) : '-'}</Td>
                     <Td>
                       <Badge
                         colorScheme={
@@ -210,9 +230,6 @@ export default function TablesPage() {
                         {table.status}
                       </Badge>
                     </Td>
-                    <Td maxW="200px" isTruncated>{table.areaId}</Td>
-                    <Td maxW="200px" isTruncated>{table.billiardTypeId}</Td>
-                    <Td maxW="200px" isTruncated>{table.priceId}</Td>
                     <Td>
                       <HStack spacing={2} justify="flex-end">
                         <IconButton

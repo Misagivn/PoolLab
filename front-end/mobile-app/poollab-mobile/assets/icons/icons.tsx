@@ -17,6 +17,8 @@ import FromAtoZIcon from "./AtoZIcon";
 import AreaIcon from "./pinPointAreaIcon";
 import AddCircleIcon from "./addCircleIcon";
 import MinusSignCircleIcon from "./minusCircleIcon";
+import ShowPasswordIcon from "./showPasswordIcon";
+import CheckIcon from "./checkIcon";
 const icons = {
   fbIcon: FacebookIcon,
   ggIcon: GoogleIcon,
@@ -34,6 +36,8 @@ const icons = {
   areaIcon: AreaIcon,
   addCircleIcon: AddCircleIcon,
   minusCircleIcon: MinusSignCircleIcon,
+  showPasswordIcon: ShowPasswordIcon,
+  checkIcon: CheckIcon,
 };
 
 const Icon = ({ name, ...props }) => {

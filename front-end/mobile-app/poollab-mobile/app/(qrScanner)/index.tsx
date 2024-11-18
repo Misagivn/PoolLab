@@ -1,54 +1,61 @@
-import { StyleSheet, Text, View } from "react-native";
-import React, { useEffect } from "react";
+import { StyleSheet, Text, Vibration, View } from "react-native";
+import React, { useState } from "react";
+import {
+  BarcodeScanningResult,
+  CameraView,
+  useCameraPermissions,
+} from "expo-camera";
 import { SafeAreaView } from "react-native-safe-area-context";
-import BackButton from "@/components/backButton";
-import { BarCodeScanner } from "expo-barcode-scanner";
-import { StatusBar } from "expo-status-bar";
+import Button from "@/components/roundButton";
+
 const index = () => {
-  const [hasPermission, setHasPermission] = React.useState(false);
-  const [scanData, setScanData] = React.useState();
-
-  useEffect(() => {
-    async () => {
-      const { status } = await BarCodeScanner.requestPermissionsAsync();
-      setHasPermission(status === "granted");
-    };
-  }, []);
-
-  if (!hasPermission) {
-    return;
-    <View style={styles.container}>
-      <Text>Please grant camera the permission</Text>
-    </View>;
-  }
-  const handleBarCodeScanned = ({ type, data }) => {
-    setScanData(data);
-    console.log(`Data: ${data}`);
-    console.log(`Type: ${type}`);
-    // setScanData(data);
-  };
-
-  return (
+  const [hasCameraPermission, setHasCameraPermission] = useCameraPermissions();
+  const [scanningEnable, setScanningEnable] = useState(true);
+  if (!hasCameraPermission) {
     <SafeAreaView>
-      <StatusBar style="auto" />
-      <BackButton />
-      <View style={styles.container}>
-        <BarcodeScanner
-          onBarCodeScanned={scanData ? undefined : handleBarCodeScanned}
-          style={StyleSheet.absoluteFillObject}
-        />
+      <View style={styles.requestCamera}>
+        <Text>
+          Ứng dụng cần quyền sử dụng camera để sử dụng chức năng quét QR
+        </Text>
+        <Button
+          title={"Cấp quyền sử dụng camera"}
+          buttonStyles={undefined}
+          textStyles={undefined}
+          onPress={() => {
+            setHasCameraPermission;
+          }}
+        />{" "}
       </View>
-    </SafeAreaView>
+    </SafeAreaView>;
+  }
+  async function onBarcodeScanned({ data }: BarcodeScanningResult) {
+    if (!scanningEnable) return;
+    try {
+      Vibration.vibrate(500);
+      console.log(data);
+      setScanningEnable(false);
+    } catch (error) {
+      console.log(error);
+      setScanningEnable(false);
+    }
+  }
+  return (
+    <CameraView
+      // style={}
+      facing="back"
+      onBarcodeScanned={onBarcodeScanned}
+      barcodeScannerSettings={{ barcodeTypes: ["qr"] }}
+    />
   );
 };
 
 export default index;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
+  requestCamera: {
     justifyContent: "center",
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 10,
   },
 });

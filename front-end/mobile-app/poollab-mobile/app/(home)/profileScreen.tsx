@@ -6,8 +6,8 @@ import { theme } from "@/constants/theme";
 import Icon from "@/assets/icons/icons";
 import { router } from "expo-router";
 import { get_user_details } from "@/api/user_api";
-import { getStoredUser } from "@/api/tokenDecode";
 import CustomHeader from "@/components/customHeader";
+import { getAccountId } from "@/data/userData";
 const ProfileScreen = () => {
   //Get userId from AsyncStorage
   const [userFullName, setUserFullName] = useState("");
@@ -15,9 +15,9 @@ const ProfileScreen = () => {
   useEffect(() => {
     const loadStat = async () => {
       try {
-        const storedUser = await getStoredUser();
-        if (storedUser) {
-          get_user_details(storedUser.AccountId).then((response) => {
+        const accountId = await getAccountId();
+        if (accountId) {
+          get_user_details(accountId).then((response) => {
             if (response.data.status === 200) {
               const userFullName = response.data.data.fullName;
               const userEmail = response.data.data.email;

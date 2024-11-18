@@ -1,32 +1,69 @@
-import { useState, useEffect } from "react";
-import { getStoredUser } from "@/api/tokenDecode";
-import { get_user_details } from "@/api/user_api";
+import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
+import {getStoredUser} from '../api/tokenDecode'
+import {get_user_details} from '../api/user_api'
+export const getAccountId = async () => {
+  try {
+    const accountData = await getStoredUser();
+    if (accountData) {
+      const accountId = accountData.AccountId
+      return accountId
+    }
+  } catch (error) {
+    console.error('Error getting account ID:', error);
+  }
+};
 
-export const userData = () => {
-    const [userFullName1, setUserFullName] = useState("");
-    const [userEmail1, setUserEmail] = useState("");
-    useEffect(() => {
-      const loadStat = async () => {
-        try {
-          const storedUser = await getStoredUser();
-          if (storedUser) {
-            get_user_details(storedUser.AccountId).then((response) => {
-              if (response.data.status === 200) {
-                const userFullName = response.data.data.fullName;
-                const userEmail = response.data.data.email;
-                setUserFullName(userFullName);
-                setUserEmail(userEmail);
-              }
-            });
-          }
-        } catch (error) {
-          console.error("Error loading stored user:", error);
-        }
-      };
-      loadStat();
-    }, []);
-    return {
-      userFullName1,
-      userEmail1,
-    };
+export const getUserName = async () => {
+  try {
+    const accountData = await getStoredUser();
+    if (accountData) {
+      const accountName = accountData.Username
+      return accountName
+    }
+  } catch (error) {
+    console.error('Error getting user name:', error);
+  }
+};
+
+export const getUserFullName = async (userId) => {
+  try {
+    if (userId) {
+      const response = await get_user_details(userId);
+      if (response.data.status === 200) {
+        const userFullName = response.data.data.fullName;
+        return userFullName;
+      }
+    }
+  } catch (error) {
+    console.error('Error getting user balance:', error);
+  }
+};
+
+
+export const getUserEmail = async (userId) => {
+  try {
+    if (userId) {
+      const response = await get_user_details(userId);
+      if (response.data.status === 200) {
+        const userEmail = response.data.data.email;
+        return userEmail;
+      }
+    }
+  } catch (error) {
+    console.error('Error getting user balance:', error);
+  }
+};
+
+export const getUserBalance = async (userId) => {
+  try {
+    if (userId) {
+      const response = await get_user_details(userId);
+      if (response.data.status === 200) {
+        const userBalance = response.data.data.balance;
+        return userBalance;
+      }
+    }
+  } catch (error) {
+    console.error('Error getting user balance:', error);
+  }
 };

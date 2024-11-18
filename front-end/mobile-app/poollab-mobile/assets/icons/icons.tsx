@@ -19,6 +19,8 @@ import AddCircleIcon from "./addCircleIcon";
 import MinusSignCircleIcon from "./minusCircleIcon";
 import ShowPasswordIcon from "./showPasswordIcon";
 import CheckIcon from "./checkIcon";
+import TrashIcon from "./trashIcon";
+import CameraIcon from "./cameraIcon";
 const icons = {
   fbIcon: FacebookIcon,
   ggIcon: GoogleIcon,
@@ -38,6 +40,8 @@ const icons = {
   minusCircleIcon: MinusSignCircleIcon,
   showPasswordIcon: ShowPasswordIcon,
   checkIcon: CheckIcon,
+  trashIcon: TrashIcon,
+  cameraIcon: CameraIcon,
 };
 
 const Icon = ({ name, ...props }) => {

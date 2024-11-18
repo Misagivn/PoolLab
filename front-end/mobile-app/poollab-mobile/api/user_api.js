@@ -75,6 +75,7 @@ export const update_user = async (data, userId, token) => {
     return response;
   } catch (error) {
     if (error.response) {
+      console.log("error response:", error.response);
       // Server responded with an error status (4xx, 5xx)
       return error.response;
     } else if (error.request) {

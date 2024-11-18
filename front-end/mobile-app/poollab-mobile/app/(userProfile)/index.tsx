@@ -10,6 +10,8 @@ import Icon from "@/assets/icons/icons";
 import { getStoredUser, getStoredToken } from "@/api/tokenDecode";
 import { get_user_details, update_user } from "@/api/user_api";
 import CustomAlert from "@/components/alertCustom";
+import { getAccountId } from "@/data/userData";
+import FacebookIcon from "@/assets/icons/fbIcon";
 const index = () => {
   //Get userId from AsyncStorage
   const [userId, setUserId] = useState("");
@@ -24,6 +26,9 @@ const index = () => {
   const [alertVisible, setAlertVisible] = useState(false);
   const [errorResponse, setErrorResponse] = useState("");
   const [successResponse, setSuccessResponse] = useState("");
+  const [imageSource, setImageSource] = useState(
+    require("../../assets/images/eda492de2906a8827a6266e32bcd3ffb.webp")
+  );
   const validateEmail = () => {
     const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
     if (!emailRegex.test(accEmail)) {
@@ -52,14 +57,15 @@ const index = () => {
     );
   };
   useEffect(() => {
+    setIsLoading(true);
     const loadStat = async () => {
       try {
-        const storedUser = await getStoredUser();
+        const accountId = await getAccountId();
         const storedToken = await getStoredToken();
-        if (storedUser && storedToken) {
+        if (accountId && storedToken) {
           const token = storedToken;
           setUserToken(token);
-          get_user_details(storedUser.AccountId).then((response) => {
+          get_user_details(accountId).then((response) => {
             if (response.data.status === 200) {
               const userId = response.data.data.id;
               const userFullName = response.data.data.fullName;
@@ -73,6 +79,7 @@ const index = () => {
               setUserNumber(userNumber);
             }
           });
+          setIsLoading(false);
         }
       } catch (error) {
         console.error("Error loading stored user:", error);
@@ -102,16 +109,15 @@ const index = () => {
     } else {
       setIsLoading(true);
       try {
-        console.log(updateData);
         update_user(updateData, userId, userToken).then((response) => {
-          if (response.data.status === 200) {
+          if (response.status === 200) {
             setAlertVisible(true);
             setSuccessResponse("Cập nhật thành công");
             //alert("Cập nhật thành công");
             //router.push("/(home)/profileScreen");
             setIsLoading(false);
           } else {
-            console.log(response.data.message);
+            console.log("error message:", response.data.message);
             setAlertVisible(true);
             setErrorResponse(response.data.message);
             //alert(response.data.message);
@@ -143,12 +149,14 @@ const index = () => {
             <Text style={styles.title}>Cập nhật thông tin</Text>
             <Text style={styles.title2}>tài khoản.</Text>
           </View>
-          <View style={styles.imageBox}>
-            <Image
-              style={styles.image}
-              source={require("../../assets/images/eda492de2906a8827a6266e32bcd3ffb.webp")}
-            />
-          </View>
+          <Pressable>
+            <View style={styles.imageBox}>
+              <Image style={styles.image} source={imageSource} />
+              <View style={styles.cameraIconOverlay}>
+                <Icon size={24} name="cameraIcon" />
+              </View>
+            </View>
+          </Pressable>
           <View style={styles.detailsRow}>
             <InputCustom
               placeholder="Email"
@@ -270,6 +278,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginTop: 10,
+    position: "relative",
   },
   image: {
     width: 150,
@@ -277,6 +286,16 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     borderWidth: 5,
     borderColor: theme.colors.primary,
+  },
+  cameraIconOverlay: {
+    position: "absolute",
+    right: 100,
+    bottom: 0,
+    backgroundColor: theme.colors.primary,
+    borderRadius: 20,
+    padding: 8,
+    justifyContent: "center",
+    alignItems: "center",
   },
   detailsRow: {
     marginTop: 10,

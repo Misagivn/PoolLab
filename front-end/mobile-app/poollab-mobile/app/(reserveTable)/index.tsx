@@ -1,6 +1,6 @@
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import React, { useEffect, useState } from "react";
-import { get_user_booking } from "@/api/booking_api";
+import { cancel_booking, get_user_booking } from "@/api/booking_api";
 import { getStoredUser } from "@/api/tokenDecode";
 import { theme } from "@/constants/theme";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -12,12 +12,15 @@ import { get_all_billard_type_area } from "@/api/area_api";
 import { get_all_billard_type } from "@/api/billard_type";
 import CustomAlert from "@/components/alertCustom";
 import Button from "@/components/roundButton";
+import { Colors } from "react-native/Libraries/NewAppScreen";
+import IconButton from "@/components/iconButton";
 
 const index = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [alertVisible, setAlertVisible] = useState(false);
   const [areaError, setAreaError] = useState("");
   const [errorResponse, setErrorResponse] = useState("");
+  const [deleteResponse, setDeleteResponse] = useState("");
   const [customerId, setCustomerId] = useState("");
   const [bookingData, setBookingData] = useState([]);
   const [storeData, setStoreData] = useState([]);
@@ -70,6 +73,24 @@ const index = () => {
       />
     );
   };
+  const alertPopup2 = (title, message, confirmText, cancelText) => {
+    return (
+      <CustomAlert
+        visible={alertVisible}
+        title={title}
+        message={message}
+        confirmText={confirmText}
+        cancelText={cancelText}
+        onConfirm={() => {
+          setAlertVisible(false);
+          fetchData();
+        }}
+        onCancel={() => {
+          setAlertVisible(false);
+        }}
+      />
+    );
+  };
   const getArea = async (storeId: string, billardtypeId: any) => {
     try {
       const getAreaData = {
@@ -104,12 +125,6 @@ const index = () => {
         } else if (response.data.status === 404) {
           setAlertVisible(true);
           setErrorResponse(response.data.message);
-          console.log(
-            "response message: ",
-            response.data.message,
-            "status: ",
-            response.data.status
-          );
           setIsLoading(false);
         }
       });
@@ -117,10 +132,23 @@ const index = () => {
       console.error("Error fetching data:", error);
     }
   };
-  const onSubmit = () => {
+  const handleSearch = () => {
     console.log("submit", searchData);
     setIsLoading(true);
     searchFunction();
+  };
+  const handleCancelBooking = async (bookingId) => {
+    console.log("id deleted: ", bookingId);
+    try {
+      const response = await cancel_booking({ bookingId, cancelAnswer: "" });
+      if (response.status === 200) {
+        console.log("success delete: ", response.message);
+        setAlertVisible(true);
+        setDeleteResponse("Thành công hủy đặt lịch");
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
   };
   const fetchData = async () => {
     const storedUser = await getStoredUser();
@@ -198,6 +226,9 @@ const index = () => {
     }
     if (errorResponse) {
       return alertPopup("Lỗi", errorResponse, "OK", "Hủy");
+    }
+    if (deleteResponse) {
+      return alertPopup2("Thành Công", deleteResponse, "OK", "Hủy");
     }
   }
   return (
@@ -342,7 +373,7 @@ const index = () => {
               buttonStyles={styles.updateButton}
               textStyles={styles.updateButtonText}
               onPress={() => {
-                onSubmit();
+                handleSearch();
               }}
               loading={isLoading}
             />
@@ -359,19 +390,58 @@ const index = () => {
                   : styles.completeBox,
               ]}
             >
-              <Text>{item.tableName}</Text>
-              <Text>{item.bookingDate}</Text>
-              <Text>{item.timeStart}</Text>
-              <Text>{item.timeEnd}</Text>
-              <Text>{item.storeName}</Text>
-              <Text>{item.address}</Text>
-              <Text>{item.deposit}</Text>
+              <View style={styles.innerBox}>
+                <View style={styles.infoBox2}>
+                  <Text style={styles.infoBoxTitle}>Tên bàn:</Text>
+                  <Text style={styles.infoBoxText}>{item.tableName}</Text>
+                </View>
+                <View style={styles.infoBox2}>
+                  <Text style={styles.infoBoxTitle}>Ngày chơi:</Text>
+                  <Text style={styles.infoBoxText}>{item.bookingDate}</Text>
+                </View>
+                <View style={styles.infoBox2}>
+                  <Text style={styles.infoBoxTitle}>Thời gian chơi:</Text>
+                  <Text style={styles.infoBoxText}>
+                    {item.timeStart} - {item.timeEnd}
+                  </Text>
+                </View>
+                <View style={styles.infoBox2}>
+                  <Text style={styles.infoBoxTitle}>Tên quán:</Text>
+                  <Text style={styles.infoBoxText}>{item.storeName}</Text>
+                </View>
+                <View style={styles.infoBox2}>
+                  <Text style={styles.infoBoxTitle}>Địa chỉ:</Text>
+                  <Text style={styles.infoBoxText}>{item.address}</Text>
+                </View>
+                <View style={styles.infoBox2}>
+                  <Text style={styles.infoBoxTitle}>Tiền cọc:</Text>
+                  <Text style={styles.infoBoxText}>{item.deposit}</Text>
+                </View>
+                <View style={styles.infoBox2}>
+                  <Text style={styles.infoBoxTitle}>Ngày tạo:</Text>
+                  <Text style={styles.infoBoxText}>{item.createdDate}</Text>
+                </View>
+                {item.status === "Đã Đặt" && (
+                  <View
+                    style={{
+                      justifyContent: "center",
+                      alignItems: "center",
+                      alignSelf: "flex-end",
+                      marginTop: 5,
+                    }}
+                  >
+                    <IconButton
+                      iconName={"trashIcon"}
+                      onPress={undefined}
+                      textStyles={{ fontSize: 13, color: "white" }}
+                      buttonStyles={styles.cancelButton}
+                      title={"HỦY BÀN"}
+                      onPress={() => handleCancelBooking(item.id)}
+                    />
+                  </View>
+                )}
+              </View>
             </View>
-            // {item.status === 'Confirmed' && (
-            //   <Pressable onPress={() => onDelete(item.id)}>
-            //     <Trash2 color="red" size={24} />
-            //   </Pressable>
-            // )}
           ))}
         </ScrollView>
       </View>
@@ -406,7 +476,7 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background,
     marginVertical: 5,
     marginHorizontal: 5,
-    padding: 15,
+    padding: 10,
     shadowColor: "black",
     shadowOffset: {
       width: 5,
@@ -418,11 +488,17 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderCurve: "continuous",
   },
+  innerBox: {
+    backgroundColor: theme.colors.background,
+    padding: 15,
+    borderRadius: 10,
+    borderCurve: "continuous",
+  },
   confirmedBox: {
     backgroundColor: theme.colors.secondary,
     marginVertical: 5,
     marginHorizontal: 5,
-    padding: 15,
+    padding: 10,
     shadowColor: "black",
     shadowOffset: {
       width: 5,
@@ -438,7 +514,7 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.hightLight,
     marginVertical: 5,
     marginHorizontal: 5,
-    padding: 15,
+    padding: 10,
     shadowColor: "black",
     shadowOffset: {
       width: 5,
@@ -454,7 +530,7 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.greenCheck,
     marginVertical: 5,
     marginHorizontal: 5,
-    padding: 15,
+    padding: 10,
     shadowColor: "black",
     shadowOffset: {
       width: 5,
@@ -492,5 +568,29 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 20,
     fontWeight: "bold",
+  },
+  infoBox: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: 5,
+  },
+  infoBoxTitle: {
+    fontSize: 15,
+    fontWeight: "bold",
+  },
+  infoBox2: {
+    flexDirection: "row",
+    gap: 10,
+  },
+  infoBoxText: {
+    fontSize: 15,
+  },
+  cancelButton: {
+    gap: 5,
+    height: 40,
+    paddingHorizontal: 10,
+    backgroundColor: theme.colors.primary,
+    borderRadius: 10,
   },
 });

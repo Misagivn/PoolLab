@@ -1,4 +1,4 @@
-// app/dashboard/page.tsx
+// app/manager/dashpage/page.tsx
 "use client";
 
 import { 
@@ -19,14 +19,11 @@ import {
   Icon
 } from '@chakra-ui/react';
 import { 
-  FiTrendingUp, 
-  FiTrendingDown, 
   FiDollarSign, 
   FiShoppingBag, 
   FiUsers, 
   FiBarChart 
 } from 'react-icons/fi';
-import Sidebar from '@/app/components/shared/sidebar';
 
 // Các component phụ nên được tách ra file riêng
 interface StatCardProps {
@@ -98,89 +95,83 @@ const CircularStatCard = ({ label, value, color = "blue" }: CircularStatCardProp
 };
 
 export default function DashboardPage() {
-  const bgColor = useColorModeValue('gray.50', 'gray.800');
   const cardBg = useColorModeValue('white', 'gray.700');
 
   return (
-    <Flex minH="100vh" bg={bgColor}>
-      <Sidebar />
-      <Box flex="1" ml="64" p="6">
-        <Container maxW="container.xl">
-          {/* Stats Grid */}
-          <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing="6" mb="6">
-            <StatCard
-              title="Total Sales"
-              value="$654.66k"
-              percentage={16.24}
-              icon={FiDollarSign}
-              isIncrease={true}
-            />
-            <StatCard
-              title="Total Orders"
-              value="$854.66k"
-              percentage={4.82}
-              icon={FiShoppingBag}
-              isIncrease={false}
-            />
-            <StatCard
-              title="Daily Visitors"
-              value="$987.21M"
-              percentage={2.45}
-              icon={FiUsers}
-              isIncrease={true}
-            />
-            <StatCard
-              title="Conversion Rate"
-              value="1.75%"
-              percentage={1.75}
-              icon={FiBarChart}
-              isIncrease={true}
-            />
+    <Container maxW="container.xl">
+      {/* Stats Grid */}
+      <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing="6" mb="6">
+        <StatCard
+          title="Total Sales"
+          value="$654.66k"
+          percentage={16.24}
+          icon={FiDollarSign}
+          isIncrease={true}
+        />
+        <StatCard
+          title="Total Orders"
+          value="$854.66k"
+          percentage={4.82}
+          icon={FiShoppingBag}
+          isIncrease={false}
+        />
+        <StatCard
+          title="Daily Visitors"
+          value="$987.21M"
+          percentage={2.45}
+          icon={FiUsers}
+          isIncrease={true}
+        />
+        <StatCard
+          title="Conversion Rate"
+          value="1.75%"
+          percentage={1.75}
+          icon={FiBarChart}
+          isIncrease={true}
+        />
+      </SimpleGrid>
+
+      {/* Charts Grid */}
+      <SimpleGrid columns={{ base: 1, lg: 2 }} spacing="6" mb="6">
+        <Box bg={cardBg} p="6" borderRadius="lg" shadow="sm">
+          <Text fontSize="lg" fontWeight="medium" mb="4">Monthly Progress</Text>
+          <Stack spacing="4">
+            <ProgressStat label="Revenue" value={75} />
+            <ProgressStat label="Sales" value={65} />
+            <ProgressStat label="Users" value={85} />
+          </Stack>
+        </Box>
+
+        <Box bg={cardBg} p="6" borderRadius="lg" shadow="sm">
+          <Text fontSize="lg" fontWeight="medium" mb="4">Monthly Statistics</Text>
+          <SimpleGrid columns={3} spacing="4">
+            <CircularStatCard label="Profit" value={68} />
+            <CircularStatCard label="Revenue" value={75} />
+            <CircularStatCard label="Expenses" value={55} />
           </SimpleGrid>
+        </Box>
+      </SimpleGrid>
 
-          {/* Charts Grid */}
-          <SimpleGrid columns={{ base: 1, lg: 2 }} spacing="6" mb="6">
-            <Box bg={cardBg} p="6" borderRadius="lg" shadow="sm">
-              <Text fontSize="lg" fontWeight="medium" mb="4">Monthly Progress</Text>
-              <Stack spacing="4">
-                <ProgressStat label="Revenue" value={75} />
-                <ProgressStat label="Sales" value={65} />
-                <ProgressStat label="Users" value={85} />
-              </Stack>
-            </Box>
+      {/* Bottom Grid */}
+      <SimpleGrid columns={{ base: 1, lg: 2 }} spacing="6">
+        <Box bg={cardBg} p="6" borderRadius="lg" shadow="sm">
+          <Text fontSize="lg" fontWeight="medium" mb="4">Earning Updates</Text>
+          <Stack spacing="4">
+            <ProgressStat label="Marketing" value={50} color="blue" />
+            <ProgressStat label="Payments" value={70} color="green" />
+            <ProgressStat label="Sales" value={85} color="purple" />
+          </Stack>
+        </Box>
 
-            <Box bg={cardBg} p="6" borderRadius="lg" shadow="sm">
-              <Text fontSize="lg" fontWeight="medium" mb="4">Monthly Statistics</Text>
-              <SimpleGrid columns={3} spacing="4">
-                <CircularStatCard label="Profit" value={68} />
-                <CircularStatCard label="Revenue" value={75} />
-                <CircularStatCard label="Expenses" value={55} />
-              </SimpleGrid>
-            </Box>
-          </SimpleGrid>
-
-          {/* Bottom Grid */}
-          <SimpleGrid columns={{ base: 1, lg: 2 }} spacing="6">
-            <Box bg={cardBg} p="6" borderRadius="lg" shadow="sm">
-              <Text fontSize="lg" fontWeight="medium" mb="4">Earning Updates</Text>
-              <Stack spacing="4">
-                <ProgressStat label="Marketing" value={50} color="blue" />
-                <ProgressStat label="Payments" value={70} color="green" />
-                <ProgressStat label="Sales" value={85} color="purple" />
-              </Stack>
-            </Box>
-
-            <Box bg={cardBg} p="6" borderRadius="lg" shadow="sm">
-              <Text fontSize="lg" fontWeight="medium" mb="4">Performance Overview</Text>
-              <Flex justify="space-around" align="center" h="full">
-                <CircularStatCard label="Completed" value={75} color="green" />
-                <CircularStatCard label="Pending" value={45} color="orange" />
-                <CircularStatCard label="Canceled" value={25} color="red" />
-              </Flex>
-            </Box>
-          </SimpleGrid>
-        </Container>
-      </Box>
-    </Flex>
+        <Box bg={cardBg} p="6" borderRadius="lg" shadow="sm">
+          <Text fontSize="lg" fontWeight="medium" mb="4">Performance Overview</Text>
+          <Flex justify="space-around" align="center" h="full">
+            <CircularStatCard label="Completed" value={75} color="green" />
+            <CircularStatCard label="Pending" value={45} color="orange" />
+            <CircularStatCard label="Canceled" value={25} color="red" />
+          </Flex>
+        </Box>
+      </SimpleGrid>
+    </Container>
   );
 }

@@ -1,61 +1,240 @@
-import { StyleSheet, Text, Vibration, View } from "react-native";
-import React, { useState } from "react";
 import {
-  BarcodeScanningResult,
-  CameraView,
-  useCameraPermissions,
-} from "expo-camera";
-import { SafeAreaView } from "react-native-safe-area-context";
+  Image,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import React, { useEffect, useState } from "react";
+import { getStoredTableData } from "@/api/tokenDecode";
+import { theme } from "@/constants/theme";
+import { StatusBar } from "expo-status-bar";
 import Button from "@/components/roundButton";
-
+import DemoCustomTimeInput from "@/components/customTimeInput";
+import { router } from "expo-router";
+import { getAccountId, getUserName } from "@/data/userData";
+import { activate_table } from "@/api/billard_table";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 const index = () => {
-  const [hasCameraPermission, setHasCameraPermission] = useCameraPermissions();
-  const [scanningEnable, setScanningEnable] = useState(true);
-  if (!hasCameraPermission) {
-    <SafeAreaView>
-      <View style={styles.requestCamera}>
-        <Text>
-          Ứng dụng cần quyền sử dụng camera để sử dụng chức năng quét QR
-        </Text>
-        <Button
-          title={"Cấp quyền sử dụng camera"}
-          buttonStyles={undefined}
-          textStyles={undefined}
-          onPress={() => {
-            setHasCameraPermission;
-          }}
-        />{" "}
-      </View>
-    </SafeAreaView>;
-  }
-  async function onBarcodeScanned({ data }: BarcodeScanningResult) {
-    if (!scanningEnable) return;
+  const [tableData, setTableData] = useState([]);
+  const [timeCanPlay, setTimeCanPlay] = useState([]);
+  const [playTime, setPlayTime] = useState("00:30");
+  const [userId, setUserId] = useState("");
+  useEffect(() => {
+    const loadStat = async () => {
+      try {
+        const storedTableData = await getStoredTableData();
+        if (storedTableData) {
+          setTableData(storedTableData.data.bidaTable);
+          setTimeCanPlay(storedTableData.data.timeCus);
+        }
+      } catch (error) {
+        console.error("Error loading stored table data:", error);
+      }
+      try {
+        const accountId = await getAccountId();
+        if (accountId) {
+          setUserId(accountId);
+        }
+      } catch (error) {
+        console.error("Error loading stored user:", error);
+      }
+    };
+    loadStat();
+  }, []);
+
+  const startTableData = {
+    billiardTableID: tableData.id,
+    customerID: userId,
+    customerTime: playTime,
+  };
+  const handleStartTable = async () => {
     try {
-      Vibration.vibrate(500);
-      console.log(data);
-      setScanningEnable(false);
+      console.log("start table data: ", startTableData);
+      const response = await activate_table(startTableData);
+      if (response.status === 200) {
+        AsyncStorage.setItem("userPlayTime", JSON.stringify(playTime));
+        console.log("Table started successfully!");
+        console.log("Data sau khi dat ", response.data);
+        router.replace("./(tableFunction)");
+      } else {
+        console.error("Error starting table:", response.data);
+      }
     } catch (error) {
-      console.log(error);
-      setScanningEnable(false);
+      console.error("Error starting table:", error);
     }
-  }
+  };
   return (
-    <CameraView
-      // style={}
-      facing="back"
-      onBarcodeScanned={onBarcodeScanned}
-      barcodeScannerSettings={{ barcodeTypes: ["qr"] }}
-    />
+    <SafeAreaView style={{ marginTop: 30 }}>
+      <StatusBar hidden={false} style="dark" />
+      <ScrollView>
+        <View style={styles.container}>
+          <View style={styles.titleBox}>
+            <Text style={styles.title}>Thông tin </Text>
+            <Text style={styles.subTitle}>kích hoạt bàn chơi.</Text>
+          </View>
+          <View style={styles.outerBox}>
+            <View style={styles.infoBox}>
+              <Text style={styles.infoBoxTitle}>Tên bàn:</Text>
+              <Text style={styles.infoBoxText}>{tableData.name}</Text>
+            </View>
+            <View style={styles.infoBox}>
+              <Text style={styles.infoBoxTitle}>Loại bàn:</Text>
+              <Text style={styles.infoBoxText}>
+                {tableData.billiardTypeName}
+              </Text>
+            </View>
+            <View style={styles.infoBox}>
+              <Text style={styles.infoBoxTitle}>Khu vực chơi:</Text>
+              <Text style={styles.infoBoxText}>{tableData.areaName}</Text>
+            </View>
+            <View style={styles.infoBox}>
+              <Text style={styles.infoBoxTitle}>Địa chỉ:</Text>
+              <Text style={styles.infoBoxText}>{tableData.address}</Text>
+            </View>
+            <View style={styles.infoBox}>
+              <Text style={styles.infoBoxTitle}>Giá bàn:</Text>
+              <Text style={styles.infoBoxText}>
+                {tableData.bidaPrice + "/h"}
+              </Text>
+            </View>
+            <View style={styles.infoBox}>
+              <Text style={styles.infoBoxTitle}>Thời gian có thể chơi:</Text>
+              <Text style={styles.infoBoxText}>{timeCanPlay}</Text>
+            </View>
+          </View>
+          <View style={styles.imageBox}>
+            <Image style={styles.image} source={{ uri: tableData.qrcode }} />
+          </View>
+          <View style={styles.timeInput}>
+            <Text style={styles.infoBoxTitle}>Thời gian chơi:</Text>
+            <DemoCustomTimeInput
+              placeholder="Chọn thời gian chơi"
+              onSelect={(time) => setPlayTime(time)}
+              containerStyles={{
+                backgroundColor: "white",
+              }}
+              modalStyles={{
+                backgroundColor: "#fff",
+              }}
+              textStyles={{
+                color: "#333",
+              }}
+              is24Hour={true}
+              initialMinute={30}
+              minTime="00:30"
+              maxTime="12:00"
+            />
+          </View>
+          <View style={styles.buttonBox}>
+            <Button
+              title="Kích hoạt bàn"
+              buttonStyles={[styles.startButton, styles.buttonCommon]}
+              textStyles={styles.ButtonText}
+              onPress={() => {
+                handleStartTable();
+              }}
+              // loading={isLoading}
+            />
+            <Button
+              title="Hủy"
+              buttonStyles={[styles.cancelButton, styles.buttonCommon]}
+              textStyles={styles.ButtonText}
+              onPress={() => {
+                router.replace("./(home)");
+              }}
+              // loading={isLoading}
+            />
+          </View>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
 export default index;
 
 const styles = StyleSheet.create({
-  requestCamera: {
+  container: {
+    backgroundColor: theme.colors.background,
     justifyContent: "center",
-    alignItems: "center",
+    marginHorizontal: 10,
+    marginVertical: 10,
+    padding: 15,
+    shadowColor: "black",
+    shadowOffset: {
+      width: 5,
+      height: 10,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 6,
+    borderRadius: 20,
+    borderCurve: "continuous",
+  },
+  titleBox: {},
+  title: {
+    fontSize: 40,
+    fontWeight: "bold",
+    color: theme.colors.primary,
+  },
+  subTitle: {
+    fontSize: 30,
+    fontWeight: "bold",
+    color: "black",
+  },
+  outerBox: {
+    marginTop: 20,
+  },
+  infoBox: {
     flexDirection: "row",
+    alignItems: "center",
     gap: 10,
   },
+  infoBoxTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+  },
+  infoBoxText: {
+    fontSize: 15,
+  },
+  imageBox: {
+    marginTop: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 20,
+    borderCurve: "continuous",
+  },
+  image: {
+    alignSelf: "center",
+    width: 300,
+    height: 400,
+  },
+  buttonBox: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 10,
+  },
+  buttonCommon: {
+    flex: 1,
+    marginHorizontal: 8, // Add some spacing between buttons
+  },
+  startButton: {
+    objectFit: "fill",
+    backgroundColor: theme.colors.secondary,
+    borderRadius: 10,
+  },
+  ButtonText: {
+    color: "white",
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  cancelButton: {
+    objectFit: "fill",
+    backgroundColor: theme.colors.hightLight,
+    borderRadius: 10,
+  },
+  timeInput: {},
 });

@@ -21,6 +21,7 @@ import ShowPasswordIcon from "./showPasswordIcon";
 import CheckIcon from "./checkIcon";
 import TrashIcon from "./trashIcon";
 import CameraIcon from "./cameraIcon";
+import FlashlightIcon from "./flashLightIcon";
 const icons = {
   fbIcon: FacebookIcon,
   ggIcon: GoogleIcon,
@@ -42,6 +43,7 @@ const icons = {
   checkIcon: CheckIcon,
   trashIcon: TrashIcon,
   cameraIcon: CameraIcon,
+  flashIcon: FlashlightIcon,
 };
 
 const Icon = ({ name, ...props }) => {

@@ -23,8 +23,6 @@ export const create_booking = async (data) => {
 
 export const get_user_booking = async (data) => {
   try {
-    console.log("---------------------------------------------");
-    console.log("Co chay  get: ", data);
     const response = await ApiManager.get(
       `/Booking/GetAllBooking?CustomerId=${data.CustomerId}&BilliardTypeId=${data.billiardTypeId}&StoreId=${data.storeId}&AreaId=${data.areaId}&Status=${data.status}&SortBy=${data.SortBy}&SortAscending=${data.SortAscending}&PageSize=50&PageNumber=${data.PageNumber}`
     );

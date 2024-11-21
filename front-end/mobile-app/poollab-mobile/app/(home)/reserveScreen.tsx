@@ -14,7 +14,6 @@ import { get_all_billard_type } from "@/api/billard_type";
 import { getStoredUser } from "@/api/tokenDecode";
 import { get_all_billard_type_area } from "@/api/area_api";
 import { create_booking } from "@/api/booking_api";
-import CustomPopup from "@/components/popupCustom";
 import CustomAlert from "@/components/alertCustom";
 import { router } from "expo-router";
 //demo data
@@ -35,17 +34,6 @@ const ReserveScreen = () => {
   const [areaError, setAreaError] = useState("");
   const [errorResponse, setErrorResponse] = useState("");
   const [successResponse, setSuccessResponse] = useState("");
-  //const [popupVisible, setPopupVisible] = useState(false);
-  // const [tableData, setTableData] = useState({
-  //   Address: "",
-  //   Store_Name: "",
-  //   Area_Name: "",
-  //   Billard_Type_Name: "",
-  //   Booking_Date: "",
-  //   Time_Start: "",
-  //   Time_End: "",
-  //   Price: "",
-  // });
   const handleStartTimeSelect = (time) => {
     setSelectedStartTime(time);
     console.log("Selected start time:", time);
@@ -129,9 +117,6 @@ const ReserveScreen = () => {
       setAreaError(
         "Không thể tải dữ liệu của Area!. Hãy thử đổi địa chỉ hoặc loại bàn."
       );
-      // alert(
-      //   "Không thể tải dữ liệu của Area!. Hãy thử đổi địa chỉ hoặc loại bàn."
-      // );
     }
   };
   useEffect(() => {
@@ -158,7 +143,6 @@ const ReserveScreen = () => {
       try {
         const storedBillardType = await get_all_billard_type();
         if (storedBillardType) {
-          //setStoreData(storedStore.data.data);
           const rawdata = storedBillardType.data.data;
           const transformData = rawdata.map(
             (item: { name: any; id: any; descript: any }) => ({
@@ -237,8 +221,6 @@ const ReserveScreen = () => {
     if (endMinutes - startMinutes > maxMinutes) {
       setAlertVisible(true);
       setErrorResponse("Time range cannot exceed 24 hours.");
-      //alert("Time range cannot exceed 24 hours.");
-      //alert("Time range cannot exceed 24 hours.");
       return false;
     }
 
@@ -268,7 +250,6 @@ const ReserveScreen = () => {
     ) {
       setAlertVisible(true);
       setErrorResponse("Vui lòng nhập tất cả các thông tin!");
-      //alert("Vui lòng nhập tất cả các thông tin!");
     } else {
       setIsLoading(true);
       try {
@@ -276,27 +257,13 @@ const ReserveScreen = () => {
           if (response?.data.status === 200) {
             console.log("Booking created successfully!");
             console.log("Data sau khi dat ", response.data.data);
-            // setTableData({
-            //   Address: response.data.data.address,
-            //   Store_Name: response.data.data.storeName,
-            //   Area_Name: response.data.data.areaName,
-            //   Billard_Type_Name: response.data.data.billiardTypeName,
-            //   Booking_Date: response.data.data.bookingDate,
-            //   Time_Start: response.data.data.timeStart,
-            //   Time_End: response.data.data.timeEnd,
-            //   Price: response.data.data.price,
-            // });
-            //setPopupVisible(true);
             setAlertVisible(true);
             setSuccessResponse("Đã tạo bàn thành công!");
-            //alert("Đã tạo bàn thành công!");
             setIsLoading(false);
           } else {
             setIsLoading(false);
             setAlertVisible(true);
             setErrorResponse(response.data.message);
-            //alert(response.data.message);
-            //alert(response.data.message);
           }
         });
       } catch (error) {
@@ -389,13 +356,6 @@ const ReserveScreen = () => {
                 dateFormat="YYYY-MM-DD"
                 maxDate={new Date("2025-12-31")} // Optional: limit future dates
                 required={true}
-                // customValidation={(date) => {
-                //   // Optional: add custom validation rules
-                //   if (date.getDay() === 0 || date.getDay() === 6) {
-                //     return "Weekend dates are not allowed";
-                //   }
-                //   return null;
-                // }}
               />
               <Text style={styles.inputTitle}>Thời gian bắt đầu</Text>
               <DemoCustomTimeInput
@@ -414,6 +374,8 @@ const ReserveScreen = () => {
                 initialHour={8}
                 initialMinute={0}
                 is24Hour={true}
+                maxTime="21:30"
+                minTime="8:00"
               />
               <Text style={styles.inputTitle}>Thời gian kết thúc</Text>
               <DemoCustomTimeInput
@@ -429,10 +391,11 @@ const ReserveScreen = () => {
                 textStyles={{
                   color: "#333",
                 }}
-                initialHour={7}
+                initialHour={8}
                 initialMinute={0}
                 is24Hour={true}
                 minTime={selectedStartTime}
+                maxTime="22:00"
               />
               <Text style={styles.inputTitle}>Lời nhắn cho quán</Text>
               <InputCustom

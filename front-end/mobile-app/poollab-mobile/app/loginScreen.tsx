@@ -123,13 +123,12 @@ const LoginScreen = () => {
             const token = response?.data.data;
             const decodedToken = jwtDecode(token);
             // const userName = decodedToken.Username;
-            const userId = decodedToken.AccountId;
             AsyncStorage.multiSet([
               ["userToken", JSON.stringify(token)],
               ["userData", JSON.stringify(decodedToken)],
             ]);
             setIsLoading(false);
-            router.push("(home)");
+            router.replace("(home)");
           } else {
             setAlertVisible(true);
             setErrorResponse(response.data.message);
@@ -175,7 +174,7 @@ const LoginScreen = () => {
           value={accEmail}
           onEndEditing={validateEmail}
           onChangeText={(emailRef) => {
-            setAccEmail(emailRef.toLowerCase());
+            setAccEmail(emailRef.toLowerCase().trim());
           }}
           //onChangeText={(value) => (emailRef.current = value)}
         />

@@ -2,7 +2,6 @@ import React, { useState, memo } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Modal, Pressable } from 'react-native';
 import { theme } from '@/constants/theme';
 import Icon from '@/assets/icons/icons';
-//import { ChevronUp, ChevronDown } from 'lucide-react';
 
 const DemoCustomTimeInput = memo((props) => {
   const {
@@ -16,6 +15,7 @@ const DemoCustomTimeInput = memo((props) => {
     initialMinute = 0,
     is24Hour = true,
     minTime = null,
+    maxTime = null,
   } = props;
 
   const [visible, setVisible] = useState(false);
@@ -30,12 +30,25 @@ const DemoCustomTimeInput = memo((props) => {
   const onHourIncrement = () => {
     setHour((prevHour) => {
       let newHour = (prevHour + 1) % (is24Hour ? 24 : 12);
-      if (minTime) {
-        const [minHour, minMinute] = minTime.split(':').map(Number);
-        if (newHour === minHour && minute <= minMinute) {
-          newHour = minHour;
+      
+      // Validate against minTime and maxTime
+      if (minTime || maxTime) {
+        const [minHour, minMinute] = minTime ? minTime.split(':').map(Number) : [0, 0];
+        const [maxHour, maxMinute] = maxTime ? maxTime.split(':').map(Number) : [23, 59];
+        
+        if (newHour < minHour || newHour > maxHour) {
+          return prevHour;
+        }
+        
+        if (newHour === minHour && minute < minMinute) {
+          return minHour;
+        }
+        
+        if (newHour === maxHour && minute > maxMinute) {
+          return maxHour;
         }
       }
+      
       return newHour;
     });
   };
@@ -43,12 +56,25 @@ const DemoCustomTimeInput = memo((props) => {
   const onHourDecrement = () => {
     setHour((prevHour) => {
       let newHour = (prevHour - 1 + (is24Hour ? 24 : 12)) % (is24Hour ? 24 : 12);
-      if (minTime) {
-        const [minHour, minMinute] = minTime.split(':').map(Number);
+      
+      // Validate against minTime and maxTime
+      if (minTime || maxTime) {
+        const [minHour, minMinute] = minTime ? minTime.split(':').map(Number) : [0, 0];
+        const [maxHour, maxMinute] = maxTime ? maxTime.split(':').map(Number) : [23, 59];
+        
+        if (newHour < minHour || newHour > maxHour) {
+          return prevHour;
+        }
+        
         if (newHour === minHour && minute < minMinute) {
-          newHour = minHour;
+          return minHour;
+        }
+        
+        if (newHour === maxHour && minute > maxMinute) {
+          return maxHour;
         }
       }
+      
       return newHour;
     });
   };
@@ -56,12 +82,25 @@ const DemoCustomTimeInput = memo((props) => {
   const onMinuteIncrement = () => {
     setMinute((prevMinute) => {
       let newMinute = (prevMinute + 30) % 60;
-      if (minTime) {
-        const [minHour, minMinute] = minTime.split(':').map(Number);
-        if (hour === minHour && newMinute <= minMinute) {
-          newMinute = minMinute + 30;
+      
+      // Validate against minTime and maxTime
+      if (minTime || maxTime) {
+        const [minHour, minMinute] = minTime ? minTime.split(':').map(Number) : [0, 0];
+        const [maxHour, maxMinute] = maxTime ? maxTime.split(':').map(Number) : [23, 59];
+        
+        if (hour < minHour || hour > maxHour) {
+          return prevMinute;
+        }
+        
+        if (hour === minHour && newMinute < minMinute) {
+          return minMinute;
+        }
+        
+        if (hour === maxHour && newMinute > maxMinute) {
+          return maxMinute;
         }
       }
+      
       return newMinute;
     });
   };
@@ -69,33 +108,50 @@ const DemoCustomTimeInput = memo((props) => {
   const onMinuteDecrement = () => {
     setMinute((prevMinute) => {
       let newMinute = (prevMinute - 30 + 60) % 60;
-      if (minTime) {
-        const [minHour, minMinute] = minTime.split(':').map(Number);
+      
+      // Validate against minTime and maxTime
+      if (minTime || maxTime) {
+        const [minHour, minMinute] = minTime ? minTime.split(':').map(Number) : [0, 0];
+        const [maxHour, maxMinute] = maxTime ? maxTime.split(':').map(Number) : [23, 59];
+        
+        if (hour < minHour || hour > maxHour) {
+          return prevMinute;
+        }
+        
         if (hour === minHour && newMinute < minMinute) {
-          newMinute = minMinute;
+          return minMinute;
+        }
+        
+        if (hour === maxHour && newMinute > maxMinute) {
+          return maxMinute;
         }
       }
+      
       return newMinute;
     });
   };
 
   const onTimeConfirm = () => {
-    if (minTime) {
-      const [minHour, minMinute] = minTime.split(':').map(Number);
-      if (hour > minHour || (hour === minHour && minute > minMinute)) {
-        const formattedTime = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-        onSelect?.(formattedTime);
-        setVisible(false);
-        setError('');
-      } else {
-        setError('Thời gian kết thúc phải lớn hơn bắt đầu');
+    const formattedTime = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+    
+    // Comprehensive time validation
+    if (minTime || maxTime) {
+      const [minHour, minMinute] = minTime ? minTime.split(':').map(Number) : [0, 0];
+      const [maxHour, maxMinute] = maxTime ? maxTime.split(':').map(Number) : [23, 59];
+      
+      const isValidTime = 
+        (hour > minHour || (hour === minHour && minute >= minMinute)) &&
+        (hour < maxHour || (hour === maxHour && minute <= maxMinute));
+      
+      if (!isValidTime) {
+        setError('Selected time is outside the allowed range');
+        return;
       }
-    } else {
-      const formattedTime = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-      onSelect?.(formattedTime);
-      setVisible(false);
-      setError('');
     }
+    
+    onSelect?.(formattedTime);
+    setVisible(false);
+    setError('');
   };
 
   return (
@@ -165,6 +221,10 @@ const DemoCustomTimeInput = memo((props) => {
     </View>
   );
 });
+
+// Styles remain the same as in the original component
+
+export default DemoCustomTimeInput;
 
 const styles = StyleSheet.create({
   dropdown: {
@@ -236,5 +296,3 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
 });
-
-export default DemoCustomTimeInput;

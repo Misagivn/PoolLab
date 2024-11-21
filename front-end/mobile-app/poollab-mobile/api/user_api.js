@@ -89,3 +89,15 @@ export const update_user = async (data, userId, token) => {
     }
   }
 };
+export const update_user_avatar = async (image) => {
+  try {
+    const response = await ApiManager.uploadFile(
+      `https://poollabwebapi20241008201316.azurewebsites.net/api/Account/UploadFileAvatar`, 
+      image, //base64Image },
+    );
+    return response;
+  } catch (error) {
+    console.error('Avatar upload error:', error.response?.data, " error response:", error.message);
+    throw error;
+  }
+};

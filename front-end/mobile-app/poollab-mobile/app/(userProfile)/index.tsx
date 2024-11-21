@@ -1,4 +1,12 @@
-import { Image, Pressable, StyleSheet, Text, View } from "react-native";
+import {
+  Alert,
+  Image,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import React, { useEffect, useState } from "react";
 import { router } from "expo-router";
 import Button from "@/components/roundButton";
@@ -7,11 +15,15 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import BackButton from "@/components/backButton";
 import InputCustom from "@/components/inputCustom";
 import Icon from "@/assets/icons/icons";
-import { getStoredUser, getStoredToken } from "@/api/tokenDecode";
-import { get_user_details, update_user } from "@/api/user_api";
+import { getStoredToken } from "@/api/tokenDecode";
+import {
+  get_user_details,
+  update_user,
+  update_user_avatar,
+} from "@/api/user_api";
 import CustomAlert from "@/components/alertCustom";
 import { getAccountId } from "@/data/userData";
-import FacebookIcon from "@/assets/icons/fbIcon";
+import * as ImagePicker from "expo-image-picker";
 const index = () => {
   //Get userId from AsyncStorage
   const [userId, setUserId] = useState("");
@@ -31,7 +43,7 @@ const index = () => {
   );
   const validateEmail = () => {
     const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-    if (!emailRegex.test(accEmail)) {
+    if (!emailRegex.test(userEmail)) {
       setErrorMessage("Xin hãy nhập địa chỉ email hợp lệ");
       setEmailFormat(false);
     } else {
@@ -39,7 +51,12 @@ const index = () => {
       setEmailFormat(true);
     }
   };
-  const alertPopup = (title, message, confirmText, cancelText) => {
+  const alertPopup = (
+    title: string | undefined,
+    message: string | undefined,
+    confirmText: string | undefined,
+    cancelText: string | undefined
+  ) => {
     return (
       <CustomAlert
         visible={alertVisible}
@@ -72,11 +89,13 @@ const index = () => {
               const userName = response.data.data.userName;
               const userEmail = response.data.data.email;
               const userNumber = response.data.data.phoneNumber;
+              const userAvatar = response.data.data.avatarUrl;
               setUserId(userId);
               setUserFullName(userFullName);
               setUserEmail(userEmail);
               setUserName(userName);
               setUserNumber(userNumber);
+              setImageSource(userAvatar);
             }
           });
           setIsLoading(false);
@@ -87,11 +106,68 @@ const index = () => {
     };
     loadStat();
   }, []);
+  const requestPermissions = async () => {
+    if (Platform.OS !== "android") {
+      const { status } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert(
+          "Sorry, we need camera roll permissions to make this work!"
+        );
+        return false;
+      }
+      return true;
+    }
+    return true;
+  };
+  // Utility function to convert blob to base64 if needed
+  const pickImage = async () => {
+    try {
+      const hasPermission = await requestPermissions();
+      if (!hasPermission) return;
+
+      let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [3, 3],
+        quality: 1,
+        base64: true,
+      });
+
+      if (!result.canceled) {
+        const selectedImage = result.assets[0];
+        setImageSource(selectedImage);
+        const imageToUpload = {
+          uri: selectedImage.uri,
+          base64: selectedImage.base64,
+          type: "image/jpeg",
+          name: "avatar.jpg",
+        };
+        // Convert image to binary
+        try {
+          update_user_avatar(imageToUpload).then((response) => {
+            if (response.status === 200) {
+              setImageSource(response.data);
+            } else {
+              Alert.alert("Error", "Image upload failed", response.data);
+            }
+          });
+        } catch (error) {
+          console.error("Error uploading image:", error);
+        }
+        return selectedImage;
+      }
+    } catch (error) {
+      console.error("Error picking image:", error);
+      Alert.alert("Error", "Failed to pick image");
+    }
+  };
   const updateData = {
     fullName: userFullName,
     userName: userName,
     email: userEmail,
     phoneNumber: userNumber,
+    avatarUrl: imageSource,
   };
   const updateUser = async () => {
     if (
@@ -110,6 +186,7 @@ const index = () => {
       setIsLoading(true);
       try {
         update_user(updateData, userId, userToken).then((response) => {
+          console.log("response: ", response);
           if (response.status === 200) {
             setAlertVisible(true);
             setSuccessResponse("Cập nhật thành công");
@@ -149,9 +226,12 @@ const index = () => {
             <Text style={styles.title}>Cập nhật thông tin</Text>
             <Text style={styles.title2}>tài khoản.</Text>
           </View>
-          <Pressable>
+          <Pressable onPress={pickImage}>
             <View style={styles.imageBox}>
-              <Image style={styles.image} source={imageSource} />
+              <Image
+                style={styles.image}
+                source={{ uri: imageSource.toString() }}
+              />
               <View style={styles.cameraIconOverlay}>
                 <Icon size={24} name="cameraIcon" />
               </View>

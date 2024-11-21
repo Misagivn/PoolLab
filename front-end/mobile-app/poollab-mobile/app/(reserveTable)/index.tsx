@@ -36,8 +36,8 @@ const index = () => {
     storeId: storeId,
     areaId: areaId,
     status: infoStatus,
-    SortBy: "bookingDate",
-    SortAscending: true,
+    SortBy: "createdDate",
+    SortAscending: false,
     PageNumber: "1",
   };
   const statusData = [
@@ -162,8 +162,8 @@ const index = () => {
           storeId: storeId,
           areaId: areaId,
           status: "",
-          SortBy: "bookingDate",
-          SortAscending: true,
+          SortBy: "createdDate",
+          SortAscending: false,
           PageNumber: "1",
         };
         get_user_booking(dataDefault).then((response) => {

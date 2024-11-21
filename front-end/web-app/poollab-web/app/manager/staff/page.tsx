@@ -6,7 +6,6 @@ import {
   Text,
   Heading,
   Badge,
-  useToast,
   Spinner,
   Input,
   InputGroup,
@@ -24,107 +23,45 @@ import {
   Button,
   Avatar,
   Icon,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalCloseButton,
   useDisclosure,
-  Grid,
 } from '@chakra-ui/react';
-import { useState, useEffect, useCallback } from 'react';
-import { jwtDecode } from 'jwt-decode';
+import { useState, useEffect } from 'react';
 import { 
   FiSearch, 
   FiRefreshCcw,
-  FiEdit2,
-  FiTrash2,
   FiUserPlus,
-  FiMail,
-  FiPhone,
-  FiCalendar,
-  FiInfo
+  FiInfo,
 } from 'react-icons/fi';
-
-interface StaffResponse {
-  status: number;
-  message: string | null;
-  data: {
-    items: Staff[];
-    totalItem: number;
-    pageSize: number;
-    totalPages: number;
-    pageNumber: number;
-  };
-}
-
-interface Staff {
-  id: string;
-  email: string;
-  avatarUrl: string;
-  userName: string;
-  fullName: string;
-  phoneNumber: string;
-  roleId: string;
-  roleName: string;
-  storeId: string;
-  balance: number;
-  joinDate: string;
-  status: string;
-}
+import { useStaff } from '@/hooks/useStaff';
+import { StaffFormModal } from '@/components/staff/StaffFormModal';
+import { StaffDetailModal } from '@/components/staff/StaffDetailModal';
+import { Staff } from '@/utils/types/staff.types';
 
 export default function StaffPage() {
-  const [staff, setStaff] = useState<Staff[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { staff, loading, fetchStaff } = useStaff();
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState('all');
   const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null);
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const toast = useToast();
-
-  const fetchStaff = useCallback(async () => {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) throw new Error('No token found');
   
-      // Lấy storeId từ token
-      const decoded = jwtDecode(token) as any;
-      const storeId = decoded.storeId;
+  const { 
+    isOpen: isDetailOpen, 
+    onOpen: onDetailOpen, 
+    onClose: onDetailClose 
+  } = useDisclosure();
   
-      const response = await fetch(
-        `https://poollabwebapi20241008201316.azurewebsites.net/api/Account/GetAllAccount?RoleId=21cfbbf3-ccd1-4394-b0e9-ee0e42564b87&StoreId=${storeId}`,
-        { 
-          headers: { 
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-  
-      const data: StaffResponse = await response.json();
-  
-      if (data.status === 200 && data.data?.items) {
-        // Không cần filter vì API đã trả về staff theo storeId
-        setStaff(data.data.items);
-      }
-    } catch (err) {
-      toast({
-        title: 'Lỗi',
-        description: 'Không thể tải danh sách nhân viên',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-      setStaff([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [toast]);
+  const { 
+    isOpen: isFormOpen, 
+    onOpen: onFormOpen, 
+    onClose: onFormClose 
+  } = useDisclosure();
 
   useEffect(() => {
     fetchStaff();
   }, [fetchStaff]);
+
+  const getWorkingStatus = (status: string) => {
+    return status === 'Kích hoạt' ? 'Đang làm việc' : 'Đã nghỉ việc';
+  };
 
   const filteredStaff = staff.filter(member => {
     const searchString = searchQuery.toLowerCase();
@@ -134,7 +71,8 @@ export default function StaffPage() {
       member.phoneNumber?.toLowerCase().includes(searchString);
     
     if (filter === 'all') return matchesSearch;
-    return matchesSearch && member.status.toLowerCase() === filter.toLowerCase();
+    const status = getWorkingStatus(member.status).toLowerCase();
+    return matchesSearch && status === filter.toLowerCase();
   });
 
   if (loading) {
@@ -154,15 +92,7 @@ export default function StaffPage() {
           <Button
             leftIcon={<Icon as={FiUserPlus} />}
             colorScheme="blue"
-            onClick={() => {
-              toast({
-                title: "Thông báo",
-                description: "Tính năng sẽ sớm được cập nhật",
-                status: "info",
-                duration: 3000,
-                isClosable: true,
-              });
-            }}
+            onClick={onFormOpen}
           >
             Thêm nhân viên
           </Button>
@@ -187,15 +117,16 @@ export default function StaffPage() {
             onChange={(e) => setFilter(e.target.value)}
           >
             <option value="all">Tất cả trạng thái</option>
-            <option value="kích hoạt">Đang làm việc</option>
-            <option value="nghỉ việc">Nghỉ việc</option>
+            <option value="đang làm việc">Đang làm việc</option>
+            <option value="đã nghỉ việc">Đã nghỉ việc</option>
           </Select>
 
           <IconButton
             aria-label="Refresh"
             icon={<Icon as={FiRefreshCcw} />}
             onClick={() => {
-              setLoading(true);
+              setSearchQuery('');
+              setFilter('all');
               fetchStaff();
             }}
           />
@@ -209,7 +140,7 @@ export default function StaffPage() {
               <Th>EMAIL</Th>
               <Th>SỐ ĐIỆN THOẠI</Th>
               <Th>TRẠNG THÁI</Th>
-              <Th textAlign="right">THAO TÁC</Th>
+              <Th width="100px" textAlign="right">THAO TÁC</Th>
             </Tr>
           </Thead>
           <Tbody>
@@ -220,7 +151,7 @@ export default function StaffPage() {
                     <Avatar 
                       size="sm" 
                       name={member.fullName}
-                      src={member.avatarUrl}
+                      src={member.avatarUrl || undefined}
                     />
                     <Box>
                       <Text fontWeight="medium">{member.fullName}</Text>
@@ -234,7 +165,7 @@ export default function StaffPage() {
                   <Badge
                     colorScheme={member.status === 'Kích hoạt' ? 'green' : 'red'}
                   >
-                    {member.status}
+                    {getWorkingStatus(member.status)}
                   </Badge>
                 </Td>
                 <Td>
@@ -246,21 +177,8 @@ export default function StaffPage() {
                       variant="ghost"
                       onClick={() => {
                         setSelectedStaff(member);
-                        onOpen();
+                        onDetailOpen();
                       }}
-                    />
-                    <IconButton
-                      aria-label="Edit staff"
-                      icon={<Icon as={FiEdit2} />}
-                      size="sm"
-                      variant="ghost"
-                    />
-                    <IconButton
-                      aria-label="Delete staff"
-                      icon={<Icon as={FiTrash2} />}
-                      size="sm"
-                      variant="ghost"
-                      colorScheme="red"
                     />
                   </HStack>
                 </Td>
@@ -275,6 +193,8 @@ export default function StaffPage() {
             align="center" 
             justify="center" 
             py={10}
+            bg="gray.50"
+            borderRadius="lg"
           >
             <Text color="gray.500">
               Không tìm thấy nhân viên nào
@@ -292,67 +212,17 @@ export default function StaffPage() {
           </Flex>
         )}
 
-        {/* Staff Detail Modal */}
-        <Modal isOpen={isOpen} onClose={onClose}>
-          <ModalOverlay />
-          <ModalContent>
-            <ModalHeader>Thông tin nhân viên</ModalHeader>
-            <ModalCloseButton />
-            <ModalBody pb={6}>
-              {selectedStaff && (
-                <Stack spacing={4}>
-                  <Flex align="center" gap={4}>
-                    <Avatar
-                      size="xl"
-                      name={selectedStaff.fullName}
-                      src={selectedStaff.avatarUrl}
-                    />
-                    <Box>
-                      <Heading size="md">{selectedStaff.fullName}</Heading>
-                      <Text color="gray.500">{selectedStaff.userName}</Text>
-                      <Badge
-                        mt={2}
-                        colorScheme={selectedStaff.status === 'Kích hoạt' ? 'green' : 'red'}
-                      >
-                        {selectedStaff.status}
-                      </Badge>
-                    </Box>
-                  </Flex>
+        {/* Modals */}
+        <StaffFormModal
+          isOpen={isFormOpen}
+          onClose={onFormClose}
+        />
 
-                  <Grid templateColumns="repeat(2, 1fr)" gap={4}>
-                    <Box>
-                      <HStack color="gray.600" mb={1}>
-                        <Icon as={FiMail} />
-                        <Text>Email</Text>
-                      </HStack>
-                      <Text fontWeight="medium">{selectedStaff.email}</Text>
-                    </Box>
-
-                    <Box>
-                      <HStack color="gray.600" mb={1}>
-                        <Icon as={FiPhone} />
-                        <Text>Số điện thoại</Text>
-                      </HStack>
-                      <Text fontWeight="medium">
-                        {selectedStaff.phoneNumber || "Chưa cập nhật"}
-                      </Text>
-                    </Box>
-
-                    <Box>
-                      <HStack color="gray.600" mb={1}>
-                        <Icon as={FiCalendar} />
-                        <Text>Ngày vào làm</Text>
-                      </HStack>
-                      <Text fontWeight="medium">
-                        {new Date(selectedStaff.joinDate).toLocaleDateString('vi-VN')}
-                      </Text>
-                    </Box>
-                  </Grid>
-                </Stack>
-              )}
-            </ModalBody>
-          </ModalContent>
-        </Modal>
+        <StaffDetailModal
+          isOpen={isDetailOpen}
+          onClose={onDetailClose}
+          staff={selectedStaff}
+        />
       </Stack>
     </Box>
   );

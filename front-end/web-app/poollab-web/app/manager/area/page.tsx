@@ -5,7 +5,6 @@ import {
   Flex,
   Text,
   Heading,
-  useToast,
   Spinner,
   Input,
   InputGroup,
@@ -21,18 +20,16 @@ import {
   IconButton,
   Button,
   Icon,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalCloseButton,
   useDisclosure,
-  Image,
-  VStack,
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogContent,
+  AlertDialogOverlay,
+  useToast,
 } from '@chakra-ui/react';
-import { useState, useEffect, useCallback } from 'react';
-import { jwtDecode } from 'jwt-decode';
+import { useState, useEffect, useRef } from 'react';
 import { 
   FiSearch, 
   FiRefreshCcw,
@@ -43,75 +40,92 @@ import {
   FiPlus,
   FiMap
 } from 'react-icons/fi';
-
-interface AreaResponse {
-  status: number;
-  message: string | null;
-  data: Area[];
-}
-
-interface Area {
-  id: string;
-  name: string;
-  descript: string;
-  areaImg: string | null;
-  storeId: string;
-}
-
-interface JWTPayload {
-  storeId: string;
-}
+import { useArea } from '@/hooks/useArea';
+import { AreaDetailModal } from '@/components/area/AreaDetailModal';
+import { AreaFormModal } from '@/components/area/AreaFormModal';
+import { Area } from '@/utils/types/area.types';
+import { jwtDecode } from 'jwt-decode';
+import { JWTPayload } from '@/utils/types/area.types';
 
 export default function AreaPage() {
-  const [areas, setAreas] = useState<Area[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { 
+    areas, 
+    loading, 
+    fetchAreas, 
+    createArea, 
+    updateArea, 
+    deleteArea 
+  } = useArea();
+  
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedArea, setSelectedArea] = useState<Area | null>(null);
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [areaToDelete, setAreaToDelete] = useState<Area | null>(null);
+  const cancelRef = useRef(null);
   const toast = useToast();
 
-  const fetchAreas = useCallback(async () => {
+  // Modals state
+  const { 
+    isOpen: isDetailOpen, 
+    onOpen: onDetailOpen, 
+    onClose: onDetailClose 
+  } = useDisclosure();
+  
+  const { 
+    isOpen: isFormOpen, 
+    onOpen: onFormOpen, 
+    onClose: onFormClose 
+  } = useDisclosure();
+  
+  const { 
+    isOpen: isDeleteOpen, 
+    onOpen: onDeleteOpen, 
+    onClose: onDeleteClose 
+  } = useDisclosure();
+
+  useEffect(() => {
+    fetchAreas();
+  }, [fetchAreas]);
+
+  const handleAddArea = async (data: Partial<Area>) => {
     try {
       const token = localStorage.getItem('token');
       if (!token) throw new Error('No token found');
 
       const decoded = jwtDecode(token) as JWTPayload;
-      const storeId = decoded.storeId;
-
-      const response = await fetch(
-        'https://poollabwebapi20241008201316.azurewebsites.net/api/Area/GetAllArea',
-        { 
-          headers: { 
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-
-      const data: AreaResponse = await response.json();
-
-      if (data.status === 200) {
-        // Filter areas by storeId from token
-        const filteredAreas = data.data.filter(area => area.storeId === storeId);
-        setAreas(filteredAreas);
-      }
-    } catch (err) {
-      toast({
-        title: 'Lỗi',
-        description: 'Không thể tải danh sách khu vực',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-      setAreas([]);
-    } finally {
-      setLoading(false);
+      await createArea({
+        ...data,
+        storeId: decoded.storeId,
+      } as Omit<Area, 'id'>);
+      onFormClose();
+    } catch (error) {
+      console.error('Error adding area:', error);
     }
-  }, [toast]);
+  };
 
-  useEffect(() => {
-    fetchAreas();
-  }, [fetchAreas]);
+  const handleEditArea = async (data: Partial<Area>) => {
+    if (!selectedArea) return;
+    try {
+      await updateArea(selectedArea.id, {
+        ...data,
+        storeId: selectedArea.storeId,
+      } as Omit<Area, 'id'>);
+      onFormClose();
+      setSelectedArea(null);
+    } catch (error) {
+      console.error('Error updating area:', error);
+    }
+  };
+
+  const handleDeleteArea = async () => {
+    if (!areaToDelete) return;
+    try {
+      await deleteArea(areaToDelete.id);
+      onDeleteClose();
+      setAreaToDelete(null);
+    } catch (error) {
+      console.error('Error deleting area:', error);
+    }
+  };
 
   const filteredAreas = areas.filter(area => 
     area.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -136,20 +150,15 @@ export default function AreaPage() {
             leftIcon={<Icon as={FiPlus} />}
             colorScheme="blue"
             onClick={() => {
-              toast({
-                title: "Thông báo",
-                description: "Tính năng sẽ sớm được cập nhật",
-                status: "info",
-                duration: 3000,
-                isClosable: true,
-              });
+              setSelectedArea(null);
+              onFormOpen();
             }}
           >
             Thêm khu vực
           </Button>
         </Flex>
 
-        {/* Search */}
+        {/* Search and Refresh */}
         <HStack spacing={4}>
           <InputGroup maxW="320px">
             <InputLeftElement>
@@ -166,13 +175,13 @@ export default function AreaPage() {
             aria-label="Refresh"
             icon={<Icon as={FiRefreshCcw} />}
             onClick={() => {
-              setLoading(true);
+              setSearchQuery('');
               fetchAreas();
             }}
           />
         </HStack>
 
-        {/* Table */}
+        {/* Areas Table */}
         <Table variant="simple" bg="white">
           <Thead bg="gray.50">
             <Tr>
@@ -200,7 +209,7 @@ export default function AreaPage() {
                       variant="ghost"
                       onClick={() => {
                         setSelectedArea(area);
-                        onOpen();
+                        onDetailOpen();
                       }}
                     />
                     <IconButton
@@ -208,6 +217,10 @@ export default function AreaPage() {
                       icon={<Icon as={FiEdit2} />}
                       size="sm"
                       variant="ghost"
+                      onClick={() => {
+                        setSelectedArea(area);
+                        onFormOpen();
+                      }}
                     />
                     <IconButton
                       aria-label="Delete area"
@@ -215,6 +228,10 @@ export default function AreaPage() {
                       size="sm"
                       variant="ghost"
                       colorScheme="red"
+                      onClick={() => {
+                        setAreaToDelete(area);
+                        onDeleteOpen();
+                      }}
                     />
                   </HStack>
                 </Td>
@@ -223,6 +240,7 @@ export default function AreaPage() {
           </Tbody>
         </Table>
 
+        {/* Empty State */}
         {filteredAreas.length === 0 && (
           <Flex 
             direction="column" 
@@ -240,9 +258,7 @@ export default function AreaPage() {
               mt={4}
               size="sm"
               leftIcon={<Icon as={FiRefreshCcw} />}
-              onClick={() => {
-                setSearchQuery('');
-              }}
+              onClick={() => setSearchQuery('')}
             >
               Đặt lại bộ lọc
             </Button>
@@ -250,56 +266,52 @@ export default function AreaPage() {
         )}
 
         {/* Area Detail Modal */}
-        <Modal isOpen={isOpen} onClose={onClose} size="md">
-          <ModalOverlay />
-          <ModalContent>
-            <ModalHeader>Chi tiết khu vực</ModalHeader>
-            <ModalCloseButton />
-            <ModalBody pb={6}>
-              {selectedArea && (
-                <Stack spacing={6}>
-                  <VStack align="start" spacing={1}>
-                    <Text fontWeight="bold" fontSize="xl">
-                      {selectedArea.name}
-                    </Text>
-                    <Text color="gray.600">
-                      {selectedArea.descript || "Chưa có mô tả"}
-                    </Text>
-                  </VStack>
+        <AreaDetailModal
+          isOpen={isDetailOpen}
+          onClose={onDetailClose}
+          area={selectedArea}
+        />
 
-                  {selectedArea.areaImg && (
-                    <Box borderRadius="md" overflow="hidden">
-                      <Image 
-                        src={selectedArea.areaImg} 
-                        alt={selectedArea.name}
-                        width="100%"
-                        height="auto"
-                      />
-                    </Box>
-                  )}
+        {/* Area Form Modal */}
+        <AreaFormModal
+          isOpen={isFormOpen}
+          onClose={() => {
+            onFormClose();
+            setSelectedArea(null);
+          }}
+          onSubmit={selectedArea ? handleEditArea : handleAddArea}
+          initialData={selectedArea}
+          title={selectedArea ? 'Chỉnh sửa khu vực' : 'Thêm khu vực mới'}
+        />
 
-                  <HStack spacing={2} justify="flex-end">
-                    <Button
-                      leftIcon={<Icon as={FiEdit2} />}
-                      size="sm"
-                      onClick={() => {
-                        toast({
-                          title: "Thông báo",
-                          description: "Tính năng sẽ sớm được cập nhật",
-                          status: "info",
-                          duration: 3000,
-                          isClosable: true,
-                        });
-                      }}
-                    >
-                      Chỉnh sửa
-                    </Button>
-                  </HStack>
-                </Stack>
-              )}
-            </ModalBody>
-          </ModalContent>
-        </Modal>
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog
+          isOpen={isDeleteOpen}
+          leastDestructiveRef={cancelRef}
+          onClose={onDeleteClose}
+        >
+          <AlertDialogOverlay>
+            <AlertDialogContent>
+              <AlertDialogHeader fontSize="lg" fontWeight="bold">
+                Xóa khu vực
+              </AlertDialogHeader>
+
+              <AlertDialogBody>
+                Bạn có chắc chắn muốn xóa khu vực "{areaToDelete?.name}"? 
+                Hành động này không thể hoàn tác.
+              </AlertDialogBody>
+
+              <AlertDialogFooter>
+                <Button ref={cancelRef} onClick={onDeleteClose}>
+                  Hủy
+                </Button>
+                <Button colorScheme="red" onClick={handleDeleteArea} ml={3}>
+                  Xóa
+                </Button>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialogOverlay>
+        </AlertDialog>
       </Stack>
     </Box>
   );

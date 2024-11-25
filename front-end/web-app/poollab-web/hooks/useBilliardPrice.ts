@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useToast } from '@chakra-ui/react';
-import { BilliardPrice } from '@/utils/types/billiard-price.types';
+import { BilliardPrice } from '@/utils/types/table.types';
 import { billiardPriceApi } from '@/apis/billiard-price.api';
 
 export const useBilliardPrice = () => {

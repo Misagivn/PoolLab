@@ -50,3 +50,11 @@ export interface PaginatedStaffResponse {
     pageNumber: number;
   };
 }
+
+export interface UpdateStaffRequest {
+  email: string;
+  avatarUrl: string;
+  userName: string;
+  fullName: string;
+  phoneNumber: string;
+}

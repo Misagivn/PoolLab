@@ -1,4 +1,4 @@
-import { ApiResponse, TableDetail } from "@/utils/types/table.types";
+import { ApiResponse, TableDetail, UpdateTableData } from "@/utils/types/table.types";
 
 const BASE_URL = 'https://poollabwebapi20241008201316.azurewebsites.net/api';
 
@@ -105,6 +105,48 @@ export const billiardTableApi = {
     } catch (error) {
       console.error('API Error:', error);
       throw new Error('Error fetching table detail');
+    }
+  },
+
+  updateTable: async (tableId: string, data: UpdateTableData, token: string): Promise<ApiResponse<any>> => {
+    try {
+      const response = await fetch(
+        `${BASE_URL}/BilliardTable/UpdateInfoTable/${tableId}`,
+        {
+          method: 'PUT',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data),
+        }
+      );
+
+      if (!response.ok) throw new Error('Failed to update table');
+      return await response.json();
+    } catch (error) {
+      throw new Error('Error updating table');
+    }
+  },
+
+  updateTableStatus: async (tableId: string, status: string, token: string): Promise<ApiResponse<any>> => {
+    try {
+      const response = await fetch(
+        `${BASE_URL}/BilliardTable/UpdateStatusTable/${tableId}`,
+        {
+          method: 'PUT',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ status }),
+        }
+      );
+
+      if (!response.ok) throw new Error('Failed to update table status');
+      return await response.json();
+    } catch (error) {
+      throw new Error('Error updating table status');
     }
   },
   

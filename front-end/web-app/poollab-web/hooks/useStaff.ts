@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useToast } from '@chakra-ui/react';
 import { jwtDecode } from 'jwt-decode';
-import { Staff, JWTPayload, StaffFormData } from '@/utils/types/staff.types';
+import { Staff, JWTPayload, StaffFormData, UpdateStaffRequest } from '@/utils/types/staff.types';
 import { staffApi } from '@/apis/staff.api';
 
 export const useStaff = () => {
@@ -90,11 +90,33 @@ export const useStaff = () => {
     }
   };
 
+  const updateStaff = async (staffId: string, data: UpdateStaffRequest) => {
+    try {
+      const response = await staffApi.updateStaff(staffId, data);
+      
+      if (response.status === 200) {
+        await fetchStaff(); // Refresh danh sách sau khi update
+        return true;
+      }
+      throw new Error(response.message || 'Cập nhật thông tin thất bại');
+    } catch (err) {
+      toast({
+        title: 'Lỗi',
+        description: err instanceof Error ? err.message : 'Không thể cập nhật thông tin nhân viên',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+      throw err;
+    }
+  };
+
   return {
     staff,
     loading,
     fetchStaff,
     createStaff,
+    updateStaff,
     uploadAvatar
   };
 };

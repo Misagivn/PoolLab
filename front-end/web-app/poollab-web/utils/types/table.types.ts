@@ -70,6 +70,19 @@ export interface TableDetail {
   bidaPrice: number;
 }
 
+export interface UpdateTableData {
+  name: string;
+  descript: string;
+  image: string;
+  areaId: string;
+  billiardTypeId: string;
+  priceId: string;
+}
+
+export interface UpdateStatusData {
+  status: string;
+}
+
 export interface TableFilters {
   searchQuery: string;
   statusFilter: string;

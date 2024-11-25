@@ -24,10 +24,15 @@ import { BilliardTableRow } from '@/components/tables/BilliardTableRow';
 export default function TablesPage() {
   const {
     tables,
+    areas,             
+    types,            
+    prices,           
     loading,
     filters,
     setFilters,
     deleteTable,
+    updateTable,       
+    updateTableStatus, 
     refreshTables,
     selectedTable,
     detailLoading,
@@ -59,7 +64,7 @@ export default function TablesPage() {
               <Thead bg="gray.50">
                 <Tr>
                   <Th width="50px">STT</Th>
-                  <Th width="100px">HÌNH ẢNH</Th>
+                  {/* <Th width="100px">HÌNH ẢNH</Th> */}
                   <Th>TÊN BÀN</Th>
                   <Th>LOẠI BÀN</Th>
                   <Th>KHU VỰC</Th>
@@ -71,15 +76,21 @@ export default function TablesPage() {
               </Thead>
               <Tbody>
                 {tables.map((table, index) => (
-                  <BilliardTableRow 
-                    key={table.id} 
-                    table={table} 
-                    index={index}
-                    onDelete={deleteTable}
-                    onViewDetail={fetchTableDetail}  // Thêm prop này
-                    selectedTable={selectedTable}    // Và prop này
-                    detailLoading={detailLoading}   // Và prop này
-                  />
+                  <Tr key={table.id}>
+                    <BilliardTableRow 
+                      table={table}
+                      index={index}
+                      onDelete={deleteTable}
+                      onViewDetail={fetchTableDetail}
+                      onUpdate={updateTable}         
+                      onUpdateStatus={updateTableStatus} 
+                      selectedTable={selectedTable}
+                      detailLoading={detailLoading}
+                      areas={areas}                   
+                      types={types}                   
+                      prices={prices}               
+                    />
+                  </Tr>
                 ))}
               </Tbody>
             </Table>

@@ -47,6 +47,7 @@
     "react-native-svg": "^15.8.0",
     "react-native-vnpay-merchant": "file:react-native-vnpay-merchant",
     "react-native-web": "~0.19.13",
+    "vnpay": "^1.6.0",
     "zustand": "^5.0.0"
   },
   "devDependencies": {

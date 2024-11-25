@@ -7,7 +7,8 @@ import {
   BilliardPrice, 
   BilliardType,
   TableFilters,
-  TableDetail 
+  TableDetail, 
+  UpdateTableData
 } from '@/utils/types/table.types';
 import { billiardTableApi } from '@/apis/table.api';
 import { areaApi } from '@/apis/area.api';
@@ -98,10 +99,18 @@ export const useBilliardManager = () => {
       setLoading(true);
       const token = localStorage.getItem('token');
       if (!token) throw new Error('No token found');
-
+  
+      // Decode token để lấy storeId
+      const decoded = jwtDecode(token) as { storeId: string };
+      const storeId = decoded.storeId;
+  
       const response = await billiardTableApi.getAllTables(token);
       if (response.status === 200) {
-        setTables(response.data.items);
+        // Lọc bàn theo storeId
+        const filteredTables = response.data.items.filter(
+          (table: BilliardTable) => table.storeId === storeId
+        );
+        setTables(filteredTables);
       }
     } catch (error) {
       toast({
@@ -201,6 +210,70 @@ export const useBilliardManager = () => {
     }
   };
 
+  const updateTable = async (tableId: string, tableData: UpdateTableData, imageFile?: File) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error('No token found');
+
+      let imageUrl = tableData.image;
+      if (imageFile) {
+        const imageResponse = await billiardTableApi.uploadImage(imageFile, token);
+        if (imageResponse.status === 200) {
+          imageUrl = imageResponse.data;
+        }
+      }
+
+      const finalData = {
+        ...tableData,
+        image: imageUrl,
+      };
+
+      const response = await billiardTableApi.updateTable(tableId, finalData, token);
+      if (response.status === 200) {
+        toast({
+          title: 'Thành công',
+          description: 'Đã cập nhật thông tin bàn',
+          status: 'success',
+          duration: 3000,
+        });
+        fetchTables();
+      }
+    } catch (error) {
+      toast({
+        title: 'Lỗi',
+        description: 'Không thể cập nhật thông tin bàn',
+        status: 'error',
+        duration: 3000,
+      });
+      throw error;
+    }
+  };
+
+  const updateTableStatus = async (tableId: string, status: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error('No token found');
+
+      const response = await billiardTableApi.updateTableStatus(tableId, status, token);
+      if (response.status === 200) {
+        toast({
+          title: 'Thành công',
+          description: 'Đã cập nhật trạng thái bàn',
+          status: 'success',
+          duration: 3000,
+        });
+        fetchTables();
+      }
+    } catch (error) {
+      toast({
+        title: 'Lỗi',
+        description: 'Không thể cập nhật trạng thái bàn',
+        status: 'error',
+        duration: 3000,
+      });
+    }
+  };
+
   useEffect(() => {
     const initData = async () => {
       setLoading(true);
@@ -232,6 +305,8 @@ export const useBilliardManager = () => {
     types,
     loading,
     filters,
+    updateTable,
+    updateTableStatus,
     setFilters,
     createTable,
     deleteTable,

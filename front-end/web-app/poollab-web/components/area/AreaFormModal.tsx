@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import {
   Modal,
   ModalOverlay,
@@ -19,6 +19,7 @@ import {
   FormErrorMessage,
 } from '@chakra-ui/react';
 import { Area } from '@/utils/types/area.types';
+import { areaApi } from '@/apis/area.api';
 
 interface AreaFormModalProps {
   isOpen: boolean;
@@ -35,38 +36,73 @@ export const AreaFormModal = ({
   initialData,
   title 
 }: AreaFormModalProps) => {
-  const [name, setName] = useState(initialData?.name || '');
-  const [description, setDescription] = useState(initialData?.descript || '');
-  const [imageUrl, setImageUrl] = useState(initialData?.areaImg || '');
+  const [formData, setFormData] = useState<Partial<Area>>({
+    name: '',
+    descript: '',
+    areaImg: '',
+  });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{[key: string]: string}>({});
+  
   const fileInputRef = useRef<HTMLInputElement>(null);
   const toast = useToast();
 
-  const validateForm = () => {
-    const newErrors: {[key: string]: string} = {};
-    if (!name.trim()) {
-      newErrors.name = 'Tên khu vực là bắt buộc';
+  // Load initial data when editing
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        name: initialData.name || '',
+        descript: initialData.descript || '',
+        areaImg: initialData.areaImg || '',
+        storeId: initialData.storeId
+      });
+    } else {
+      // Reset form for new area
+      setFormData({
+        name: '',
+        descript: '',
+        areaImg: '',
+      });
     }
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+  }, [initialData, isOpen]);
 
   const handleSubmit = async () => {
-    if (!validateForm()) return;
-
     try {
       setLoading(true);
-      await onSubmit({
-        name,
-        descript: description,
-        areaImg: imageUrl,
-        storeId: initialData?.storeId
-      });
+      
+      // Nếu là update, chỉ gửi các trường đã thay đổi
+      if (initialData) {
+        const updatedFields: Partial<Area> = {
+          storeId: initialData.storeId
+        };
+
+        // So sánh và chỉ thêm vào các trường đã thay đổi
+        if (formData.name !== initialData.name) {
+          updatedFields.name = formData.name;
+        }
+        if (formData.descript !== initialData.descript) {
+          updatedFields.descript = formData.descript;
+        }
+        if (formData.areaImg !== initialData.areaImg) {
+          updatedFields.areaImg = formData.areaImg;
+        }
+
+        await onSubmit(updatedFields);
+      } else {
+        // Nếu là thêm mới, kiểm tra tên bắt buộc
+        if (!formData.name?.trim()) {
+          setErrors({ name: 'Tên khu vực là bắt buộc' });
+          return;
+        }
+        await onSubmit(formData);
+      }
+
       onClose();
-      setName('');
-      setDescription('');
-      setImageUrl('');
+      setFormData({
+        name: '',
+        descript: '',
+        areaImg: '',
+      });
       setErrors({});
     } catch (error) {
       toast({
@@ -89,20 +125,12 @@ export const AreaFormModal = ({
       const formData = new FormData();
       formData.append('file', file);
       
-      const response = await fetch(
-        'https://poollabwebapi20241008201316.azurewebsites.net/api/Area/UploadAreaImg',
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-          },
-          body: formData
-        }
-      );
-      
-      const result = await response.json();
-      if (result.status === 200) {
-        setImageUrl(result.data);
+      const response = await areaApi.uploadAreaImage(formData);
+      if (response.status === 200) {
+        setFormData(prev => ({
+          ...prev,
+          areaImg: response.data as string
+        }));
         toast({
           title: 'Thành công',
           description: 'Tải ảnh lên thành công',
@@ -130,11 +158,14 @@ export const AreaFormModal = ({
         <ModalCloseButton />
         <ModalBody>
           <VStack spacing={4}>
-            <FormControl isRequired isInvalid={!!errors.name}>
+            <FormControl isInvalid={!!errors.name} isRequired={!initialData}>
               <FormLabel>Tên khu vực</FormLabel>
               <Input 
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                value={formData.name}
+                onChange={(e) => setFormData(prev => ({
+                  ...prev,
+                  name: e.target.value
+                }))}
                 placeholder="Nhập tên khu vực"
               />
               <FormErrorMessage>{errors.name}</FormErrorMessage>
@@ -143,8 +174,11 @@ export const AreaFormModal = ({
             <FormControl>
               <FormLabel>Mô tả</FormLabel>
               <Textarea 
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                value={formData.descript}
+                onChange={(e) => setFormData(prev => ({
+                  ...prev,
+                  descript: e.target.value
+                }))}
                 placeholder="Nhập mô tả khu vực"
               />
             </FormControl>
@@ -165,10 +199,10 @@ export const AreaFormModal = ({
               >
                 Chọn ảnh
               </Button>
-              {imageUrl && (
+              {formData.areaImg && (
                 <Box borderRadius="md" overflow="hidden">
                   <Image
-                    src={imageUrl}
+                    src={formData.areaImg}
                     alt="Area preview"
                     width="100%"
                     height="auto"

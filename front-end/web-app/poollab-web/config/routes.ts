@@ -40,7 +40,7 @@ export const routes: RouteConfig[] = [
     icon: FiBox,
   },
   {
-    path: '/manager/drinks',
+    path: '/manager/products',
     label: 'Hàng hóa',
     icon: FiShoppingCart,
   },

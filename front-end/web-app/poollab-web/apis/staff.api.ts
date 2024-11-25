@@ -1,4 +1,4 @@
-import { CreateStaffRequest, PaginatedStaffResponse, StaffResponse } from '@/utils/types/staff.types';
+import { CreateStaffRequest, PaginatedStaffResponse, StaffResponse, UpdateStaffRequest } from '@/utils/types/staff.types';
 
 const BASE_URL = 'https://poollabwebapi20241008201316.azurewebsites.net/api';
 const ROLE_ID = '21cfbbf3-ccd1-4394-b0e9-ee0e42564b87'; // Staff role ID
@@ -61,6 +61,22 @@ export const staffApi = {
           Authorization: `Bearer ${token}`,
         },
         body: formData
+      }
+    );
+    return response.json();
+  },
+
+  updateStaff: async (staffId: string, data: UpdateStaffRequest): Promise<StaffResponse> => {
+    const token = localStorage.getItem('token');
+    const response = await fetch(
+      `${BASE_URL}/Account/UpdateInfoUser/${staffId}`,
+      {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
       }
     );
     return response.json();

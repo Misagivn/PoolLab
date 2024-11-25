@@ -31,17 +31,23 @@ import {
   FiRefreshCcw,
   FiUserPlus,
   FiInfo,
+  FiEdit2
 } from 'react-icons/fi';
 import { useStaff } from '@/hooks/useStaff';
 import { StaffFormModal } from '@/components/staff/StaffFormModal';
 import { StaffDetailModal } from '@/components/staff/StaffDetailModal';
+import { UpdateStaffModal } from '@/components/staff/UpdateStaffModal';
+import { Pagination } from '@/components/common/Pagination';
 import { Staff } from '@/utils/types/staff.types';
+
+const ITEMS_PER_PAGE = 10;
 
 export default function StaffPage() {
   const { staff, loading, fetchStaff } = useStaff();
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState('all');
   const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
   
   const { 
     isOpen: isDetailOpen, 
@@ -55,25 +61,47 @@ export default function StaffPage() {
     onClose: onFormClose 
   } = useDisclosure();
 
+  const {
+    isOpen: isUpdateOpen,
+    onOpen: onUpdateOpen,
+    onClose: onUpdateClose
+  } = useDisclosure();
+
   useEffect(() => {
     fetchStaff();
   }, [fetchStaff]);
+
+  useEffect(() => {
+    // Reset to first page when search query or filter changes
+    setCurrentPage(1);
+  }, [searchQuery, filter]);
 
   const getWorkingStatus = (status: string) => {
     return status === 'Kích hoạt' ? 'Đang làm việc' : 'Đã nghỉ việc';
   };
 
-  const filteredStaff = staff.filter(member => {
-    const searchString = searchQuery.toLowerCase();
-    const matchesSearch = 
-      member.fullName.toLowerCase().includes(searchString) ||
-      member.email.toLowerCase().includes(searchString) ||
-      member.phoneNumber?.toLowerCase().includes(searchString);
-    
-    if (filter === 'all') return matchesSearch;
-    const status = getWorkingStatus(member.status).toLowerCase();
-    return matchesSearch && status === filter.toLowerCase();
-  });
+  const filteredStaff = staff
+    .sort((a, b) => new Date(b.joinDate).getTime() - new Date(a.joinDate).getTime()) // Sort by newest first
+    .filter(member => {
+      const searchString = searchQuery.toLowerCase();
+      const matchesSearch = 
+        member.fullName.toLowerCase().includes(searchString) ||
+        member.email.toLowerCase().includes(searchString) ||
+        member.phoneNumber?.toLowerCase().includes(searchString);
+      
+      if (filter === 'all') return matchesSearch;
+      const status = getWorkingStatus(member.status).toLowerCase();
+      return matchesSearch && status === filter.toLowerCase();
+    });
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredStaff.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const paginatedStaff = filteredStaff.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
 
   if (loading) {
     return (
@@ -127,6 +155,7 @@ export default function StaffPage() {
             onClick={() => {
               setSearchQuery('');
               setFilter('all');
+              setCurrentPage(1);
               fetchStaff();
             }}
           />
@@ -136,6 +165,7 @@ export default function StaffPage() {
         <Table variant="simple" bg="white">
           <Thead bg="gray.50">
             <Tr>
+              <Th width="80px" textAlign="center">STT</Th>
               <Th>NHÂN VIÊN</Th>
               <Th>EMAIL</Th>
               <Th>SỐ ĐIỆN THOẠI</Th>
@@ -144,8 +174,9 @@ export default function StaffPage() {
             </Tr>
           </Thead>
           <Tbody>
-            {filteredStaff.map((member) => (
+            {paginatedStaff.map((member, index) => (
               <Tr key={member.id}>
+                <Td textAlign="center">{startIndex + index + 1}</Td>
                 <Td>
                   <HStack spacing={3}>
                     <Avatar 
@@ -171,6 +202,16 @@ export default function StaffPage() {
                 <Td>
                   <HStack spacing={2} justify="flex-end">
                     <IconButton
+                      aria-label="Edit staff"
+                      icon={<Icon as={FiEdit2} />}
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => {
+                        setSelectedStaff(member);
+                        onUpdateOpen();
+                      }}
+                    />
+                    <IconButton
                       aria-label="View details"
                       icon={<Icon as={FiInfo} />}
                       size="sm"
@@ -187,7 +228,7 @@ export default function StaffPage() {
           </Tbody>
         </Table>
 
-        {filteredStaff.length === 0 && (
+        {filteredStaff.length === 0 ? (
           <Flex 
             direction="column" 
             align="center" 
@@ -205,11 +246,18 @@ export default function StaffPage() {
               onClick={() => {
                 setSearchQuery('');
                 setFilter('all');
+                setCurrentPage(1);
               }}
             >
               Đặt lại bộ lọc
             </Button>
           </Flex>
+        ) : (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
         )}
 
         {/* Modals */}
@@ -221,6 +269,12 @@ export default function StaffPage() {
         <StaffDetailModal
           isOpen={isDetailOpen}
           onClose={onDetailClose}
+          staff={selectedStaff}
+        />
+
+        <UpdateStaffModal 
+          isOpen={isUpdateOpen}
+          onClose={onUpdateClose}
           staff={selectedStaff}
         />
       </Stack>

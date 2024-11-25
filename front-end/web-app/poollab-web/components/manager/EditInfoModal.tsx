@@ -90,7 +90,7 @@ export const EditInfoModal = ({
                 }
               />
             </FormControl>
-            <FormControl>
+            {/* <FormControl>
               <FormLabel>Avatar URL</FormLabel>
               <Input
                 value={formData.avatarUrl}
@@ -98,7 +98,7 @@ export const EditInfoModal = ({
                   setFormData((prev) => ({ ...prev, avatarUrl: e.target.value }))
                 }
               />
-            </FormControl>
+            </FormControl> */}
           </VStack>
         </ModalBody>
 

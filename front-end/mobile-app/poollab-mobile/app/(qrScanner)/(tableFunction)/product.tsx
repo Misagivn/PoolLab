@@ -1,5 +1,4 @@
 import {
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
@@ -24,6 +23,7 @@ import QuantitySelector from "@/components/quantityCount";
 import CustomHeader from "@/components/customHeader";
 import { getStoredTableData } from "@/api/tokenDecode";
 import { router } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
 const product = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [productType, setProductType] = useState([]);

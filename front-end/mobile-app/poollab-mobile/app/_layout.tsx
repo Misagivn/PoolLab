@@ -10,6 +10,7 @@ export default function RootLayout() {
       <Stack.Screen name="(qrScanner)" options={{ headerShown: false }} />
       <Stack.Screen name="(userProfile)" options={{ headerShown: false }} />
       <Stack.Screen name="(reserveTable)" options={{ headerShown: false }} />
+      <Stack.Screen name="(wallet)" options={{ headerShown: false }} />
     </Stack>
   );
 }

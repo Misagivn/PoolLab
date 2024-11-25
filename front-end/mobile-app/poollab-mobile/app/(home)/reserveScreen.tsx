@@ -124,7 +124,6 @@ const ReserveScreen = () => {
       try {
         const storedStore = await get_all_Store();
         if (storedStore) {
-          //setStoreData(storedStore.data.data);
           const rawdata = storedStore.data.data;
           const transformData = rawdata.map(
             (item: { name: any; id: any; address: any }) => ({

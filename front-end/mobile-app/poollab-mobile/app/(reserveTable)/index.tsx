@@ -133,7 +133,6 @@ const index = () => {
     }
   };
   const handleSearch = () => {
-    console.log("submit", searchData);
     setIsLoading(true);
     searchFunction();
   };

@@ -41,6 +41,8 @@ const index = () => {
         console.error("Error loading stored user:", error);
       }
     };
+    getStoredTableData();
+    getAccountId();
     loadStat();
   }, []);
 
@@ -54,7 +56,7 @@ const index = () => {
       console.log("start table data: ", startTableData);
       const response = await activate_table(startTableData);
       if (response.status === 200) {
-        AsyncStorage.setItem("userPlayTime", JSON.stringify(playTime));
+        AsyncStorage.setItem("userPlayTime", playTime);
         console.log("Table started successfully!");
         console.log("Data sau khi dat ", response.data);
         router.replace("./(tableFunction)");
@@ -142,7 +144,7 @@ const index = () => {
               buttonStyles={[styles.cancelButton, styles.buttonCommon]}
               textStyles={styles.ButtonText}
               onPress={() => {
-                router.replace("./(home)");
+                router.replace("../(home)");
               }}
               // loading={isLoading}
             />

@@ -37,17 +37,22 @@ import { useStaff } from '@/hooks/useStaff';
 import { StaffFormModal } from '@/components/staff/StaffFormModal';
 import { StaffDetailModal } from '@/components/staff/StaffDetailModal';
 import { UpdateStaffModal } from '@/components/staff/UpdateStaffModal';
-import { Pagination } from '@/components/common/Pagination';
 import { Staff } from '@/utils/types/staff.types';
 
-const ITEMS_PER_PAGE = 10;
-
 export default function StaffPage() {
-  const { staff, loading, fetchStaff } = useStaff();
+  const { 
+    staff, 
+    loading, 
+    fetchStaff, 
+    selectedStaff,
+    selectStaff,
+    getWorkingStatus 
+  } = useStaff();
+  
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState('all');
-  const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
   
   const { 
     isOpen: isDetailOpen, 
@@ -76,12 +81,8 @@ export default function StaffPage() {
     setCurrentPage(1);
   }, [searchQuery, filter]);
 
-  const getWorkingStatus = (status: string) => {
-    return status === 'Kích hoạt' ? 'Đang làm việc' : 'Đã nghỉ việc';
-  };
-
   const filteredStaff = staff
-    .sort((a, b) => new Date(b.joinDate).getTime() - new Date(a.joinDate).getTime()) // Sort by newest first
+    .sort((a, b) => new Date(b.joinDate).getTime() - new Date(a.joinDate).getTime())
     .filter(member => {
       const searchString = searchQuery.toLowerCase();
       const matchesSearch = 
@@ -90,8 +91,7 @@ export default function StaffPage() {
         member.phoneNumber?.toLowerCase().includes(searchString);
       
       if (filter === 'all') return matchesSearch;
-      const status = getWorkingStatus(member.status).toLowerCase();
-      return matchesSearch && status === filter.toLowerCase();
+      return matchesSearch && getWorkingStatus(member.status).toLowerCase() === filter.toLowerCase();
     });
 
   // Pagination calculations
@@ -101,6 +101,13 @@ export default function StaffPage() {
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
+  };
+
+  const handleRefresh = () => {
+    setSearchQuery('');
+    setFilter('all');
+    setCurrentPage(1);
+    fetchStaff();
   };
 
   if (loading) {
@@ -152,81 +159,78 @@ export default function StaffPage() {
           <IconButton
             aria-label="Refresh"
             icon={<Icon as={FiRefreshCcw} />}
-            onClick={() => {
-              setSearchQuery('');
-              setFilter('all');
-              setCurrentPage(1);
-              fetchStaff();
-            }}
+            onClick={handleRefresh}
           />
         </HStack>
 
         {/* Table */}
-        <Table variant="simple" bg="white">
-          <Thead bg="gray.50">
-            <Tr>
-              <Th width="80px" textAlign="center">STT</Th>
-              <Th>NHÂN VIÊN</Th>
-              <Th>EMAIL</Th>
-              <Th>SỐ ĐIỆN THOẠI</Th>
-              <Th>TRẠNG THÁI</Th>
-              <Th width="100px" textAlign="right">THAO TÁC</Th>
-            </Tr>
-          </Thead>
-          <Tbody>
-            {paginatedStaff.map((member, index) => (
-              <Tr key={member.id}>
-                <Td textAlign="center">{startIndex + index + 1}</Td>
-                <Td>
-                  <HStack spacing={3}>
-                    <Avatar 
-                      size="sm" 
-                      name={member.fullName}
-                      src={member.avatarUrl || undefined}
-                    />
-                    <Box>
-                      <Text fontWeight="medium">{member.fullName}</Text>
-                      <Text fontSize="sm" color="gray.500">{member.userName}</Text>
-                    </Box>
-                  </HStack>
-                </Td>
-                <Td>{member.email}</Td>
-                <Td>{member.phoneNumber || "Chưa cập nhật"}</Td>
-                <Td>
-                  <Badge
-                    colorScheme={member.status === 'Kích hoạt' ? 'green' : 'red'}
-                  >
-                    {getWorkingStatus(member.status)}
-                  </Badge>
-                </Td>
-                <Td>
-                  <HStack spacing={2} justify="flex-end">
-                    <IconButton
-                      aria-label="Edit staff"
-                      icon={<Icon as={FiEdit2} />}
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => {
-                        setSelectedStaff(member);
-                        onUpdateOpen();
-                      }}
-                    />
-                    <IconButton
-                      aria-label="View details"
-                      icon={<Icon as={FiInfo} />}
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => {
-                        setSelectedStaff(member);
-                        onDetailOpen();
-                      }}
-                    />
-                  </HStack>
-                </Td>
+        <Box overflowX="auto">
+          <Table variant="simple" bg="white">
+            <Thead bg="gray.50">
+              <Tr>
+                <Th width="80px" textAlign="center">STT</Th>
+                <Th>NHÂN VIÊN</Th>
+                <Th>EMAIL</Th>
+                <Th>SỐ ĐIỆN THOẠI</Th>
+                <Th>TRẠNG THÁI</Th>
+                <Th width="100px" textAlign="right">THAO TÁC</Th>
               </Tr>
-            ))}
-          </Tbody>
-        </Table>
+            </Thead>
+            <Tbody>
+              {paginatedStaff.map((member, index) => (
+                <Tr key={member.id}>
+                  <Td textAlign="center">{startIndex + index + 1}</Td>
+                  <Td>
+                    <HStack spacing={3}>
+                      <Avatar 
+                        size="sm" 
+                        name={member.fullName}
+                        src={member.avatarUrl || undefined}
+                      />
+                      <Box>
+                        <Text fontWeight="medium">{member.fullName}</Text>
+                        <Text fontSize="sm" color="gray.500">{member.userName}</Text>
+                      </Box>
+                    </HStack>
+                  </Td>
+                  <Td>{member.email}</Td>
+                  <Td>{member.phoneNumber || "Chưa cập nhật"}</Td>
+                  <Td>
+                    <Badge
+                      colorScheme={member.status === 'Kích hoạt' ? 'green' : 'red'}
+                    >
+                      {getWorkingStatus(member.status)}
+                    </Badge>
+                  </Td>
+                  <Td>
+                    <HStack spacing={2} justify="flex-end">
+                      <IconButton
+                        aria-label="Edit staff"
+                        icon={<Icon as={FiEdit2} />}
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                          selectStaff(member);
+                          onUpdateOpen();
+                        }}
+                      />
+                      <IconButton
+                        aria-label="View details"
+                        icon={<Icon as={FiInfo} />}
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                          selectStaff(member);
+                          onDetailOpen();
+                        }}
+                      />
+                    </HStack>
+                  </Td>
+                </Tr>
+              ))}
+            </Tbody>
+          </Table>
+        </Box>
 
         {filteredStaff.length === 0 ? (
           <Flex 
@@ -243,21 +247,33 @@ export default function StaffPage() {
             <Button
               mt={4}
               size="sm"
-              onClick={() => {
-                setSearchQuery('');
-                setFilter('all');
-                setCurrentPage(1);
-              }}
+              onClick={handleRefresh}
             >
               Đặt lại bộ lọc
             </Button>
           </Flex>
         ) : (
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={handlePageChange}
-          />
+          <Flex justify="center" mt={4}>
+            <HStack>
+              <Button
+                size="sm"
+                disabled={currentPage === 1}
+                onClick={() => handlePageChange(currentPage - 1)}
+              >
+                Trước
+              </Button>
+              <Text>
+                Trang {currentPage} / {totalPages}
+              </Text>
+              <Button
+                size="sm"
+                disabled={currentPage === totalPages}
+                onClick={() => handlePageChange(currentPage + 1)}
+              >
+                Sau
+              </Button>
+            </HStack>
+          </Flex>
         )}
 
         {/* Modals */}

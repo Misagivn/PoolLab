@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Modal,
   ModalOverlay,
@@ -16,6 +16,8 @@ import {
   VStack,
   useToast,
   FormErrorMessage,
+  Avatar,
+  Box,
 } from '@chakra-ui/react';
 import { useStaff } from '@/hooks/useStaff';
 import { Staff, UpdateStaffRequest } from '@/utils/types/staff.types';
@@ -29,59 +31,62 @@ interface UpdateStaffModalProps {
 export const UpdateStaffModal = ({ isOpen, onClose, staff }: UpdateStaffModalProps) => {
   const { updateStaff } = useStaff();
   const [formData, setFormData] = useState<UpdateStaffRequest>({
-    email: staff?.email || '',
-    avatarUrl: staff?.avatarUrl || '',
-    userName: staff?.userName || '',
-    fullName: staff?.fullName || '',
-    phoneNumber: staff?.phoneNumber || '',
+    email: '',
+    avatarUrl: '',
+    userName: '',
+    fullName: '',
+    phoneNumber: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const toast = useToast();
 
-  const resetForm = () => {
-    if (staff) {
+  useEffect(() => {
+    if (staff && isOpen) {
       setFormData({
-        email: staff.email,
+        email: staff.email || '',
         avatarUrl: staff.avatarUrl || '',
-        userName: staff.userName,
-        fullName: staff.fullName,
-        phoneNumber: staff.phoneNumber,
+        userName: staff.userName || '',
+        fullName: staff.fullName || '',
+        phoneNumber: staff.phoneNumber || '',
       });
+      setErrors({});
     }
-    setErrors({});
-  };
+  }, [staff, isOpen]);
 
   const handleClose = () => {
-    resetForm();
+    setFormData({
+      email: '',
+      avatarUrl: '',
+      userName: '',
+      fullName: '',
+      phoneNumber: '',
+    });
+    setErrors({});
     onClose();
   };
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
-    // Email validation
     if (!formData.email) {
       newErrors.email = 'Email là bắt buộc';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = 'Email không hợp lệ';
     }
 
-    // Username validation
     if (!formData.userName) {
       newErrors.userName = 'Tên đăng nhập là bắt buộc';
     } else if (formData.userName.length < 3) {
       newErrors.userName = 'Tên đăng nhập phải có ít nhất 3 ký tự';
     }
 
-    // Full name validation
     if (!formData.fullName) {
       newErrors.fullName = 'Họ và tên là bắt buộc';
     } else if (formData.fullName.length < 2) {
       newErrors.fullName = 'Họ và tên phải có ít nhất 2 ký tự';
     }
 
-    // Phone number validation (optional but must be valid if provided)
     if (formData.phoneNumber && !/^[0-9]{10,11}$/.test(formData.phoneNumber)) {
       newErrors.phoneNumber = 'Số điện thoại không hợp lệ (phải có 10-11 số)';
     }
@@ -95,45 +100,19 @@ export const UpdateStaffModal = ({ isOpen, onClose, staff }: UpdateStaffModalPro
 
     try {
       setLoading(true);
-      await updateStaff(staff.id, {
-        ...formData,
-        avatarUrl: staff.avatarUrl || '', // Giữ nguyên avatarUrl cũ
-      });
-      toast({
-        title: 'Thành công',
-        description: 'Cập nhật thông tin nhân viên thành công',
-        status: 'success',
-        duration: 3000,
-        isClosable: true,
-      });
+      await updateStaff(staff.id, formData);
       handleClose();
     } catch (error) {
-      toast({
-        title: 'Lỗi',
-        description: error instanceof Error ? error.message : 'Không thể cập nhật thông tin nhân viên',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
+      console.error('Update failed:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  // Reset form when staff changes
-  useState(() => {
-    resetForm();
-  }, [staff]);
-
   if (!staff) return null;
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={handleClose}
-      closeOnOverlayClick={false}
-      size="md"
-    >
+    <Modal isOpen={isOpen} onClose={handleClose} closeOnOverlayClick={false} size="md">
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Cập nhật thông tin nhân viên</ModalHeader>
@@ -141,7 +120,14 @@ export const UpdateStaffModal = ({ isOpen, onClose, staff }: UpdateStaffModalPro
         
         <ModalBody>
           <VStack spacing={4}>
-            {/* Email Field */}
+            <Box>
+              <Avatar
+                size="xl"
+                src={staff.avatarUrl || undefined}
+                name={staff.fullName}
+              />
+            </Box>
+
             <FormControl isRequired isInvalid={!!errors.email}>
               <FormLabel>Email</FormLabel>
               <Input
@@ -153,7 +139,6 @@ export const UpdateStaffModal = ({ isOpen, onClose, staff }: UpdateStaffModalPro
               <FormErrorMessage>{errors.email}</FormErrorMessage>
             </FormControl>
 
-            {/* Username Field */}
             <FormControl isRequired isInvalid={!!errors.userName}>
               <FormLabel>Tên đăng nhập</FormLabel>
               <Input
@@ -164,7 +149,6 @@ export const UpdateStaffModal = ({ isOpen, onClose, staff }: UpdateStaffModalPro
               <FormErrorMessage>{errors.userName}</FormErrorMessage>
             </FormControl>
 
-            {/* Full Name Field */}
             <FormControl isRequired isInvalid={!!errors.fullName}>
               <FormLabel>Họ và tên</FormLabel>
               <Input
@@ -175,7 +159,6 @@ export const UpdateStaffModal = ({ isOpen, onClose, staff }: UpdateStaffModalPro
               <FormErrorMessage>{errors.fullName}</FormErrorMessage>
             </FormControl>
 
-            {/* Phone Number Field */}
             <FormControl isInvalid={!!errors.phoneNumber}>
               <FormLabel>Số điện thoại</FormLabel>
               <Input

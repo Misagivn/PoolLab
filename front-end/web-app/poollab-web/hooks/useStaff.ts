@@ -7,10 +7,12 @@ import { staffApi } from '@/apis/staff.api';
 export const useStaff = () => {
   const [staff, setStaff] = useState<Staff[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null);
   const toast = useToast();
 
   const fetchStaff = useCallback(async () => {
     try {
+      setLoading(true);
       const token = localStorage.getItem('token');
       if (!token) throw new Error('No token found');
 
@@ -19,6 +21,8 @@ export const useStaff = () => {
 
       if (response.status === 200) {
         setStaff(response.data.items);
+      } else {
+        throw new Error(response.message || 'Failed to fetch staff');
       }
     } catch (err) {
       toast({
@@ -95,7 +99,32 @@ export const useStaff = () => {
       const response = await staffApi.updateStaff(staffId, data);
       
       if (response.status === 200) {
-        await fetchStaff(); // Refresh danh sách sau khi update
+        // Update local state immediately
+        setStaff(prevStaff => 
+          prevStaff.map(s => 
+            s.id === staffId 
+              ? { 
+                  ...s,
+                  email: data.email,
+                  userName: data.userName,
+                  fullName: data.fullName,
+                  phoneNumber: data.phoneNumber,
+                  avatarUrl: data.avatarUrl || s.avatarUrl
+                } 
+              : s
+          )
+        );
+
+        toast({
+          title: 'Thành công',
+          description: 'Cập nhật thông tin nhân viên thành công',
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        });
+
+        // Fetch fresh data in background
+        fetchStaff();
         return true;
       }
       throw new Error(response.message || 'Cập nhật thông tin thất bại');
@@ -111,12 +140,23 @@ export const useStaff = () => {
     }
   };
 
+  const selectStaff = (staff: Staff | null) => {
+    setSelectedStaff(staff);
+  };
+
+  const getWorkingStatus = (status: string) => {
+    return status === 'Kích hoạt' ? 'Đang làm việc' : 'Đã nghỉ việc';
+  };
+
   return {
     staff,
     loading,
+    selectedStaff,
     fetchStaff,
     createStaff,
     updateStaff,
-    uploadAvatar
+    uploadAvatar,
+    selectStaff,
+    getWorkingStatus
   };
 };

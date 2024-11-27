@@ -7,6 +7,7 @@ const InputCustom = (props) => {
         props.icon && props.icon
     }
         <TextInput {...props} style={{flex: 1}} placeholderTextColor={"black"} ref={props.inputRef && props.inputRef}/>
+        {props.iconRight && props.iconRight}
     </View>
   )
 }

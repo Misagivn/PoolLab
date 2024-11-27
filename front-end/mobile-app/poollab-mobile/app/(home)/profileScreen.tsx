@@ -6,23 +6,28 @@ import { theme } from "@/constants/theme";
 import Icon from "@/assets/icons/icons";
 import { router } from "expo-router";
 import { get_user_details } from "@/api/user_api";
-import { getStoredUser } from "@/api/tokenDecode";
 import CustomHeader from "@/components/customHeader";
+import { getAccountId } from "@/data/userData";
 const ProfileScreen = () => {
   //Get userId from AsyncStorage
   const [userFullName, setUserFullName] = useState("");
   const [userEmail, setUserEmail] = useState("");
+  const [image, setImage] = useState(
+    require("../../assets/images/eda492de2906a8827a6266e32bcd3ffb.webp")
+  );
   useEffect(() => {
     const loadStat = async () => {
       try {
-        const storedUser = await getStoredUser();
-        if (storedUser) {
-          get_user_details(storedUser.AccountId).then((response) => {
+        const accountId = await getAccountId();
+        if (accountId) {
+          get_user_details(accountId).then((response) => {
             if (response.data.status === 200) {
               const userFullName = response.data.data.fullName;
               const userEmail = response.data.data.email;
+              const userImage = response.data.data.avatarUrl;
               setUserFullName(userFullName);
               setUserEmail(userEmail);
+              setImage(userImage);
             }
           });
         }
@@ -36,10 +41,7 @@ const ProfileScreen = () => {
     <SafeAreaView>
       <CustomHeader />
       <View style={styles.header}>
-        <Image
-          style={styles.headerImage}
-          source={require("../../assets/images/eda492de2906a8827a6266e32bcd3ffb.webp")}
-        />
+        <Image style={styles.headerImage} source={{ uri: image.toString() }} />
         <View style={styles.basicInfo}>
           <Text style={styles.infoName}>{userFullName}</Text>
           <Text style={styles.infoEmail}>{userEmail}</Text>
@@ -57,6 +59,13 @@ const ProfileScreen = () => {
           <Text style={styles.functionName}>Quản lý ví tiền</Text>
           <Icon name="arrowRight" size={20} strokeWidth={3} color="black" />
         </View>
+        <Pressable
+          style={styles.functionBox}
+          onPress={() => router.push("../(reserveTable)")}
+        >
+          <Text style={styles.functionName}>Quản lý đặt bàn</Text>
+          <Icon name="arrowRight" size={20} strokeWidth={3} color="black" />
+        </Pressable>
         <View style={styles.functionBox}>
           <Text style={styles.functionName}>Quản lý khóa học</Text>
           <Icon name="arrowRight" size={20} strokeWidth={3} color="black" />

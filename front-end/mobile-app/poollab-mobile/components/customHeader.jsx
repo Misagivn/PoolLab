@@ -2,30 +2,29 @@ import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { React, useState, useEffect } from "react";
 import { theme } from "@/constants/theme";
 import Icon from "@/assets/icons/icons";
-import { getStoredUser } from "@/api/tokenDecode";
-import { get_user_details } from "@/api/user_api";
-import { store } from "expo-router/build/global-state/router-store";
+import {getAccountId, getUserName, getUserBalance} from '@/data/userData'
+import { router } from "expo-router";
 const CustomHeader = () => {
   //Get username from AsyncStorage
   const [userName, setUserName] = useState("");
   const [userBalance, setUserBalance] = useState(0);
-  useEffect(() => {
-    const loadStat = async () => {
-      try {
-        const storedUser = await getStoredUser();
-        if (storedUser) {
-          setUserName(storedUser.Username); // Assuming the stored user data has a 'Username' property
-          get_user_details(storedUser.AccountId).then((response) => {
-            if (response.data.status === 200) {
-              const userBalance = response.data.data.balance;
-              setUserBalance(userBalance);
-            }
-          });
-        }
-      } catch (error) {
-        console.error("Error loading stored user:", error);
+  const loadStat = async () => {
+    try {
+      const userId = await getAccountId();
+      const userName = await getUserName();
+      if (userId, userName) {
+        setUserName(userName);
+        getUserBalance(userId).then((userBalance) => {
+          if (userBalance) {
+            setUserBalance(userBalance);
+          }
+        });
       }
-    };
+  } catch (error) {
+      console.error("Error loading stored user:", error);
+    }
+  };
+  useEffect(() => {
     loadStat();
   }, []);
   return (
@@ -48,7 +47,7 @@ const CustomHeader = () => {
           <View style={styles.walletCount}>
             <Pressable
               onPress={() => {
-                console.log("add money");
+                router.push("/(wallet)");
               }}
             >
               <Icon name="addIcon" size={20} strokeWidth={1.5} color="black" />

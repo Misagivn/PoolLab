@@ -10,14 +10,11 @@ const instance = axios.create({
   withCredentials: true
 });
 
-// Add a response interceptor
 instance.interceptors.response.use(
-  (response) => response,
+  (response) => response.data,
   (error) => {
     if (error.response?.status === 401) {
-      // Clear localStorage
       localStorage.clear();
-      // Redirect to login page
       window.location.href = '/';
     }
     return Promise.reject(error);
@@ -25,14 +22,11 @@ instance.interceptors.response.use(
 );
 
 instance.interceptors.request.use((config) => {
-  // Get token from localStorage
   const token = localStorage.getItem('token');
   
-  // If token exists, add it to headers
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   } else {
-    // If no token, redirect to login
     window.location.href = '/';
   }
   

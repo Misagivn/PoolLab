@@ -75,6 +75,7 @@ export const update_user = async (data, userId, token) => {
     return response;
   } catch (error) {
     if (error.response) {
+      console.log("error response:", error.response);
       // Server responded with an error status (4xx, 5xx)
       return error.response;
     } else if (error.request) {
@@ -86,5 +87,17 @@ export const update_user = async (data, userId, token) => {
       console.log("Error:", error.message);
       return error;
     }
+  }
+};
+export const update_user_avatar = async (image) => {
+  try {
+    const response = await ApiManager.uploadFile(
+      `https://poollabwebapi20241008201316.azurewebsites.net/api/Account/UploadFileAvatar`, 
+      image, //base64Image },
+    );
+    return response;
+  } catch (error) {
+    console.error('Avatar upload error:', error.response?.data, " error response:", error.message);
+    throw error;
   }
 };

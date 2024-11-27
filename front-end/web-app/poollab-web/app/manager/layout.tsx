@@ -1,20 +1,19 @@
 "use client";
 
-import { ChakraProvider } from '@chakra-ui/react';
-import Sidebar from '@/app/components/shared/sidebar';
+import { Box, Flex } from '@chakra-ui/react';
+import Sidebar from '@/components/shared/sidebar';
 
-export default function RootLayout({
+export default function ManagerLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body>
-        <ChakraProvider>
-          {children}
-        </ChakraProvider>
-      </body>
-    </html>
+    <Flex minH="100vh">
+      <Sidebar />
+      <Box flex="1" ml="250px" bg="gray.50" p="6">
+        {children}
+      </Box>
+    </Flex>
   );
 }

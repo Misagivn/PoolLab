@@ -11,7 +11,7 @@ import { useState, useEffect } from "react";
 import { user_login } from "@/api/user_api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { jwtDecode } from "jwt-decode";
-
+import CustomAlert from "@/components/alertCustom";
 /**
  * LoginScreen: màn hình đăng nhập
  *
@@ -29,6 +29,9 @@ const LoginScreen = () => {
   const [passwordFormat, setPasswordFormat] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
   const [errorMessage1, setErrorMessage1] = useState("");
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [errorResponse, setErrorResponse] = useState("");
+  const [showPassword, setShowPassword] = useState(true);
   const loginData = {
     email: accEmail,
     password: accPassword,
@@ -70,6 +73,23 @@ const LoginScreen = () => {
       setPasswordFormat(true);
     }
   };
+  const alertPopup = (title, message, confirmText, cancelText) => {
+    return (
+      <CustomAlert
+        visible={alertVisible}
+        title={title}
+        message={message}
+        confirmText={confirmText}
+        cancelText={cancelText}
+        onConfirm={() => {
+          setAlertVisible(false);
+        }}
+        onCancel={() => {
+          setAlertVisible(false);
+        }}
+      />
+    );
+  };
 
   /**
    * Check login
@@ -88,11 +108,12 @@ const LoginScreen = () => {
       !passwordFormat
     ) {
       if (!emailFormat) {
-        alert(errorMessage);
+        setAlertVisible(true);
+        // alertPopup("Lỗi", errorMessage, "OK", "Hủy");
       } else if (!passwordFormat) {
-        alert(errorMessage1);
+        setAlertVisible(true);
       } else {
-        alert("Please enter the required fields");
+        setAlertVisible(true);
       }
     } else {
       setIsLoading(true);
@@ -102,15 +123,16 @@ const LoginScreen = () => {
             const token = response?.data.data;
             const decodedToken = jwtDecode(token);
             // const userName = decodedToken.Username;
-            const userId = decodedToken.AccountId;
             AsyncStorage.multiSet([
               ["userToken", JSON.stringify(token)],
               ["userData", JSON.stringify(decodedToken)],
             ]);
             setIsLoading(false);
-            router.push("(home)");
+            router.replace("(home)");
           } else {
-            alert(response.data.message);
+            setAlertVisible(true);
+            setErrorResponse(response.data.message);
+            //alert(response.data.message);
             setIsLoading(false);
           }
         });
@@ -120,9 +142,19 @@ const LoginScreen = () => {
       }
     }
   };
-  useEffect(() => {
-    console.log("Is loading: ", isLoading);
-  }, []);
+  if (alertVisible) {
+    if (!errorMessage && !errorMessage1 && !errorResponse) {
+      return alertPopup("Lỗi", "Vui lòng nhập tất cả các trường", "OK", "Hủy");
+    } else if (!errorMessage && !errorResponse) {
+      return alertPopup("Lỗi", errorMessage1, "OK", "Hủy");
+    } else if (!errorMessage1 && !errorResponse) {
+      return alertPopup("Lỗi", errorMessage, "OK", "Hủy");
+    } else if (errorMessage && errorMessage1 && !errorResponse) {
+      return alertPopup("Lỗi", "Vui lòng nhập tất cả đúng format", "OK", "Hủy");
+    } else if (errorResponse) {
+      return alertPopup("Lỗi", errorResponse, "OK", "Hủy");
+    }
+  }
   return (
     <View style={styles.container}>
       <StatusBar hidden={false} style="dark" />
@@ -139,9 +171,10 @@ const LoginScreen = () => {
           icon={
             <Icon name="emailIcon" size={25} strokeWidth={1} color="black" />
           }
+          value={accEmail}
           onEndEditing={validateEmail}
           onChangeText={(emailRef) => {
-            setAccEmail(emailRef.toLowerCase());
+            setAccEmail(emailRef.toLowerCase().trim());
           }}
           //onChangeText={(value) => (emailRef.current = value)}
         />
@@ -150,14 +183,26 @@ const LoginScreen = () => {
         ) : null}
         <InputCustom
           placeholder="Mật khẩu"
-          secureTextEntry={true}
+          secureTextEntry={showPassword}
           icon={
             <Icon name="passwordIcon" size={25} strokeWidth={1} color="black" />
           }
+          value={accPassword}
           onEndEditing={validatePassword}
           onChangeText={(text) => {
             setAccPassword(text);
           }}
+          iconRight={
+            <Icon
+              name="showPasswordIcon"
+              size={25}
+              strokeWidth={1}
+              color="black"
+              onPress={() => {
+                setShowPassword(!showPassword);
+              }}
+            />
+          }
         />
         {errorMessage1 ? (
           <Text style={styles.errorText}>{errorMessage1}</Text>

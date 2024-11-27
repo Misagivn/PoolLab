@@ -2,7 +2,12 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useToast } from '@chakra-ui/react';
 import { jwtDecode } from 'jwt-decode';
-import { Product, PaginatedResponse, ProductFilters } from '@/utils/types/product.types';
+import { 
+  Product, 
+  PaginatedResponse, 
+  ProductFilters,
+  CreateProductDTO 
+} from '@/utils/types/product.types';
 import { productApi } from '@/apis/product.api';
 
 interface JWTPayload {
@@ -29,6 +34,7 @@ export const useProduct = () => {
 
   const toast = useToast();
 
+  // Handle search debounce
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(filters.search);
@@ -37,6 +43,7 @@ export const useProduct = () => {
     return () => clearTimeout(timer);
   }, [filters.search]);
 
+  // Fetch products when filters change
   useEffect(() => {
     fetchProducts(1, pageSize, {
       ...filters,
@@ -91,7 +98,7 @@ export const useProduct = () => {
     }
   }, [toast, pageSize, getStoreId, filters]);
 
-  const createProduct = useCallback(async (data: Omit<Product, 'id'>) => {
+  const createProduct = useCallback(async (data: CreateProductDTO) => {
     try {
       const storeId = getStoreId();
       const response = await productApi.createProduct({
@@ -187,6 +194,25 @@ export const useProduct = () => {
     }
   }, [toast, fetchProducts, currentPage, pageSize, products.length]);
 
+  const uploadImage = useCallback(async (file: File) => {
+    try {
+      const response = await productApi.uploadProductImage(file);
+      if (response.status === 200) {
+        return response.data;
+      }
+      throw new Error(response.message || 'Failed to upload image');
+    } catch (error) {
+      toast({
+        title: 'Lỗi',
+        description: 'Không thể tải lên hình ảnh',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+      throw error;
+    }
+  }, [toast]);
+
   const handleFiltersChange = useCallback((newFilters: ProductFilters) => {
     setFilters(newFilters);
     setCurrentPage(1); 
@@ -233,6 +259,7 @@ export const useProduct = () => {
   }, []);
 
   return {
+    // State
     products,
     loading,
     totalPages,
@@ -240,15 +267,23 @@ export const useProduct = () => {
     pageSize,
     totalItems,
     filters,
+
+    // Core product operations
     fetchProducts,
     createProduct,
     updateProduct,
     deleteProduct,
+    uploadImage,
+
+    // Filter and pagination handlers
     handleFiltersChange,
     handleRefresh,
     handlePageChange,
     handlePageSizeChange,
+
+    // Utility functions
     formatPrice,
-    formatDate
+    formatDate,
+    getStoreId
   };
 };

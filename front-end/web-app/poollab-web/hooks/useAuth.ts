@@ -62,6 +62,11 @@ export const useAuth = () => {
           const decodedToken = decodeJWT(data.data);
           handleRoleNavigation(decodedToken);
 
+          sessionStorage.setItem("username", decodedToken.username);
+          if (decodedToken.storeId && decodedToken.storeId.trim() !== "") {
+            sessionStorage.setItem("storeId", decodedToken.storeId);
+          }
+          
           toast({
             title: AUTH_MESSAGES.LOGIN_SUCCESS,
             description: data.message,

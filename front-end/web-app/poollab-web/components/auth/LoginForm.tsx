@@ -8,7 +8,7 @@ import {
   Text,
   Image,
   FormErrorMessage,
-} from '@chakra-ui/react';
+} from "@chakra-ui/react";
 
 interface LoginFormProps {
   email: string;
@@ -48,16 +48,16 @@ export const LoginForm = ({
       <form onSubmit={onSubmit}>
         <VStack spacing={6}>
           <FormControl isRequired isInvalid={!!error}>
-            <FormLabel color="#4A5568">Email</FormLabel>
+            <FormLabel color="#4A5568">Tên Đăng Nhập</FormLabel>
             <Input
-              type="email"
-              placeholder="Email của bạn"
+              type="text"
+              placeholder="Tên đăng nhập của bạn"
               value={email}
               onChange={onEmailChange}
               bg="white"
               size="lg"
               borderRadius="md"
-              _placeholder={{ color: 'gray.400' }}
+              _placeholder={{ color: "gray.400" }}
             />
           </FormControl>
 
@@ -71,7 +71,7 @@ export const LoginForm = ({
               bg="white"
               size="lg"
               borderRadius="md"
-              _placeholder={{ color: 'gray.400' }}
+              _placeholder={{ color: "gray.400" }}
             />
             {error && <FormErrorMessage>{error}</FormErrorMessage>}
           </FormControl>
@@ -82,8 +82,8 @@ export const LoginForm = ({
             size="lg"
             bg="#3182CE"
             color="white"
-            _hover={{ bg: '#2B6CB0' }}
-            _active={{ bg: '#00FFA9' }}
+            _hover={{ bg: "#2B6CB0" }}
+            _active={{ bg: "#00FFA9" }}
             isLoading={isLoading}
             loadingText="Đang đăng nhập..."
             borderRadius="md"

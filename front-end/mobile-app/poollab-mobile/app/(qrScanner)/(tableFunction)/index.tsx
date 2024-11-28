@@ -1,12 +1,5 @@
-import {
-  Image,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
-import React, { useEffect, useState } from "react";
+import { SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
+import React, { useEffect, useState, useRef } from "react";
 import { getStoredTableData } from "@/api/tokenDecode";
 import { theme } from "@/constants/theme";
 import { StatusBar } from "expo-status-bar";
@@ -16,12 +9,16 @@ import { getAccountId, getUserName } from "@/data/userData";
 import { deactive_table } from "@/api/billard_table";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import CountdownTimer from "@/components/countDownTimer";
+import product from "./product";
 const index = () => {
+  const [isLoading, setIsLoading] = useState(false);
   const [tableData, setTableData] = useState([]);
   const [timeCanPlay, setTimeCanPlay] = useState([]);
   const [playTime, setPlayTime] = useState("01:00");
   const [userId, setUserId] = useState("");
   const [userName, setUserName] = useState("");
+  const [timeRemaining, setTimeRemaining] = useState("");
+  const [havePlay, setHavePlay] = useState("");
   useEffect(() => {
     const loadStat = async () => {
       try {
@@ -52,6 +49,7 @@ const index = () => {
       try {
         const playTime = await AsyncStorage.getItem("userPlayTime");
         if (playTime) {
+          console.log("playTime: ", playTime);
           setPlayTime(playTime);
         }
       } catch (error) {
@@ -61,19 +59,55 @@ const index = () => {
     loadStat();
   }, []);
 
-  const endTableData = {
-    billiardTableID: tableData.id,
-    customerID: userId,
-    customerTime: playTime.toString(),
-  };
   const endTableDataTimeOut = {
     billiardTableID: tableData.id,
     customerID: userId,
     customerTime: "",
   };
+  const calculateHavePlayTime = (playTime, remainingTime) => {
+    try {
+      // Validate inputs
+      if (!playTime || !remainingTime) {
+        console.log("Invalid inputs:", { playTime, remainingTime });
+        return "00:00";
+      }
+
+      // Convert playTime (format "HH:MM") to minutes
+      const [playHours, playMinutes] = playTime.split(":").map(Number);
+      const totalPlayMins = playHours * 60 + playMinutes;
+
+      // Convert remainingTime (format "HH:MM") to minutes
+      const [remainHours, remainMinutes] = remainingTime.split(":").map(Number);
+      const totalRemainMins = remainHours * 60 + remainMinutes;
+
+      // Calculate actual played minutes
+      const playedMinutes = totalPlayMins - totalRemainMins;
+
+      // Handle negative time (in case of errors)
+      if (playedMinutes < 0) {
+        return "00:00";
+      }
+
+      // If played minutes are less than 30, round up to 30 minutes
+      const roundedMinutes =
+        playedMinutes < 30 ? 30 : Math.floor(playedMinutes / 30) * 30;
+
+      // Convert back to HH:MM format
+      const hours = Math.floor(roundedMinutes / 60);
+      const minutes = roundedMinutes % 60;
+
+      return `${hours.toString().padStart(2, "0")}:${minutes
+        .toString()
+        .padStart(2, "0")}`;
+    } catch (error) {
+      console.error("Error calculating play time:", error);
+      return "00:00";
+    }
+  };
+
   const endTableTimeOut = async () => {
     try {
-      console.log("end table data: ", endTableDataTimeOut);
+      console.log("end table data time out: ", endTableDataTimeOut);
       const response = await deactive_table(endTableDataTimeOut);
       if (response.status === 200) {
         console.log("Table ended successfully!");
@@ -86,19 +120,40 @@ const index = () => {
       console.error("Error ending table:", error);
     }
   };
+  const timerRef = React.useRef();
   const handleEndTable = async () => {
-    try {
-      console.log("end table data: ", endTableData);
-      const response = await deactive_table(endTableData);
-      if (response.status === 200) {
-        console.log("Table ended successfully!");
-        console.log("Data sau khi dat ", response.data);
-        router.replace("../../(home)");
-      } else {
-        console.error("Error ending table:", response.data);
+    setIsLoading(true);
+    if (timerRef.current) {
+      const remainingTime = timerRef.current.getRemainingTime();
+      // Call your handleEndTable logic here
+      timerRef.current.stopTimer();
+      console.log("Timer stopped at 2:", remainingTime);
+      setTimeRemaining(remainingTime);
+      const calculatedPlayTime = calculateHavePlayTime(playTime, remainingTime);
+      console.log("calculatedPlayTime: ", calculatedPlayTime);
+      setHavePlay(calculatedPlayTime);
+      const endTableData = {
+        billiardTableID: tableData.id,
+        customerID: userId,
+        customerTime: calculatedPlayTime,
+      };
+      try {
+        console.log("end table data: ", endTableData);
+        const response = await deactive_table(endTableData);
+        if (response.status === 200) {
+          console.log("Table ended successfully!");
+          setIsLoading(false);
+          console.log("Data sau khi dat ", response.data);
+          router.replace("../../(home)");
+        } else {
+          console.error("Error ending table:", response);
+          setIsLoading(false);
+        }
+      } catch (error) {
+        console.error("Error ending table:", error);
       }
-    } catch (error) {
-      console.error("Error ending table:", error);
+    } else {
+      console.log("Timer not found");
     }
   };
   return (
@@ -111,8 +166,12 @@ const index = () => {
             <Text style={styles.subTitle}>phiên chơi.</Text>
           </View>
           <CountdownTimer
-            initialTime={playTime.toString()}
+            ref={timerRef}
+            initialTime={playTime}
             onComplete={endTableTimeOut}
+            onStop={(remainingTime) => {
+              console.log("Timer stopped at 1:", remainingTime);
+            }}
           />
           <View style={styles.outerBox}>
             <View style={styles.infoBox}>
@@ -150,12 +209,26 @@ const index = () => {
           </View>
           <View style={styles.buttonBox}>
             <Button
-              title="Kết thúc phiên chơi"
+              title="KẾT THÚC PHIÊN CHƠI"
               buttonStyles={[styles.startButton, styles.buttonCommon]}
               textStyles={styles.ButtonText}
               onPress={() => {
                 handleEndTable();
               }}
+            />
+          </View>
+        </View>
+        <View style={styles.container}>
+          <View style={styles.titleBox}>
+            <Text style={styles.subTitle}>Sản phẩm được đặt</Text>
+            <Button
+              title="ĐẶT SẢN PHẨM"
+              buttonStyles={styles.startButton}
+              textStyles={styles.ButtonText}
+              onPress={() => {
+                router.push("./product");
+              }}
+              loading={isLoading}
             />
           </View>
         </View>

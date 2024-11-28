@@ -1,9 +1,8 @@
 import { Stack } from "expo-router";
-export default function tableFunctionLayout() {
+export default function innerScreenLayout() {
   return (
     <Stack>
       <Stack.Screen name="index" options={{ headerShown: false }} />
-      <Stack.Screen name="product" options={{ headerShown: false }} />
     </Stack>
   );
 }

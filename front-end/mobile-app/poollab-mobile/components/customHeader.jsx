@@ -3,6 +3,7 @@ import { React, useState, useEffect } from "react";
 import { theme } from "@/constants/theme";
 import Icon from "@/assets/icons/icons";
 import {getAccountId, getUserName, getUserBalance} from '@/data/userData'
+import { router } from "expo-router";
 const CustomHeader = () => {
   //Get username from AsyncStorage
   const [userName, setUserName] = useState("");
@@ -46,7 +47,7 @@ const CustomHeader = () => {
           <View style={styles.walletCount}>
             <Pressable
               onPress={() => {
-                console.log("add money");
+                router.push("/(wallet)");
               }}
             >
               <Icon name="addIcon" size={20} strokeWidth={1.5} color="black" />

@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { theme } from '@/constants/theme';
 
-const CountdownTimer = ({ initialTime, onComplete }) => {
+const CountdownTimer = forwardRef(({ initialTime, onComplete, onStop }, ref) => {
   const [timeLeft, setTimeLeft] = useState(0);
   const [isActive, setIsActive] = useState(false);
 
@@ -35,21 +35,36 @@ const CountdownTimer = ({ initialTime, onComplete }) => {
     }
   }, [initialTime]);
 
-  const formatTime = (seconds) => {
+  const formatTimeHHMMSS = (seconds) => {
     const hrs = Math.floor(seconds / 3600);
     const mins = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
     return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const stopTimer = () => {
-    setIsActive(false);
-    setTimeLeft(0);
+  const formatTimeHHMM = (seconds) => {
+    const hrs = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
   };
+
+  const stopTimer = () => {
+    if (isActive) {  // Only stop if timer is active
+      setIsActive(false);
+      const remainingTime = formatTimeHHMM(timeLeft);
+      onStop?.(remainingTime);
+    }
+  };
+
+  // Expose stopTimer to parent through ref
+  useImperativeHandle(ref, () => ({
+    stopTimer,
+    getRemainingTime: () => formatTimeHHMM(timeLeft)
+  }));
 
   return (
     <View style={styles.container}>
-      <Text style={styles.timerText}>{formatTime(timeLeft)}</Text>
+      <Text style={styles.timerText}>{formatTimeHHMMSS(timeLeft)}</Text>
       {isActive && (
         <TouchableOpacity onPress={stopTimer} style={styles.stopButton}>
           <Text style={styles.stopButtonText}>Stop</Text>
@@ -57,7 +72,7 @@ const CountdownTimer = ({ initialTime, onComplete }) => {
       )}
     </View>
   );
-};
+});
 
 const styles = StyleSheet.create({
   container: {

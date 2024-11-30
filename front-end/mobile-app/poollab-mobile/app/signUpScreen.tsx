@@ -71,10 +71,10 @@ const SignUpScreen = () => {
   };
 
   const signupData = {
-    email: email,
-    password: password,
-    userName: userName,
-    fullName: userFullName,
+    email: email.toLowerCase().trim(),
+    password: password.trim(),
+    userName: userName.trim(),
+    fullName: userFullName.trim(),
   };
 
   const alertPopup = (title, message, confirmText, cancelText) => {
@@ -201,7 +201,7 @@ const SignUpScreen = () => {
           }
           value={email}
           onChangeText={(text) => {
-            setEmail(text.toLowerCase());
+            setEmail(text);
           }}
           onEndEditing={validateEmail}
         />
@@ -216,7 +216,7 @@ const SignUpScreen = () => {
           }
           value={password}
           onChangeText={(text) => {
-            setPassword(text);
+            setPassword(text.trim());
           }}
           onEndEditing={validatePassword}
           iconRight={
@@ -243,6 +243,15 @@ const SignUpScreen = () => {
           textStyles={styles.customButtonText1}
           onPress={() => checkSignUp()}
           loading={isLoading}
+          disabled={
+            email === "" ||
+            password === "" ||
+            userFullName === "" ||
+            userFullName === "" ||
+            password === "" ||
+            !emailFormat ||
+            !passwordFormat
+          }
         />
       </View>
       {/* Footer */}

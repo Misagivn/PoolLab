@@ -1,6 +1,6 @@
 import { SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
 import React, { useEffect, useState, useRef } from "react";
-import { getStoredTableData } from "@/api/tokenDecode";
+import { getStoredTableDataReserve } from "@/api/tokenDecode";
 import { theme } from "@/constants/theme";
 import { StatusBar } from "expo-status-bar";
 import Button from "@/components/roundButton";
@@ -22,9 +22,9 @@ const index = () => {
   useEffect(() => {
     const loadStat = async () => {
       try {
-        const storedTableData = await getStoredTableData();
+        const storedTableData = await getStoredTableDataReserve();
         if (storedTableData) {
-          setTableData(storedTableData.data.bidaTable);
+          setTableData(storedTableData.data);
           setTimeCanPlay(storedTableData.data.timeCus);
         }
       } catch (error) {
@@ -47,7 +47,7 @@ const index = () => {
         console.error("Error loading stored user:", error);
       }
       try {
-        const playTime = await AsyncStorage.getItem("userPlayTime");
+        const playTime = await AsyncStorage.getItem("userPlayTimeReserve");
         if (playTime) {
           console.log("playTime: ", playTime);
           setPlayTime(playTime);

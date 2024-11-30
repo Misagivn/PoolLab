@@ -1,5 +1,5 @@
-import { ScrollView, StyleSheet, Text, View } from "react-native";
-import React, { useEffect, useState } from "react";
+import { Animated, ScrollView, StyleSheet, Text, View } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
 import { cancel_booking, get_user_booking } from "@/api/booking_api";
 import { getStoredUser } from "@/api/tokenDecode";
 import { theme } from "@/constants/theme";
@@ -12,9 +12,7 @@ import { get_all_billard_type_area } from "@/api/area_api";
 import { get_all_billard_type } from "@/api/billard_type";
 import CustomAlert from "@/components/alertCustom";
 import Button from "@/components/roundButton";
-import { Colors } from "react-native/Libraries/NewAppScreen";
 import IconButton from "@/components/iconButton";
-
 const index = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [alertVisible, setAlertVisible] = useState(false);
@@ -30,6 +28,8 @@ const index = () => {
   const [areaId, setAreaId] = useState("");
   const [areaData, setAreaData] = useState([]);
   const [infoStatus, setInfoStatus] = useState("");
+  const scrollViewRef = useRef(null);
+  const scrollY = useRef(new Animated.Value(0)).current;
   const searchData = {
     CustomerId: customerId,
     billiardTypeId: billardtypeId,
@@ -39,6 +39,47 @@ const index = () => {
     SortBy: "createdDate",
     SortAscending: false,
     PageNumber: "1",
+  };
+  const formatTime = (isoString: string) => {
+    const date = new Date(isoString);
+
+    // Vietnamese day names
+    const daysOfWeek = [
+      "Chủ Nhật",
+      "Thứ Hai",
+      "Thứ Ba",
+      "Thứ Tư",
+      "Thứ Năm",
+      "Thứ Sáu",
+      "Thứ Bảy",
+    ];
+
+    // Vietnamese month names
+    const monthNames = [
+      "Tháng 1",
+      "Tháng 2",
+      "Tháng 3",
+      "Tháng 4",
+      "Tháng 5",
+      "Tháng 6",
+      "Tháng 7",
+      "Tháng 8",
+      "Tháng 9",
+      "Tháng 10",
+      "Tháng 11",
+      "Tháng 12",
+    ];
+
+    // Format: "Thứ Hai, 27 Tháng 11, 2024 lúc 08:20:49"
+    return `${daysOfWeek[date.getDay()]}, ${date.getDate()} ${
+      monthNames[date.getMonth()]
+    }, ${date.getFullYear()} lúc ${date
+      .getHours()
+      .toString()
+      .padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}:${date
+      .getSeconds()
+      .toString()
+      .padStart(2, "0")}`;
   };
   const statusData = [
     {
@@ -52,6 +93,10 @@ const index = () => {
     {
       label: "Hoàn thành",
       value: "Hoàn Thành",
+    },
+    {
+      label: "Trống",
+      value: "",
     },
   ];
   const alertPopup = (title, message, confirmText, cancelText) => {
@@ -139,7 +184,7 @@ const index = () => {
   const handleCancelBooking = async (bookingId) => {
     console.log("id deleted: ", bookingId);
     try {
-      const response = await cancel_booking({ bookingId, cancelAnswer: "" });
+      const response = await cancel_booking({ bookingId, cancelAnswer: "yes" });
       if (response.status === 200) {
         console.log("success delete: ", response.message);
         setAlertVisible(true);
@@ -160,7 +205,7 @@ const index = () => {
           billiardTypeId: billardtypeId,
           storeId: storeId,
           areaId: areaId,
-          status: "",
+          status: infoStatus,
           SortBy: "createdDate",
           SortAscending: false,
           PageNumber: "1",
@@ -238,6 +283,11 @@ const index = () => {
           <View style={styles.titleBox}>
             <Text style={styles.title}>Tìm kiếm thông tin</Text>
             <Text style={styles.subTitle}>bàn đặt</Text>
+            <Text style={styles.warning}>
+              *Lưu ý: Người dùng có thể hủy đặt bàn sau khi đã đặt 20 phút để
+              được hoàn tiền 100%. Sau khi quá thời gian 20 phút kể từ khi tạo
+              đơn đặt bàn. Hủy bàn sẽ không được hoàn tiền.
+            </Text>
             <CustomDropdown
               icon={
                 <Icon
@@ -414,11 +464,15 @@ const index = () => {
                 </View>
                 <View style={styles.infoBox2}>
                   <Text style={styles.infoBoxTitle}>Tiền cọc:</Text>
-                  <Text style={styles.infoBoxText}>{item.deposit}</Text>
+                  <Text style={styles.infoBoxText}>
+                    {Number(JSON.parse(item.deposit)).toLocaleString("en-US")}
+                  </Text>
                 </View>
-                <View style={styles.infoBox2}>
+                <View style={styles.infoBox3}>
                   <Text style={styles.infoBoxTitle}>Ngày tạo:</Text>
-                  <Text style={styles.infoBoxText}>{item.createdDate}</Text>
+                  <Text style={styles.infoBoxText}>
+                    {formatTime(item.createdDate)}
+                  </Text>
                 </View>
                 {item.status === "Đã Đặt" && (
                   <View
@@ -431,7 +485,6 @@ const index = () => {
                   >
                     <IconButton
                       iconName={"trashIcon"}
-                      onPress={undefined}
                       textStyles={{ fontSize: 13, color: "white" }}
                       buttonStyles={styles.cancelButton}
                       title={"HỦY BÀN"}
@@ -552,6 +605,10 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "black",
   },
+  warning: {
+    color: "red",
+    fontSize: 10,
+  },
   checkInfo: {
     flexDirection: "row",
     justifyContent: "center",
@@ -581,6 +638,9 @@ const styles = StyleSheet.create({
   infoBox2: {
     flexDirection: "row",
     gap: 10,
+  },
+  infoBox3: {
+    gap: 5,
   },
   infoBoxText: {
     fontSize: 15,

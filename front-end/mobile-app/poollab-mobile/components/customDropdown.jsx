@@ -5,6 +5,7 @@ const CustomDropdown = (props) => {
   const {
     data,
     onSelect,
+    onClear, // New prop for clear functionality
     placeholder = 'Select an option',
     icon,
     containerStyles,
@@ -27,6 +28,14 @@ const CustomDropdown = (props) => {
     setVisible(false);
     if (onSelect) {
       onSelect(item);
+    }
+  };
+
+  // New method to clear the dropdown
+  const clearSelection = () => {
+    setSelectedItem(null);
+    if (onClear) {
+      onClear();
     }
   };
 
@@ -63,7 +72,7 @@ const CustomDropdown = (props) => {
                   onPress={() => onItemSelect(item)}
                 >
                   <Text>{item.label}</Text>
-                  <Text>{item.address}</Text>
+                  {item.address && <Text>{item.address}</Text>}
                 </TouchableOpacity>
               )}
             />

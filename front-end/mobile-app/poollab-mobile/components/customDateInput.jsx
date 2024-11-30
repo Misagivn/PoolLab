@@ -229,11 +229,11 @@ const CustomDateInput = (props) => {
   const getPlaceholder = (type) => {
     switch (type) {
       case 'day':
-        return selectedMonth && selectedYear ? 'DD' : 'Select month/year first';
+        return selectedMonth && selectedYear ? 'Ngày' : 'Ngày';
       case 'month':
-        return 'MM';
+        return 'Tháng';
       case 'year':
-        return 'YYYY';
+        return 'Năm';
       default:
         return '';
     }
@@ -339,8 +339,8 @@ const styles = StyleSheet.create({
   },
   dateContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 10,
+    justifyContent: 'space-evenly',
+    gap: 5,
   },
   dropdown: {
     height: 50,

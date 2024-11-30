@@ -63,7 +63,23 @@ const CustomHeader = () => {
               placeholder="0"
               value={Number(JSON.parse(userBalance)).toLocaleString("en-US")}
             />
-            <Text>VND</Text>
+            <Text>đ</Text>
+            <Pressable
+            style={{
+              marginLeft: 5,
+              backgroundColor: theme.colors.primary,
+              justifyContent: "center",
+              alignItems: "center",
+              borderRadius: 20,
+              borderCurve: "continuous",
+              padding: 5,
+            }}
+              onPress={() => {
+                loadStat();
+              }}
+            >
+              <Icon name="refreshIcon" size={15} strokeWidth={3} color="white" />
+            </Pressable>
           </View>
           <Icon name="notiIcon" size={25} strokeWidth={2} color="black" />
         </View>
@@ -115,9 +131,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 10,
-    paddingHorizontal: 15,
+    paddingHorizontal: 10,
     paddingVertical: 5,
-    gap: 5,
+    gap: 3,
     borderColor: theme.colors.primary,
     borderCurve: "continuous",
     borderColor: theme.colors.primary,

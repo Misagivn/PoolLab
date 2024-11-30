@@ -1,11 +1,10 @@
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import React, { useEffect, useState } from "react";
 import CustomHeader from "@/components/customHeader";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { theme } from "@/constants/theme";
 import InputCustom from "@/components/inputCustom";
 import CustomDropdown from "@/components/customDropdown";
-import CustomDateInput from "@/components/customDateInput";
 import DemoCustomTimeInput from "@/components/customTimeInput";
 import Icon from "@/assets/icons/icons";
 import { get_all_Store } from "@/api/store_api";
@@ -16,11 +15,12 @@ import { get_all_billard_type_area } from "@/api/area_api";
 import { create_booking } from "@/api/booking_api";
 import CustomAlert from "@/components/alertCustom";
 import { router } from "expo-router";
-//demo data
+import ExpoDatePicker from "@/components/expoDatePicker";
 const ReserveScreen = () => {
   const [customerId, setCustomerId] = useState("");
   const [storeData, setStoreData] = useState([]);
   const [storeId, setStoreId] = useState("");
+  const [selectedStore, setSelectedStore] = useState(null);
   const [billardtypeData, setBillardTypeData] = useState([]);
   const [billardtypeId, setBillardTypeId] = useState("");
   const [areaData, setAreaData] = useState([]);
@@ -64,11 +64,12 @@ const ReserveScreen = () => {
     timeEnd: selectedEndTime,
   };
   const alertPopup = (
-    title,
-    message,
-    confirmText,
-    cancelText,
-    successConfirm
+    title: string | undefined,
+    message: string | undefined,
+    confirmText: string | undefined,
+    cancelText: string | undefined,
+    successConfirm: boolean | undefined,
+    areaErrorConfirm: boolean | undefined
   ) => {
     return (
       <CustomAlert
@@ -78,9 +79,17 @@ const ReserveScreen = () => {
         confirmText={confirmText}
         cancelText={cancelText}
         onConfirm={() => {
-          if (successConfirm) {
+          if (successConfirm || areaErrorConfirm === false) {
+            setSuccessResponse("");
             setAlertVisible(false);
             router.navigate("../(reserveTable)");
+          } else if (areaErrorConfirm || successConfirm === false) {
+            setAlertVisible(false);
+            setStoreId("");
+            setBillardTypeId("");
+            setAreaId("");
+            setAreaError("");
+            setErrorResponse("");
           } else {
             setAlertVisible(false);
           }
@@ -119,43 +128,52 @@ const ReserveScreen = () => {
       );
     }
   };
+  const loadStore = async () => {
+    try {
+      const storedStore = await get_all_Store();
+      if (storedStore) {
+        const rawdata = storedStore.data.data;
+        const transformData = rawdata.map(
+          (item: { name: any; id: any; address: any }) => ({
+            label: "Tên quán: " + item.name,
+            value: item.id,
+            address: "Địa chỉ: " + item.address,
+          })
+        );
+        setStoreData(transformData);
+      }
+    } catch (error) {
+      console.error("Error loading stored store:", error);
+    }
+  };
+  const loadBillardType = async () => {
+    try {
+      const storedBillardType = await get_all_billard_type();
+      if (storedBillardType) {
+        const rawdata = storedBillardType.data.data;
+        const transformData = rawdata.map(
+          (item: { name: any; id: any; descript: any }) => ({
+            label: "Loại bàn: " + item.name,
+            value: item.id,
+            address: "Mô tả: " + item.descript,
+          })
+        );
+        setBillardTypeData(transformData);
+      }
+    } catch (error) {
+      console.error("Error loading stored store:", error);
+    }
+  };
   useEffect(() => {
-    const loadStore = async () => {
-      try {
-        const storedStore = await get_all_Store();
-        if (storedStore) {
-          const rawdata = storedStore.data.data;
-          const transformData = rawdata.map(
-            (item: { name: any; id: any; address: any }) => ({
-              label: "Tên quán: " + item.name,
-              value: item.id,
-              address: "Địa chỉ: " + item.address,
-            })
-          );
-          setStoreData(transformData);
-        }
-      } catch (error) {
-        console.error("Error loading stored store:", error);
-      }
+    const setCurrentDate = () => {
+      const date = new Date();
+      if (!date) return "";
+      const day = String(date.getDate()).padStart(2, "0");
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const year = date.getFullYear();
+      setBookingDate(`${year}-${month}-${day}`);
     };
-    const loadBillardType = async () => {
-      try {
-        const storedBillardType = await get_all_billard_type();
-        if (storedBillardType) {
-          const rawdata = storedBillardType.data.data;
-          const transformData = rawdata.map(
-            (item: { name: any; id: any; descript: any }) => ({
-              label: "Loại bàn: " + item.name,
-              value: item.id,
-              address: "Mô tả: " + item.descript,
-            })
-          );
-          setBillardTypeData(transformData);
-        }
-      } catch (error) {
-        console.error("Error loading stored store:", error);
-      }
-    };
+    setCurrentDate();
     getUserId();
     loadStore();
     loadBillardType();
@@ -228,6 +246,7 @@ const ReserveScreen = () => {
   };
 
   const onSubmit = () => {
+    console.log(bookingData);
     if (checkTimeRange(selectedStartTime, selectedEndTime)) {
       console.log("Time range is valid!");
       console.log("++++++++++++++++++++++++");
@@ -263,6 +282,7 @@ const ReserveScreen = () => {
             setIsLoading(false);
             setAlertVisible(true);
             setErrorResponse(response.data.message);
+            console.log("Error: ", response.data);
           }
         });
       } catch (error) {
@@ -270,14 +290,44 @@ const ReserveScreen = () => {
       }
     }
   };
+  const resetInfo = () => {
+    console.log("Reset info", userMessage);
+    setUserMessage("");
+    loadStore();
+    loadBillardType();
+    getArea(storeId, billardtypeId);
+    setStoreId("");
+    setSelectedStore(null);
+  };
   if (alertVisible) {
     if (areaError) {
-      return alertPopup("Lỗi", areaError, "OK", "Hủy");
+      const successConfirm = false;
+      const areaErrorConfirm = true;
+      return alertPopup(
+        "Lỗi khu vực",
+        areaError,
+        "OK",
+        "Hủy",
+        successConfirm,
+        areaErrorConfirm
+      );
     } else if (errorResponse) {
-      return alertPopup("Lỗi", errorResponse, "OK", "Hủy");
+      return alertPopup(
+        "Thông Báo",
+        `${errorResponse} Hãy thử lại với thời gian hoặc ngày đặt khác.`,
+        "OK"
+      );
     } else if (successResponse) {
       const successConfirm = true;
-      return alertPopup("Lỗi", successResponse, "OK", "Hủy", successConfirm);
+      const areaErrorConfirm = false;
+      return alertPopup(
+        "Thành công",
+        successResponse,
+        "OK",
+        "Hủy",
+        successConfirm,
+        areaErrorConfirm
+      );
     }
   }
   return (
@@ -299,6 +349,7 @@ const ReserveScreen = () => {
               </Text>
             </View>
             <View style={styles.searchRow}>
+              <Text style={styles.inputTitle}>Chọn Quán, Loại, Khu vực:</Text>
               <CustomDropdown
                 icon={
                   <Icon
@@ -313,6 +364,9 @@ const ReserveScreen = () => {
                 onSelect={async (item) => {
                   setStoreId(item.value);
                   await getArea(item.value, billardtypeId);
+                }}
+                onClear={() => {
+                  setStoreId("");
                 }}
               />
               <CustomDropdown
@@ -346,17 +400,17 @@ const ReserveScreen = () => {
                   setAreaId(item.value);
                 }}
               />
-              <Text style={styles.inputTitle}>Ngày đặt bàn mong muốn</Text>
-              <CustomDateInput
-                onDateSelect={(date) => {
-                  setBookingDate(date);
-                }}
+              <Text style={styles.inputTitle}>Ngày đặt bàn mong muốn:</Text>
+              <ExpoDatePicker
                 placeholder="Chọn ngày"
-                dateFormat="YYYY-MM-DD"
-                maxDate={new Date("2025-12-31")} // Optional: limit future dates
-                required={true}
+                minimumDate={new Date()}
+                maximumDate={new Date(2026, 12, 31)}
+                dateValue={(date) => setBookingDate(date)}
               />
-              <Text style={styles.inputTitle}>Thời gian bắt đầu</Text>
+              <Text style={styles.warning}>
+                *Lưu ý: Quán chỉ hoạt động từ 8:00 đến 22:00 hàng ngày.
+              </Text>
+              <Text style={styles.inputTitle}>Thời gian bắt đầu (hh:mm) :</Text>
               <DemoCustomTimeInput
                 onSelect={handleStartTimeSelect}
                 placeholder="Select a time"
@@ -376,7 +430,9 @@ const ReserveScreen = () => {
                 maxTime="21:30"
                 minTime="8:00"
               />
-              <Text style={styles.inputTitle}>Thời gian kết thúc</Text>
+              <Text style={styles.inputTitle}>
+                Thời gian kết thúc (hh:mm) :
+              </Text>
               <DemoCustomTimeInput
                 onSelect={handleEndTimeSelect}
                 placeholder="Select a time"
@@ -390,10 +446,10 @@ const ReserveScreen = () => {
                 textStyles={{
                   color: "#333",
                 }}
-                initialHour={8}
+                initialHour={22}
                 initialMinute={0}
                 is24Hour={true}
-                minTime={selectedStartTime}
+                minTime={selectedStartTime.toString()}
                 maxTime="22:00"
               />
               <Text style={styles.inputTitle}>Lời nhắn cho quán</Text>
@@ -405,6 +461,7 @@ const ReserveScreen = () => {
                 onChangeText={(text) => {
                   setUserMessage(text);
                 }}
+                value={userMessage}
               />
               <Button
                 title="TÌM KIẾM & ĐẶT BÀN"
@@ -416,7 +473,45 @@ const ReserveScreen = () => {
                 loading={isLoading}
               />
             </View>
+            <View style={styles.advanceReseveContainer}>
+              <Text
+                style={{
+                  color: "black",
+                  fontSize: 15,
+                  fontWeight: "thin",
+                  textAlign: "center",
+                }}
+              >
+                Dịch vụ đặt bàn thường xuyên.
+              </Text>
+              <Pressable
+                onPress={() => {
+                  router.push("(advanceReserve)");
+                }}
+              >
+                <Text
+                  style={{
+                    color: theme.colors.primary,
+                    fontSize: 20,
+                    fontWeight: "bold",
+                  }}
+                >
+                  ĐẶT BÀN NGAY!
+                </Text>
+              </Pressable>
+            </View>
           </View>
+          {/* <View style={styles.resetButtonBox}>
+            <IconButton
+              title="Cài đặt lại"
+              buttonStyles={styles.resetButton}
+              textStyles={styles.resetButtonText}
+              iconName={"refreshIcon"}
+              onPress={() => {
+                resetInfo();
+              }}
+            />
+          </View> */}
           <View style={styles.customDivider}></View>
         </View>
       </ScrollView>
@@ -482,5 +577,28 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
     color: "black",
+  },
+  resetButtonBox: {
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 5,
+  },
+  resetButton: {
+    backgroundColor: theme.colors.hightLight,
+    borderRadius: 50,
+    width: 120,
+    height: 40,
+    gap: 8,
+  },
+  resetButtonText: {
+    color: "white",
+    fontSize: 12,
+    fontWeight: "semibold",
+  },
+  advanceReseveContainer: {
+    paddingTop: 20,
+    paddingHorizontal: 10,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

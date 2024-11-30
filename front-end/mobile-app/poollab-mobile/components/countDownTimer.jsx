@@ -66,8 +66,8 @@ const CountdownTimer = forwardRef(({ initialTime, onComplete, onStop }, ref) => 
     <View style={styles.container}>
       <Text style={styles.timerText}>{formatTimeHHMMSS(timeLeft)}</Text>
       {isActive && (
-        <TouchableOpacity onPress={stopTimer} style={styles.stopButton}>
-          <Text style={styles.stopButtonText}>Stop</Text>
+        <TouchableOpacity onPress={stopTimer} style={styles.stopButton} visibility={'hidden'}>
+          <Text style={styles.stopButtonText}>Dừng</Text>
         </TouchableOpacity>
       )}
     </View>

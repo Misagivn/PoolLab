@@ -83,14 +83,22 @@ const qrScanner = () => {
           billiardTableId: data,
           customerId: customerId,
         };
+        console.log("data cua ban: ", openTableData);
         const response = await get_tables_by_QR(openTableData);
-        if (response.status === 200) {
+        console.log("quet qr tra ve data:", response);
+        if (response.data.status === 200) {
           AsyncStorage.multiSet([
             ["tableData", JSON.stringify(response.data)],
             ["tableInfo", JSON.stringify(response.data.data)],
           ]);
           router.replace("../(qrScanner)");
           setScanningEnable(false);
+        } else if (response.data.status === 203) {
+          AsyncStorage.multiSet([
+            ["tableDataReserve", JSON.stringify(response.data)],
+            ["tableInfoReserve", JSON.stringify(response.data.data)],
+          ]);
+          router.replace("../(memberReserve)");
         } else {
           console.log(response.data);
           setAlertVisible(true);

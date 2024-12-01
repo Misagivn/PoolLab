@@ -33,7 +33,7 @@ const LoginScreen = () => {
   const [errorResponse, setErrorResponse] = useState("");
   const [showPassword, setShowPassword] = useState(true);
   const loginData = {
-    email: accEmail,
+    email: accEmail.toLowerCase(),
     password: accPassword,
   };
 
@@ -173,8 +173,8 @@ const LoginScreen = () => {
           }
           value={accEmail}
           onEndEditing={validateEmail}
-          onChangeText={(emailRef) => {
-            setAccEmail(emailRef.toLowerCase().trim());
+          onChangeText={(text) => {
+            setAccEmail(text.trim());
           }}
           //onChangeText={(value) => (emailRef.current = value)}
         />
@@ -190,7 +190,7 @@ const LoginScreen = () => {
           value={accPassword}
           onEndEditing={validatePassword}
           onChangeText={(text) => {
-            setAccPassword(text);
+            setAccPassword(text.trim());
           }}
           iconRight={
             <Icon
@@ -241,6 +241,11 @@ const LoginScreen = () => {
             checkLogin();
           }}
           loading={isLoading}
+          disabled={
+            (accEmail === "" && accPassword === "") ||
+            !emailFormat ||
+            !passwordFormat
+          }
         />
       </View>
       {/* Footer */}

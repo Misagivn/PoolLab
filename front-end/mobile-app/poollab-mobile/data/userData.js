@@ -1,15 +1,15 @@
-import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
-import {getStoredUser} from '../api/tokenDecode'
-import {get_user_details} from '../api/user_api'
+import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
+import { getStoredUser } from "../api/tokenDecode";
+import { get_user_details } from "../api/user_api";
 export const getAccountId = async () => {
   try {
     const accountData = await getStoredUser();
     if (accountData) {
-      const accountId = accountData.AccountId
-      return accountId
+      const accountId = accountData.AccountId;
+      return accountId;
     }
   } catch (error) {
-    console.error('Error getting account ID:', error);
+    console.error("Error getting account ID:", error);
   }
 };
 
@@ -17,11 +17,11 @@ export const getUserName = async () => {
   try {
     const accountData = await getStoredUser();
     if (accountData) {
-      const accountName = accountData.Username
-      return accountName
+      const accountName = accountData.Username;
+      return accountName;
     }
   } catch (error) {
-    console.error('Error getting user name:', error);
+    console.error("Error getting user name:", error);
   }
 };
 
@@ -35,10 +35,9 @@ export const getUserFullName = async (userId) => {
       }
     }
   } catch (error) {
-    console.error('Error getting user balance:', error);
+    console.error("Error getting user balance:", error);
   }
 };
-
 
 export const getUserEmail = async (userId) => {
   try {
@@ -50,7 +49,7 @@ export const getUserEmail = async (userId) => {
       }
     }
   } catch (error) {
-    console.error('Error getting user balance:', error);
+    console.error("Error getting user balance:", error);
   }
 };
 
@@ -64,6 +63,6 @@ export const getUserBalance = async (userId) => {
       }
     }
   } catch (error) {
-    console.error('Error getting user balance:', error);
+    console.error("Error getting user balance:", error);
   }
 };

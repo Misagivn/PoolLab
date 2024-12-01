@@ -7,7 +7,7 @@ import {
   View,
 } from "react-native";
 import React, { useEffect, useState } from "react";
-import { getStoredTableData } from "@/api/tokenDecode";
+import { getStoredTableDataReserve } from "@/api/tokenDecode";
 import { theme } from "@/constants/theme";
 import { StatusBar } from "expo-status-bar";
 import Button from "@/components/roundButton";
@@ -18,17 +18,14 @@ import { activate_table } from "@/api/billard_table";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 const index = () => {
   const [tableData, setTableData] = useState([]);
-  const [timeCanPlay, setTimeCanPlay] = useState([]);
-  const [playTime, setPlayTime] = useState("01:00");
   const [userId, setUserId] = useState("");
   useEffect(() => {
     const loadStat = async () => {
       try {
-        const storedTableData = await getStoredTableData();
+        const storedTableData = await getStoredTableDataReserve();
         if (storedTableData) {
-          setTableData(storedTableData.data.bidaTable);
-          console.log(storedTableData.data.bidaTable);
-          setTimeCanPlay(storedTableData.data.timeCus);
+          setTableData(storedTableData.data);
+          console.log(storedTableData.data);
         }
       } catch (error) {
         console.error("Error loading stored table data:", error);
@@ -42,7 +39,7 @@ const index = () => {
         console.error("Error loading stored user:", error);
       }
     };
-    getStoredTableData();
+    getStoredTableDataReserve();
     getAccountId();
     loadStat();
   }, []);
@@ -50,16 +47,14 @@ const index = () => {
   const startTableData = {
     billiardTableID: tableData.id,
     customerID: userId,
-    customerTime: playTime,
+    customerTime: "",
   };
   const handleStartTable = async () => {
     try {
       console.log("start table data: ", startTableData);
       const response = await activate_table(startTableData);
       if (response.status === 200) {
-        AsyncStorage.setItem("userPlayTime", playTime);
-        console.log("Table started successfully!");
-        console.log("Data sau khi dat ", response.data);
+        AsyncStorage.setItem("userPlayTimeReserve", response.data.data);
         router.replace("./(tableFunction)");
       } else {
         console.error("Error starting table:", response.data);
@@ -78,16 +73,9 @@ const index = () => {
             <Text style={styles.subTitle}>kích hoạt bàn chơi.</Text>
           </View>
           <Text style={styles.warning}>
-            `*Lưu ý: Lượt chơi được tính theo từng ô 30 phút. Khi kích hoạt bàn,
-            bạn đã khởi động ô đầu tiên và bị trừ theo các ô đã chơi. Ví du: Bạn
-            đã chơi 28 phút, hệ thống sẽ trừ 30 phút. Hay 1h45p hệ thống sẽ trừ
-            2 tiếng.
+            `*Lưu ý: Thời gian chơi tương ứng với thời gian mà bạn đã đặt bàn.
           </Text>
-          <Text style={styles.warning}>
-            **Chúng tôi sẽ trừ đi số tiền tương ứng với số thời gian bạn muốn
-            chơi ngay lập tức. Sau khi kết thúc phiên chơi, thời gian còn lại sẽ
-            được chúng tối trả lại cho bạn.
-          </Text>
+          <Text style={styles.warning}></Text>
           <View style={styles.outerBox}>
             <View style={styles.infoBox}>
               <Text style={styles.infoBoxTitle}>Tên bàn:</Text>
@@ -117,35 +105,9 @@ const index = () => {
                 {Number(tableData.bidaPrice).toLocaleString("en-US") + "/h"}
               </Text>
             </View>
-            <View style={styles.infoBox}>
-              <Text style={styles.infoBoxTitle}>Thời gian có thể chơi:</Text>
-              <Text style={styles.infoBoxText}>{timeCanPlay}</Text>
-            </View>
           </View>
           <View style={styles.imageBox}>
             <Image style={styles.image} source={{ uri: tableData.image }} />
-          </View>
-          <View style={styles.timeInput}>
-            <Text style={styles.infoBoxTitle}>Thời gian chơi (HH:MM):</Text>
-            <Text style={styles.warning}>***Phải cung cấp thời gian chơi.</Text>
-            <DemoCustomTimeInput
-              placeholder="Chọn thời gian chơi"
-              onSelect={(time) => setPlayTime(time)}
-              containerStyles={{
-                backgroundColor: "white",
-              }}
-              modalStyles={{
-                backgroundColor: "#fff",
-              }}
-              textStyles={{
-                color: "#333",
-              }}
-              is24Hour={true}
-              initialHour={1}
-              initialMinute={0}
-              minTime="00:30"
-              maxTime="12:00"
-            />
           </View>
           <View style={styles.buttonBox}>
             <Button

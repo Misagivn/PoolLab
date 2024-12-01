@@ -80,6 +80,24 @@ export const getStoredTableInfo = async () => {
     return null;
   }
 };
+export const getStoredTableDataReserve = async () => {
+  try {
+    const tableData = await AsyncStorage.getItem("tableDataReserve");
+    return tableData ? JSON.parse(tableData) : null;
+  } catch (error) {
+    console.error("Error getting stored table data:", error);
+    return null;
+  }
+};
+export const getStoredTableInfoReserve = async () => {
+  try {
+    const tableInfo = await AsyncStorage.getItem("tableInfoReserve");
+    return tableInfo ? JSON.parse(tableInfo) : null;
+  } catch (error) {
+    console.error("Error getting stored table info:", error);
+    return null;
+  }
+};
 
 // Example of using the token for other API calls
 export const fetchProtectedData = async () => {

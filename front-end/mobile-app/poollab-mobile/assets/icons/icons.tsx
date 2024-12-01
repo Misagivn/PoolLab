@@ -23,6 +23,9 @@ import TrashIcon from "./trashIcon";
 import CameraIcon from "./cameraIcon";
 import FlashlightIcon from "./flashLightIcon";
 import Coins01Icon from "./moneyIcon";
+import RefreshIcon from "./refreshIcon";
+import ArrowUpIcon from "./arrowUp";
+import ArrowDownIcon from "./arrowDown";
 const icons = {
   fbIcon: FacebookIcon,
   ggIcon: GoogleIcon,
@@ -46,6 +49,9 @@ const icons = {
   cameraIcon: CameraIcon,
   flashIcon: FlashlightIcon,
   moneyIcon: Coins01Icon,
+  refreshIcon: RefreshIcon,
+  arrowUpIcon: ArrowUpIcon,
+  arrowDownIcon: ArrowDownIcon,
 };
 
 const Icon = ({ name, ...props }) => {
@@ -56,6 +62,7 @@ const Icon = ({ name, ...props }) => {
       width={props.size || 24}
       strokeWidth={props.strokeWidth || 1.5}
       color={props.color || theme.colors.background}
+      rotate={props.rotate || 0}
       {...props}
     />
   );

@@ -66,10 +66,13 @@ const index = () => {
         cancelText={cancelText}
         onConfirm={() => {
           setAlertVisible(false);
+          setErrorResponse("");
+          if (successResponse) {
+            router.push("/(home)/profileScreen");
+            setSuccessResponse("");
+          }
         }}
-        onCancel={() => {
-          setAlertVisible(false);
-        }}
+        onCancel={() => {}}
       />
     );
   };
@@ -163,8 +166,8 @@ const index = () => {
     }
   };
   const updateData = {
-    fullName: userFullName,
-    userName: userName,
+    fullName: userFullName.trim(),
+    userName: userName.trim(),
     email: userEmail,
     phoneNumber: userNumber,
     avatarUrl: imageSource,
@@ -180,7 +183,7 @@ const index = () => {
         setAlertVisible(true);
         // alertPopup("Lỗi", errorMessage, "OK", "Hủy");
       } else {
-        alert("Xin hãy nhập tất cả các trường");
+        setErrorMessage("Xin hãy nhập tất cả các trường");
       }
     } else {
       setIsLoading(true);
@@ -190,14 +193,10 @@ const index = () => {
           if (response.status === 200) {
             setAlertVisible(true);
             setSuccessResponse("Cập nhật thành công");
-            //alert("Cập nhật thành công");
-            //router.push("/(home)/profileScreen");
             setIsLoading(false);
           } else {
-            console.log("error message:", response.data.message);
             setAlertVisible(true);
             setErrorResponse(response.data.message);
-            //alert(response.data.message);
             setIsLoading(false);
           }
         });
@@ -214,7 +213,7 @@ const index = () => {
     } else if (errorResponse && !successResponse) {
       return alertPopup("Lỗi", errorResponse, "OK", "Hủy");
     } else if (successResponse) {
-      return alertPopup("Lỗi", successResponse, "OK", "Hủy");
+      return alertPopup("Thông báo", successResponse, "OK", "Hủy");
     }
   }
   return (
@@ -238,6 +237,9 @@ const index = () => {
             </View>
           </Pressable>
           <View style={styles.detailsRow}>
+            {errorMessage ? (
+              <Text style={styles.errorText}>{errorMessage}</Text>
+            ) : null}
             <InputCustom
               placeholder="Email"
               icon={
@@ -251,12 +253,9 @@ const index = () => {
               value={userEmail}
               onEndEditing={validateEmail}
               onChangeText={(text) => {
-                setUserEmail(text);
+                setUserEmail(text.trim());
               }}
             />
-            {errorMessage ? (
-              <Text style={styles.errorText}>{errorMessage}</Text>
-            ) : null}
             <InputCustom
               placeholder="Tên người dùng"
               icon={
@@ -293,19 +292,26 @@ const index = () => {
               }}
             />
             <Button
-              title="Cập nhật"
+              title="CẬP NHẬT"
               buttonStyles={styles.updateButton}
               textStyles={styles.updateButtonText}
               onPress={() => {
                 updateUser();
               }}
               loading={isLoading}
+              disabled={
+                (userFullName === "" ||
+                  userName === "" ||
+                  userEmail === "" ||
+                  userNumber === null) &&
+                errorMessage !== ""
+              }
             />
             <View style={styles.footer}>
               <Text style={styles.footerText}>Cần thay đổi mật khẩu?</Text>
               <Pressable
                 onPress={() => {
-                  router.push("signUpScreen");
+                  console.log("click change password");
                 }}
               >
                 <Text style={styles.footerTextLink}>Nhấn vào đây!</Text>

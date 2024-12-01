@@ -1,8 +1,13 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
 import React from "react";
+import { 
+  Pressable, 
+  StyleSheet, 
+  Text, 
+  View 
+} from "react-native";
 import { theme } from "@/constants/theme";
-import Loading from "./Loading";
 import IndicatorLoading from "./indicatorLoading";
+
 const Button = ({
   title,
   buttonStyles,
@@ -10,9 +15,13 @@ const Button = ({
   textStyles,
   hasShadow = true,
   loading = false,
+  disabled = false,
+  loadingIndicatorSize = 50,
+  loadingColor,
+  ...pressableProps
 }) => {
   const shadowStyle = {
-    shadowColor: "dark",
+    shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 10,
@@ -20,8 +29,11 @@ const Button = ({
     shadowOpacity: 0.25,
     shadowRadius: 10,
     elevation: 5,
-    loading: false,
   };
+
+  // Create a lighter version of the primary color
+  const disabledColor = disabled ? theme.colors.darkSecondary : theme.colors.secondary;
+
   if (loading) {
     return (
       <View
@@ -31,21 +43,42 @@ const Button = ({
           { backgroundColor: theme.colors.darkSecondary },
         ]}
       >
-        <IndicatorLoading size = "50" color ={theme.colors.background} />
+        <IndicatorLoading 
+          size={loadingIndicatorSize} 
+          color={loadingColor || theme.colors.background} 
+        />
       </View>
     );
   }
+
   return (
     <Pressable
-      style={[styles.button, buttonStyles, hasShadow && shadowStyle]}
+      style={[
+        styles.button, 
+        buttonStyles, 
+        hasShadow && shadowStyle,
+        { 
+          backgroundColor: disabled ? theme.colors.darkSecondary : theme.colors.secondary 
+        }
+      ]}
       onPress={onPress}
+      disabled={disabled}
+      {...pressableProps}
     >
-      <Text style={[styles.text, textStyles]}>{title}</Text>
+      <Text 
+        style={[
+          styles.text, 
+          textStyles,
+          { 
+            color: disabled ? 'white' : 'white' 
+          }
+        ]}
+      >
+        {title}
+      </Text>
     </Pressable>
   );
 };
-
-export default Button;
 
 const styles = StyleSheet.create({
   button: {
@@ -54,13 +87,14 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.primary,
     height: 60,
     borderCurve: theme.border.heavyCurve,
-    borderRadius: 20,
+    borderRadius: theme.border.heavyCurve,
   },
   text: {
-    color: "black",
+    color: "white",
     fontSize: 20,
     fontStyle: "normal",
-    hasShadow: true,
     fontWeight: "bold",
   },
 });
+
+export default Button;

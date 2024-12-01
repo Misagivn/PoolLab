@@ -1,6 +1,11 @@
 import { Animated, ScrollView, StyleSheet, Text, View } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
-import { cancel_booking, get_user_booking } from "@/api/booking_api";
+import {
+  cancel_booking,
+  cancel_booking_recurring,
+  get_user_booking,
+  get_user_booking_recurring,
+} from "@/api/booking_api";
 import { getStoredUser } from "@/api/tokenDecode";
 import { theme } from "@/constants/theme";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -184,7 +189,10 @@ const index = () => {
   const handleCancelBooking = async (bookingId) => {
     console.log("id deleted: ", bookingId);
     try {
-      const response = await cancel_booking({ bookingId, cancelAnswer: "yes" });
+      const response = await cancel_booking_recurring({
+        bookingId,
+        cancelAnswer: "yes",
+      });
       if (response.status === 200) {
         console.log("success delete: ", response.message);
         setAlertVisible(true);
@@ -210,7 +218,7 @@ const index = () => {
           SortAscending: false,
           PageNumber: "1",
         };
-        get_user_booking(dataDefault).then((response) => {
+        get_user_booking_recurring(dataDefault).then((response) => {
           if (response.data.status === 200) {
             setBookingData(response.data.data.items);
             setIsLoading(false);
@@ -444,15 +452,24 @@ const index = () => {
                   <Text style={styles.infoBoxTitle}>Tên bàn:</Text>
                   <Text style={styles.infoBoxText}>{item.tableName}</Text>
                 </View>
-                <View style={styles.infoBox2}>
+                <View style={styles.infoBox3}>
                   <Text style={styles.infoBoxTitle}>Ngày chơi:</Text>
-                  <Text style={styles.infoBoxText}>{item.bookingDate}</Text>
+                  <Text style={styles.infoBoxText}>
+                    {formatTime(item.dateStart)}
+                  </Text>
+                  <Text style={styles.infoBoxText}>
+                    {formatTime(item.dateEnd)}
+                  </Text>
                 </View>
                 <View style={styles.infoBox2}>
                   <Text style={styles.infoBoxTitle}>Thời gian chơi:</Text>
                   <Text style={styles.infoBoxText}>
                     {item.timeStart} - {item.timeEnd}
                   </Text>
+                </View>
+                <View style={styles.infoBox3}>
+                  <Text style={styles.infoBoxTitle}>Các ngày trong tuần:</Text>
+                  <Text style={styles.infoBoxText}>{item.dayOfWeek}</Text>
                 </View>
                 <View style={styles.infoBox2}>
                   <Text style={styles.infoBoxTitle}>Tên quán:</Text>

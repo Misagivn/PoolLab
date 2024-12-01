@@ -8,7 +8,8 @@ import {
   Icon,
   Link,
   useColorModeValue,
-  Image // Thêm Image component
+  Image,
+  Container
 } from '@chakra-ui/react';
 import NextLink from 'next/link';
 import { routes } from '@/config/routes';
@@ -26,20 +27,26 @@ export default function Sidebar() {
       position="fixed"
       borderRight="1px"
       borderRightColor={useColorModeValue('gray.200', 'gray.700')}
+      overflowY="auto"
+      py="6"
     >
-      {/* Logo */}
-      <Flex h="20" alignItems="center" px="8">
-        <Link as={NextLink} href="/manager/dashpage" _hover={{ textDecoration: 'none' }}>
-          <Image
-            src="/logo/logo01.png" 
-            alt="PoolLab Logo"
-            h="360px"
-            objectFit="contain"
-          />
-        </Link>
-      </Flex>
+      <Box bg={bgColor} mb="8">
+        <Container maxW="container.sm" px={6}>
+          <Flex h="70px" alignItems="center" justifyContent="start" px="4">
+            <Link as={NextLink} href="/manager/dashpage" width="full">
+              <Image
+                src="/logo/logo01.png" 
+                alt="PoolLab Logo"
+                h="full"
+                mx="full"
+                objectFit="contain"
+              />
+            </Link>
+          </Flex>
+        </Container>
+      </Box>
 
-      <Stack spacing="1" px="4">
+      <Stack spacing="1">
         {routes.map((route) => {
           const isActive = pathname === route.path;
           return (
@@ -51,24 +58,16 @@ export default function Sidebar() {
             >
               <Flex
                 align="center"
-                p="4"
-                mx="4"
-                borderRadius="lg"
-                role="group"
+                p="2"
+                mx="2"
+                borderRadius="md"
                 cursor="pointer"
                 bg={isActive ? 'blue.50' : 'transparent'}
                 color={isActive ? 'blue.500' : 'gray.600'}
-                _hover={{
-                  bg: 'blue.50',
-                  color: 'blue.500',
-                }}
+                _hover={{ bg: 'blue.50', color: 'blue.500' }}
               >
-                <Icon
-                  mr="4"
-                  fontSize="16"
-                  as={route.icon}
-                />
-                <Text>{route.label}</Text>
+                <Icon fontSize="14" as={route.icon} mr="3" />
+                <Text fontSize="sm">{route.label}</Text>
               </Flex>
             </Link>
           );

@@ -1,4 +1,4 @@
-import { Product, PaginatedResponse, ProductFilters } from '@/utils/types/product.types';
+import { Product, PaginatedResponse, ProductFilters, CreateProductDTO } from '@/utils/types/product.types';
 import { jwtDecode } from 'jwt-decode';
 
 const BASE_URL = 'https://poollabwebapi20241008201316.azurewebsites.net/api';
@@ -51,7 +51,7 @@ export const productApi = {
     }
   },
 
-  createProduct: async (data: Partial<Product>): Promise<PaginatedResponse<Product>> => {
+  createProduct: async (data: CreateProductDTO): Promise<PaginatedResponse<Product>> => {
     try {
       const token = localStorage.getItem('token');
       if (!token) throw new Error('No token found');
@@ -71,7 +71,7 @@ export const productApi = {
           },
           body: JSON.stringify({
             ...data,
-            storeId // Ensure storeId is included
+            storeId
           })
         }
       );
@@ -92,7 +92,6 @@ export const productApi = {
 
       if (!storeId) throw new Error('No store ID found in token');
 
-      // Verify product belongs to store before update
       const product = await this.getProductById(id);
       if (product.data.storeId !== storeId) {
         throw new Error('Unauthorized: Product does not belong to this store');
@@ -108,7 +107,7 @@ export const productApi = {
           },
           body: JSON.stringify({
             ...data,
-            storeId // Ensure storeId remains unchanged
+            storeId
           })
         }
       );
@@ -129,7 +128,6 @@ export const productApi = {
 
       if (!storeId) throw new Error('No store ID found in token');
 
-      // Verify product belongs to store before deletion
       const product = await this.getProductById(id);
       if (product.data.storeId !== storeId) {
         throw new Error('Unauthorized: Product does not belong to this store');
@@ -169,6 +167,31 @@ export const productApi = {
       return response.json();
     } catch (error) {
       console.error('Error in getProductById:', error);
+      throw error;
+    }
+  },
+
+  uploadProductImage: async (file: File): Promise<{ status: number; message: string | null; data: string }> => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error('No token found');
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch(
+        `${BASE_URL}/Product/UploadFileProductImg`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`
+          },
+          body: formData
+        }
+      );
+      return response.json();
+    } catch (error) {
+      console.error('Error in uploadProductImage:', error);
       throw error;
     }
   }

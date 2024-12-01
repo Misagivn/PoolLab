@@ -9,17 +9,18 @@ import {
   Button,
   Icon,
   useToast,
+  useDisclosure,
 } from '@chakra-ui/react';
 import { FiPlus } from 'react-icons/fi';
 import { ProductList } from '@/components/product/ProductList';
 import { ProductFiltersProps } from '@/components/product/ProductFilters';
-import { ProductTable } from '@/components/product/ProductTable';
-import { ProductPagination } from '@/components/common/paginations'; 
+import { ProductPagination } from '@/components/common/paginations';
+import { ProductCreate } from '@/components/product/ProductCreate';
 import { useProduct } from '@/hooks/useProduct';
-import { Pagination } from '@/components/common/Pagination';
 
 export default function ProductsPage() {
   const toast = useToast();
+  const { isOpen, onOpen, onClose } = useDisclosure();
   
   const {
     products,
@@ -54,15 +55,7 @@ export default function ProductsPage() {
             leftIcon={<Icon as={FiPlus} />}
             colorScheme="blue"
             w={{ base: 'full', md: 'auto' }}
-            onClick={() => {
-              toast({
-                title: 'Thông báo',
-                description: 'Tính năng đang được phát triển',
-                status: 'info',
-                duration: 3000,
-                isClosable: true,
-              });
-            }}
+            onClick={onOpen}
           >
             Thêm sản phẩm
           </Button>
@@ -82,7 +75,7 @@ export default function ProductsPage() {
           products={products}
           loading={loading}
           onRefresh={handleRefresh}
-          onEdit={(Product) => {
+          onEdit={(product) => {
             toast({
               title: 'Thông báo',
               description: 'Tính năng đang được phát triển',
@@ -104,7 +97,7 @@ export default function ProductsPage() {
           formatDate={formatDate}
         />
 
-        {/* Pagination from common components */}
+        {/* Pagination */}
         {!loading && products.length > 0 && (
           <ProductPagination
             currentPage={currentPage}
@@ -113,6 +106,13 @@ export default function ProductsPage() {
             isDisabled={loading}
           />
         )}
+
+        {/* Create Product Modal */}
+        <ProductCreate 
+          isOpen={isOpen} 
+          onClose={onClose}
+          onSuccess={handleRefresh}
+        />
       </Stack>
     </Box>
   );

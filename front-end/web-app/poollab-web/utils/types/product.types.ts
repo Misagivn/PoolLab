@@ -18,6 +18,19 @@ export interface Product {
   status: string;
 }
 
+export interface CreateProductDTO {
+  name: string;
+  descript: string;
+  quantity: number;
+  minQuantity: number;
+  price: number;
+  productImg: string;
+  productTypeId: string;
+  productGroupId: string;
+  storeId: string;
+  unitId: string;
+}
+
 export interface PaginatedResponse<T> {
   status: number;
   message: string | null;

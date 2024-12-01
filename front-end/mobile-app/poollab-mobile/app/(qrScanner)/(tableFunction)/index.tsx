@@ -1,6 +1,13 @@
-import { SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
-import React, { useEffect, useState, useRef } from "react";
-import { getStoredTableData } from "@/api/tokenDecode";
+import {
+  Pressable,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import React, { useEffect, useState } from "react";
+import { getStoredTableData, get_user_products } from "@/api/tokenDecode";
 import { theme } from "@/constants/theme";
 import { StatusBar } from "expo-status-bar";
 import Button from "@/components/roundButton";
@@ -9,7 +16,7 @@ import { getAccountId, getUserName } from "@/data/userData";
 import { deactive_table } from "@/api/billard_table";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import CountdownTimer from "@/components/countDownTimer";
-import product from "./product";
+import Icon from "@/assets/icons/icons";
 const index = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [tableData, setTableData] = useState([]);
@@ -19,6 +26,19 @@ const index = () => {
   const [userName, setUserName] = useState("");
   const [timeRemaining, setTimeRemaining] = useState("");
   const [havePlay, setHavePlay] = useState("");
+  const [productOrder, setProductOrder] = useState([]);
+  const [userProducts, setUserProducts] = useState<string[]>([]);
+  const getProductData = async () => {
+    try {
+      const userProducts = get_user_products();
+      if (userProducts) {
+        setProductOrder(await userProducts);
+        console.log("User products: ", userProducts);
+      }
+    } catch (error) {
+      console.error("Error loading stored user:", error);
+    }
+  };
   useEffect(() => {
     const loadStat = async () => {
       try {
@@ -110,8 +130,6 @@ const index = () => {
       console.log("end table data time out: ", endTableDataTimeOut);
       const response = await deactive_table(endTableDataTimeOut);
       if (response.status === 200) {
-        console.log("Table ended successfully!");
-        console.log("Data sau khi dat ", response.data);
         router.replace("../../(home)");
       } else {
         console.error("Error ending table:", response.data);
@@ -127,10 +145,8 @@ const index = () => {
       const remainingTime = timerRef.current.getRemainingTime();
       // Call your handleEndTable logic here
       timerRef.current.stopTimer();
-      console.log("Timer stopped at 2:", remainingTime);
       setTimeRemaining(remainingTime);
       const calculatedPlayTime = calculateHavePlayTime(playTime, remainingTime);
-      console.log("calculatedPlayTime: ", calculatedPlayTime);
       setHavePlay(calculatedPlayTime);
       const endTableData = {
         billiardTableID: tableData.id,
@@ -141,9 +157,8 @@ const index = () => {
         console.log("end table data: ", endTableData);
         const response = await deactive_table(endTableData);
         if (response.status === 200) {
-          console.log("Table ended successfully!");
+          AsyncStorage.removeItem("userProducts");
           setIsLoading(false);
-          console.log("Data sau khi dat ", response.data);
           router.replace("../../(home)");
         } else {
           console.error("Error ending table:", response);
@@ -223,6 +238,46 @@ const index = () => {
           <View style={styles.titleBox}>
             <Text style={styles.title}>Mua sản phẩm</Text>
             <Text style={styles.subTitle}>có trong hệ thống</Text>
+            <Pressable
+              onPress={() => {
+                getProductData();
+              }}
+            >
+              <Icon
+                name="refreshIcon"
+                size={30}
+                strokeWidth={3}
+                color="black"
+              />
+            </Pressable>
+            <View style={styles.titleBox}>
+              {productOrder.length > 0 ? (
+                productOrder.map((item) => (
+                  <View key={item.id} style={styles.dataBox}>
+                    <View style={styles.innerBox}>
+                      <View style={styles.infoBox2}>
+                        <Text style={styles.infoBoxTitle}>Tên mặt hàng:</Text>
+                        <Text style={styles.infoBoxText}>
+                          {item.productName}
+                        </Text>
+                      </View>
+                      <View style={styles.infoBox2}>
+                        <Text style={styles.infoBoxTitle}>Số lượng:</Text>
+                        <Text style={styles.infoBoxText}>{item.quantity}</Text>
+                      </View>
+                      <View style={styles.infoBox2}>
+                        <Text style={styles.infoBoxTitle}>Giá mặt hàng:</Text>
+                        <Text style={styles.infoBoxText}>
+                          {item.price.toLocaleString("en-US")}
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+                ))
+              ) : (
+                <Text style={styles.infoBoxText}>Giỏ hàng rỗng.</Text>
+              )}
+            </View>
             <Button
               title="ĐẶT SẢN PHẨM"
               buttonStyles={styles.productButton}
@@ -327,5 +382,31 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.greenCheck,
     borderRadius: 10,
     marginTop: 10,
+  },
+  dataBox: {
+    backgroundColor: theme.colors.background,
+    marginVertical: 5,
+    marginHorizontal: 5,
+    padding: 10,
+    shadowColor: "black",
+    shadowOffset: {
+      width: 5,
+      height: 10,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 6,
+    borderRadius: 20,
+    borderCurve: "continuous",
+  },
+  innerBox: {
+    backgroundColor: theme.colors.background,
+    padding: 15,
+    borderRadius: 10,
+    borderCurve: "continuous",
+  },
+  infoBox2: {
+    flexDirection: "row",
+    gap: 10,
   },
 });

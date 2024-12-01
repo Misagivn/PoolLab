@@ -76,10 +76,13 @@ const ProfileScreen = () => {
           <Text style={styles.functionName}>Quản lý đặt bàn thường xuyên</Text>
           <Icon name="arrowRight" size={20} strokeWidth={3} color="black" />
         </Pressable>
-        <View style={styles.functionBox}>
-          <Text style={styles.functionName}>Quản lý khóa học</Text>
+        <Pressable
+          style={styles.functionBox}
+          onPress={() => router.push("../(calendar)")}
+        >
+          <Text style={styles.functionName}>Lịch đặt bàn/khóa học</Text>
           <Icon name="arrowRight" size={20} strokeWidth={3} color="black" />
-        </View>
+        </Pressable>
         <View style={styles.functionBox}>
           <Text style={styles.functionName}>Ví voucher</Text>
           <Icon name="arrowRight" size={20} strokeWidth={3} color="black" />

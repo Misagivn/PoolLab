@@ -7,6 +7,7 @@ export const theme = {
     background: "#fffbfa",
     hightLight: "#E08D79",
     greenCheck: "#A7D7C5",
+    disable: "#A6F1FE",
   },
   border: {
     heavyCurve: 20,

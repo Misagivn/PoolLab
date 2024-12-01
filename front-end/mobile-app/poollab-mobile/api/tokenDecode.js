@@ -118,3 +118,13 @@ export const get_user_playtime = async () => {
     return null;
   }
 };
+
+export const get_user_products = async () => {
+  try {
+    const userProducts = await AsyncStorage.getItem("userProducts");
+    return userProducts ? JSON.parse(userProducts) : null;
+  } catch (error) {
+    console.error("Error getting user products:", error);
+    return null;
+  }
+};

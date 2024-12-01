@@ -58,7 +58,7 @@ const Button = ({
         buttonStyles, 
         hasShadow && shadowStyle,
         { 
-          backgroundColor: disabled ? theme.colors.darkSecondary : theme.colors.secondary 
+          backgroundColor: disabled ? theme.colors.disable : theme.colors.secondary 
         }
       ]}
       onPress={onPress}

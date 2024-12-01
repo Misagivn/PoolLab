@@ -24,6 +24,7 @@ import CustomHeader from "@/components/customHeader";
 import { getStoredTableData } from "@/api/tokenDecode";
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 const product = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [productType, setProductType] = useState([]);
@@ -102,7 +103,6 @@ const product = () => {
     searchFunction();
   };
   const searchFunction = async () => {
-    console.log("search data: ", productTypeId + "," + productGroupId);
     try {
       const response = await get_all_product(getProductData);
       if (response.status === 200) {
@@ -163,7 +163,8 @@ const product = () => {
     try {
       const response = await add_product_to_order(tableId, productOrder);
       if (response.status === 200) {
-        console.log("success add product to order: ", response.data);
+        console.log("success add product to order: ", productOrder);
+        AsyncStorage.setItem("userProducts", JSON.stringify(productOrder));
         router.back();
       } else {
         console.log("error add product to order: ", response.data);
@@ -180,7 +181,7 @@ const product = () => {
           <CustomHeader />
           <View style={styles.titleBox}>
             <Text style={styles.title}>Tìm kiếm và mua bán</Text>
-            <Text style={styles.subTitle}>sản phẩm</Text>
+            <Text style={styles.subTitle}>dịch vụ</Text>
             <CustomDropdown
               icon={
                 <Icon
@@ -234,12 +235,14 @@ const product = () => {
                       <Text style={styles.infoBoxText}>{item.productName}</Text>
                     </View>
                     <View style={styles.infoBox2}>
-                      <Text style={styles.infoBoxTitle}>Số lượng</Text>
+                      <Text style={styles.infoBoxTitle}>Số lượng:</Text>
                       <Text style={styles.infoBoxText}>{item.quantity}</Text>
                     </View>
                     <View style={styles.infoBox2}>
                       <Text style={styles.infoBoxTitle}>Giá mặt hàng:</Text>
-                      <Text style={styles.infoBoxText}>{item.price}</Text>
+                      <Text style={styles.infoBoxText}>
+                        {item.price.toLocaleString("en-US")}
+                      </Text>
                     </View>
                   </View>
                   <View style={styles.buttonBox}>
@@ -275,6 +278,12 @@ const product = () => {
               ]}
             >
               <View style={styles.innerBox}>
+                <View style={styles.imageBox}>
+                  <Image
+                    style={styles.image}
+                    source={{ uri: item.productImg.toString() }}
+                  />
+                </View>
                 <View style={styles.infoBox2}>
                   <Text style={styles.infoBoxTitle}>Tên mặt hàng:</Text>
                   <Text style={styles.infoBoxText}>{item.name}</Text>
@@ -289,7 +298,9 @@ const product = () => {
                 </View>
                 <View style={styles.infoBox2}>
                   <Text style={styles.infoBoxTitle}>Giá mặt hàng:</Text>
-                  <Text style={styles.infoBoxText}>{item.price}</Text>
+                  <Text style={styles.infoBoxText}>
+                    {item.price.toLocaleString("en-US")}
+                  </Text>
                 </View>
                 {/* <View style={styles.infoBox2}>
                     <View style={styles.imageBox}>
@@ -451,11 +462,10 @@ const styles = StyleSheet.create({
     position: "relative",
   },
   image: {
-    width: 50,
-    height: 50,
+    width: 250,
+    height: 250,
     borderRadius: 20,
-    borderWidth: 2,
-    borderColor: theme.colors.primary,
+    borderWidth: 1,
   },
   QuantitySelectorContainer: {
     alignSelf: "flex-end",

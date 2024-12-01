@@ -99,7 +99,15 @@ const index = () => {
       value: "",
     },
   ];
-  const alertPopup = (title, message, confirmText, cancelText) => {
+  const alertPopup = (
+    title: string | undefined,
+    message: string | undefined,
+    confirmText: string | undefined,
+    cancelText: string | undefined,
+    areaErrorConfirm: boolean | undefined,
+    errorConfirm: boolean | undefined,
+    successConfirm: boolean | undefined
+  ) => {
     return (
       <CustomAlert
         visible={alertVisible}
@@ -108,13 +116,28 @@ const index = () => {
         confirmText={confirmText}
         cancelText={cancelText}
         onConfirm={() => {
-          setAlertVisible(false);
-          setStoreId("");
-          setBillardTypeId("");
+          if (successConfirm !== undefined) {
+            setStoreId("");
+            setBillardTypeId("");
+            setAreaId("");
+            setAlertVisible(false);
+          }
+          if (areaErrorConfirm !== undefined) {
+            setAlertVisible(false);
+            setStoreId("");
+            setBillardTypeId("");
+            setAreaId("");
+            setAreaError("");
+            setErrorResponse("");
+          }
+          if (errorConfirm !== undefined) {
+            setAlertVisible(false);
+            setErrorResponse("");
+          } else {
+            setAlertVisible(false);
+          }
         }}
-        onCancel={() => {
-          setAlertVisible(false);
-        }}
+        onCancel={() => {}}
       />
     );
   };
@@ -266,13 +289,35 @@ const index = () => {
   }, []);
   if (alertVisible) {
     if (areaError) {
-      return alertPopup("Lỗi", areaError, "OK", "Hủy");
-    }
-    if (errorResponse) {
-      return alertPopup("Lỗi", errorResponse, "OK", "Hủy");
-    }
-    if (deleteResponse) {
-      return alertPopup2("Thành Công", deleteResponse, "OK", "Hủy");
+      return alertPopup(
+        "Lỗi khu vực",
+        areaError,
+        "OK",
+        "Hủy",
+        true,
+        undefined,
+        undefined
+      );
+    } else if (errorResponse) {
+      return alertPopup(
+        "Thông Báo",
+        `${errorResponse}`,
+        "OK",
+        "Hủy",
+        undefined,
+        true,
+        undefined
+      );
+    } else if (deleteResponse) {
+      return alertPopup(
+        "Thành công",
+        deleteResponse,
+        "OK",
+        "Hủy",
+        undefined,
+        undefined,
+        true
+      );
     }
   }
   return (
@@ -297,7 +342,7 @@ const index = () => {
                   color="black"
                 />
               }
-              placeholder="Chọn vị trí"
+              placeholder="Chọn chi nhánh"
               data={storeData}
               onSelect={async (item) => {
                 setStoreId(item.value);
@@ -331,7 +376,7 @@ const index = () => {
                   color="black"
                 />
               }
-              placeholder="Chọn loại bàn"
+              placeholder="Chọn khu vực"
               data={areaData}
               onSelect={async (item) => {
                 setAreaId(item.value);

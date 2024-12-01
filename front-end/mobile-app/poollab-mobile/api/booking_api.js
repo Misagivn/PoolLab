@@ -2,7 +2,6 @@ import ApiManager from "./ApiManager";
 
 export const create_booking = async (data) => {
   try {
-    console.log("Co chay: ", data);
     const response = await ApiManager.post("/Booking/CreateNewBooking", data);
     return response;
   } catch (error) {
@@ -125,6 +124,28 @@ export const cancel_booking_recurring = async (data) => {
     const response = await ApiManager.put(
       `Booking/CancelBooking/${data.bookingId}`,
       requestBody
+    );
+    return response;
+  } catch (error) {
+    if (error.response) {
+      // Server responded with an error status (4xx, 5xx)
+      return error.response;
+    } else if (error.request) {
+      // Request was made but no response received
+      console.log("Request error:", error.request);
+      return error.request;
+    } else {
+      // Error occurred while setting up the request
+      console.log("Error:", error.message);
+      return error;
+    }
+  }
+};
+
+export const get_user_booking_recurring_by_id = async (id) => {
+  try {
+    const response = await ApiManager.get(
+      `/booking/getbookingrecurringbyid/${id}`
     );
     return response;
   } catch (error) {

@@ -27,7 +27,6 @@ const index = () => {
         const storedTableData = await getStoredTableData();
         if (storedTableData) {
           setTableData(storedTableData.data.bidaTable);
-          console.log(storedTableData.data.bidaTable);
           setTimeCanPlay(storedTableData.data.timeCus);
         }
       } catch (error) {

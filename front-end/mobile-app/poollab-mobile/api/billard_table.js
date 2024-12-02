@@ -1,9 +1,10 @@
 import ApiManager from "./ApiManager";
 
 export const get_tables_by_QR = async (data) => {
+  console.log(data);
   try {
     const response = await ApiManager.get(
-      `/BilliardTable/GetBilliardTableByQRCode?BilliardTableID=${data.billiardTableId}&CustomerID=${data.customerId}`
+      `/billiardtable/getbilliardtablebyqrcode?BilliardTableID=${data.billiardTableId}&CustomerID=${data.customerId}`
     );
     return response;
   } catch (error) {

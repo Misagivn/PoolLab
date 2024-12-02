@@ -40,7 +40,6 @@ const Button = ({
         style={[
           styles.button,
           buttonStyles,
-          { backgroundColor: theme.colors.darkSecondary },
         ]}
       >
         <IndicatorLoading 

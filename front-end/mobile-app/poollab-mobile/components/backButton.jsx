@@ -26,6 +26,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignSelf: "flex-start",
     borderCurve: "continuous",
-    borderRadius: 10,
+    borderRadius: 15,
   }
 })

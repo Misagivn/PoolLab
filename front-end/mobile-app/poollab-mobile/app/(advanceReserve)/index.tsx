@@ -87,7 +87,7 @@ const index = () => {
             setSelectedStartTime("08:00");
             setSelectedEndTime("22.00");
             setAlertVisible(false);
-            //router.navigate("../(reserveTable)");
+            router.navigate("../(recurringManage)");
           }
           if (areaErrorConfirm !== undefined) {
             setAlertVisible(false);
@@ -134,7 +134,6 @@ const index = () => {
             address: "Địa chỉ: " + item.areaName,
           })
         );
-        console.log(rawdata);
         setAreaData(transformData);
         console.log(transformData);
       }
@@ -187,7 +186,6 @@ const index = () => {
     const result = await search_table(searchData);
     if (result.status === 200) {
       console.log("Search table success!");
-      console.log(result.data);
       setTableData(result.data.data);
       setIsLoading(false);
     } else {

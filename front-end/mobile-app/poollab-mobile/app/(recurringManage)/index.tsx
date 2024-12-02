@@ -1,9 +1,7 @@
 import { Animated, ScrollView, StyleSheet, Text, View } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import {
-  cancel_booking,
   cancel_booking_recurring,
-  get_user_booking,
   get_user_booking_recurring,
 } from "@/api/booking_api";
 import { getStoredUser } from "@/api/tokenDecode";
@@ -33,8 +31,6 @@ const index = () => {
   const [areaId, setAreaId] = useState("");
   const [areaData, setAreaData] = useState([]);
   const [infoStatus, setInfoStatus] = useState("");
-  const scrollViewRef = useRef(null);
-  const scrollY = useRef(new Animated.Value(0)).current;
   const searchData = {
     CustomerId: customerId,
     billiardTypeId: billardtypeId,
@@ -186,7 +182,7 @@ const index = () => {
   };
   const searchFunction = async () => {
     try {
-      get_user_booking(searchData).then((response) => {
+      get_user_booking_recurring(searchData).then((response) => {
         if (response.data.status === 200) {
           setBookingData(response.data.data.items);
           setIsLoading(false);
@@ -238,7 +234,6 @@ const index = () => {
         };
         get_user_booking_recurring(dataDefault).then((response) => {
           if (response.data.status === 200) {
-            console.log("Data: ", response.data.data.items);
             setBookingData(response.data.data.items);
             setIsLoading(false);
           }

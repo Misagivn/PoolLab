@@ -159,7 +159,7 @@ const index = () => {
         if (response.status === 200) {
           AsyncStorage.removeItem("userProducts");
           setIsLoading(false);
-          router.replace("../../(home)");
+          router.replace("./review");
         } else {
           console.error("Error ending table:", response);
           setIsLoading(false);

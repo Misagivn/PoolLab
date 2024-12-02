@@ -208,7 +208,7 @@ const index = () => {
         cancelAnswer: "yes",
       });
       if (response.status === 200) {
-        console.log("success delete: ", response.message);
+        console.log("success delete:");
         setAlertVisible(true);
         setDeleteResponse("Thành công hủy đặt lịch");
       }

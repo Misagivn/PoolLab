@@ -144,7 +144,7 @@ export const cancel_booking_recurring = async (data) => {
       answer: data.cancelAnswer,
     };
     const response = await ApiManager.put(
-      `Booking/CancelBooking/${data.bookingId}`,
+      `Booking/CancelBookingrecurring/${data.bookingId}`,
       requestBody
     );
     return response;

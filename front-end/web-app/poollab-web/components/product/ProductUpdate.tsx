@@ -21,28 +21,30 @@ import {
   Box,
 } from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
-import { CreateProductDTO } from '@/utils/types/product';
+import { Product, UpdateProductDTO } from '@/utils/types/product';
 import { useProduct } from '@/hooks/useProduct';
 import { useGroup } from '@/hooks/useGroup';
 import { useType } from '@/hooks/useType';
 import { useUnit } from '@/hooks/useUnit';
 
-interface ProductCreateProps {
+interface ProductUpdateProps {
   isOpen: boolean;
   onClose: () => void;
+  product: Product | null;
   onSuccess?: () => void;
 }
 
-export const ProductCreate: React.FC<ProductCreateProps> = ({ 
-  isOpen, 
+export const ProductUpdate: React.FC<ProductUpdateProps> = ({
+  isOpen,
   onClose,
-  onSuccess 
+  product,
+  onSuccess
 }) => {
   const [imagePreview, setImagePreview] = React.useState<string>('');
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
-  const { createProduct, uploadImage } = useProduct();
+  const { updateProduct, uploadImage } = useProduct();
   const { groups, fetchGroups } = useGroup();
   const { types, fetchTypes } = useType();
   const { units, fetchUnits } = useUnit();
@@ -54,15 +56,27 @@ export const ProductCreate: React.FC<ProductCreateProps> = ({
     setValue,
     reset,
     formState: { errors }
-  } = useForm<CreateProductDTO>();
+  } = useForm<UpdateProductDTO>();
 
   React.useEffect(() => {
-    if (isOpen) {
+    if (isOpen && product) {
       fetchGroups();
       fetchTypes();
       fetchUnits();
+
+      setValue('name', product.name);
+      setValue('descript', product.descript);
+      setValue('quantity', product.quantity);
+      setValue('minQuantity', product.minQuantity);
+      setValue('price', product.price);
+      setValue('productImg', product.productImg);
+      setValue('productTypeId', product.productTypeId);
+      setValue('productGroupId', product.productGroupId);
+      setValue('unitId', product.unitId);
+      setValue('status', product.status);
+      setImagePreview(product.productImg);
     }
-  }, [isOpen]);
+  }, [isOpen, product, setValue, fetchGroups, fetchTypes, fetchUnits]);
 
   const handleImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -85,27 +99,17 @@ export const ProductCreate: React.FC<ProductCreateProps> = ({
     }
   };
 
-  const onSubmit = async (data: CreateProductDTO) => {
+  const onSubmit = async (data: UpdateProductDTO) => {
+    if (!product?.id) return;
+
     try {
       setIsSubmitting(true);
-      await createProduct(data);
-      toast({
-        title: 'Thành công',
-        description: 'Thêm sản phẩm mới thành công',
-        status: 'success',
-        duration: 3000,
-        isClosable: true,
-      });
+      await updateProduct(product.id, data);
       onSuccess?.();
       handleClose();
     } catch (error) {
-      toast({
-        title: 'Lỗi',
-        description: 'Không thể tạo sản phẩm',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
+      console.error('Error in update:', error);
+      // Error is handled in the hook
     } finally {
       setIsSubmitting(false);
     }
@@ -117,11 +121,18 @@ export const ProductCreate: React.FC<ProductCreateProps> = ({
     onClose();
   };
 
+  if (!isOpen) return null;
+
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} size="xl">
+    <Modal 
+      isOpen={isOpen} 
+      onClose={handleClose}
+      size="xl"
+      scrollBehavior="inside"
+    >
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>Thêm sản phẩm mới</ModalHeader>
+        <ModalHeader>Cập nhật sản phẩm</ModalHeader>
         <ModalCloseButton />
         
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -140,7 +151,6 @@ export const ProductCreate: React.FC<ProductCreateProps> = ({
               <FormControl isRequired isInvalid={!!errors.productTypeId}>
                 <FormLabel>Loại sản phẩm</FormLabel>
                 <Select {...register('productTypeId', { required: 'Vui lòng chọn loại sản phẩm' })}>
-                  <option value="">Chọn loại sản phẩm</option>
                   {types.map((type) => (
                     <option key={type.id} value={type.id}>{type.name}</option>
                   ))}
@@ -150,7 +160,6 @@ export const ProductCreate: React.FC<ProductCreateProps> = ({
               <FormControl isRequired isInvalid={!!errors.productGroupId}>
                 <FormLabel>Nhóm sản phẩm</FormLabel>
                 <Select {...register('productGroupId', { required: 'Vui lòng chọn nhóm sản phẩm' })}>
-                  <option value="">Chọn nhóm sản phẩm</option>
                   {groups.map((group) => (
                     <option key={group.id} value={group.id}>{group.name}</option>
                   ))}
@@ -160,7 +169,6 @@ export const ProductCreate: React.FC<ProductCreateProps> = ({
               <FormControl isRequired isInvalid={!!errors.unitId}>
                 <FormLabel>Đơn vị tính</FormLabel>
                 <Select {...register('unitId', { required: 'Vui lòng chọn đơn vị tính' })}>
-                  <option value="">Chọn đơn vị tính</option>
                   {units.map((unit) => (
                     <option key={unit.id} value={unit.id}>{unit.name}</option>
                   ))}
@@ -195,6 +203,15 @@ export const ProductCreate: React.FC<ProductCreateProps> = ({
                     min: { value: 0, message: 'Giá không được âm' }
                   })} />
                 </NumberInput>
+              </FormControl>
+
+              <FormControl isRequired isInvalid={!!errors.status}>
+                <FormLabel>Trạng thái</FormLabel>
+                <Select {...register('status', { required: 'Vui lòng chọn trạng thái' })}>
+                  <option value="Còn Hàng">Còn Hàng</option>
+                  <option value="Hết Hàng">Hết Hàng</option>
+                  <option value="Sắp Hết">Sắp Hết</option>
+                </Select>
               </FormControl>
 
               <FormControl>
@@ -232,9 +249,9 @@ export const ProductCreate: React.FC<ProductCreateProps> = ({
               colorScheme="blue"
               type="submit"
               isLoading={isSubmitting}
-              loadingText="Đang tạo..."
+              loadingText="Đang cập nhật..."
             >
-              Tạo sản phẩm
+              Cập nhật
             </Button>
           </ModalFooter>
         </form>

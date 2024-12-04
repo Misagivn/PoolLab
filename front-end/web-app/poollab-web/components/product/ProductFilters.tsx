@@ -9,7 +9,7 @@ import {
   Icon,
 } from '@chakra-ui/react';
 import { FiSearch, FiRefreshCcw } from 'react-icons/fi';
-import { ProductFilters } from '@/utils/types/product.types';
+import { ProductFilters } from '@/utils/types/product';
 
 interface ProductFiltersProps {
   filters: ProductFilters;

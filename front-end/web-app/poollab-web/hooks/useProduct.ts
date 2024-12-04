@@ -1,4 +1,3 @@
-// hooks/useProduct.ts
 import { useState, useCallback, useEffect } from 'react';
 import { useToast } from '@chakra-ui/react';
 import { jwtDecode } from 'jwt-decode';
@@ -6,8 +5,10 @@ import {
   Product, 
   PaginatedResponse, 
   ProductFilters,
-  CreateProductDTO 
-} from '@/utils/types/product.types';
+  CreateProductDTO,
+  ProductDetail,
+  UpdateProductDTO
+} from '@/utils/types/product';
 import { productApi } from '@/apis/product.api';
 
 interface JWTPayload {
@@ -23,6 +24,13 @@ export const useProduct = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalItems, setTotalItems] = useState(0);
+
+  // Detail State
+  const [selectedProduct, setSelectedProduct] = useState<ProductDetail | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+
+  // Update State
+  const [updateLoading, setUpdateLoading] = useState(false);
 
   // Filters State
   const [filters, setFilters] = useState<ProductFilters>({
@@ -98,6 +106,71 @@ export const useProduct = () => {
     }
   }, [toast, pageSize, getStoreId, filters]);
 
+  const fetchProductDetail = useCallback(async (id: string) => {
+    try {
+      setDetailLoading(true);
+      const response = await productApi.getProductDetail(id);
+      
+      if (response.status === 200) {
+        setSelectedProduct(response.data);
+        return response.data;
+      }
+      throw new Error(response.message || 'Failed to fetch product detail');
+    } catch (err) {
+      toast({
+        title: 'Lỗi',
+        description: 'Không thể tải thông tin sản phẩm',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+      setSelectedProduct(null);
+      return null;
+    } finally {
+      setDetailLoading(false);
+    }
+  }, [toast]);
+
+  const updateProduct = useCallback(async (
+    id: string,
+    data: UpdateProductDTO
+  ) => {
+    try {
+      setUpdateLoading(true);
+      const storeId = getStoreId();
+      
+      const response = await productApi.updateProduct(id, {
+        ...data,
+        storeId
+      });
+
+      if (response.status === 200) {
+        await fetchProducts(currentPage, pageSize);
+        toast({
+          title: 'Thành công',
+          description: 'Cập nhật sản phẩm thành công',
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        });
+        return response.data;
+      }
+      throw new Error(response.message || 'Failed to update product');
+    } catch (err) {
+      console.error('Error in updateProduct:', err);
+      toast({
+        title: 'Lỗi',
+        description: 'Không thể cập nhật sản phẩm',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+      throw err;
+    } finally {
+      setUpdateLoading(false);
+    }
+  }, [toast, fetchProducts, currentPage, pageSize, getStoreId]);
+
   const createProduct = useCallback(async (data: CreateProductDTO) => {
     try {
       const storeId = getStoreId();
@@ -122,41 +195,6 @@ export const useProduct = () => {
       toast({
         title: 'Lỗi',
         description: 'Không thể thêm sản phẩm mới',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-      throw err;
-    }
-  }, [toast, fetchProducts, currentPage, pageSize, getStoreId]);
-
-  const updateProduct = useCallback(async (
-    id: string,
-    data: Partial<Product>
-  ) => {
-    try {
-      const storeId = getStoreId();
-      const response = await productApi.updateProduct(id, {
-        ...data,
-        storeId
-      });
-
-      if (response.status === 200) {
-        toast({
-          title: 'Thành công',
-          description: 'Cập nhật sản phẩm thành công',
-          status: 'success',
-          duration: 3000,
-          isClosable: true,
-        });
-        await fetchProducts(currentPage, pageSize);
-        return response.data;
-      }
-      throw new Error(response.message);
-    } catch (err) {
-      toast({
-        title: 'Lỗi',
-        description: 'Không thể cập nhật sản phẩm',
         status: 'error',
         duration: 3000,
         isClosable: true,
@@ -243,6 +281,10 @@ export const useProduct = () => {
     fetchProducts(1, newSize);
   }, [fetchProducts]);
 
+  const clearSelectedProduct = useCallback(() => {
+    setSelectedProduct(null);
+  }, []);
+
   const formatPrice = useCallback((price: number) => {
     return new Intl.NumberFormat('vi-VN', {
       style: 'currency',
@@ -262,18 +304,23 @@ export const useProduct = () => {
     // State
     products,
     loading,
+    updateLoading,
     totalPages,
     currentPage,
     pageSize,
     totalItems,
     filters,
+    selectedProduct,
+    detailLoading,
 
     // Core product operations
     fetchProducts,
+    fetchProductDetail,
     createProduct,
     updateProduct,
     deleteProduct,
     uploadImage,
+    clearSelectedProduct,
 
     // Filter and pagination handlers
     handleFiltersChange,

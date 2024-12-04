@@ -22,13 +22,14 @@ import {
   Spinner,
   Text,
   Card,
-  CardBody
+  CardBody,
+  Button
 } from '@chakra-ui/react';
 import { FiInfo, FiSearch, FiRefreshCcw } from 'react-icons/fi';
 import { useState, useEffect } from 'react';
 import { useOrder } from '@/hooks/useOrders';
 import { OrderDetailModal } from '@/components/order/OrderDetailModal';
-import { Pagination } from '@/components/common/Pagination';
+import { ProductPagination } from '@/components/common/paginations';
 
 export default function OrdersPage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -52,8 +53,9 @@ export default function OrdersPage() {
     onOpen();
   };
 
-  const handlePageChange = (page: number) => {
-    fetchOrders(page);
+  const handleRefresh = () => {
+    setSearchQuery('');
+    fetchOrders(1);
   };
 
   const formatDate = (dateString: string) => {
@@ -69,7 +71,7 @@ export default function OrdersPage() {
     order.username.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  if (loading) {
+  if (loading && orders.length === 0) {
     return (
       <Flex h="100vh" align="center" justify="center">
         <Spinner size="xl" />
@@ -97,7 +99,8 @@ export default function OrdersPage() {
           <IconButton
             aria-label="Refresh"
             icon={<Icon as={FiRefreshCcw} />}
-            onClick={() => fetchOrders(1)}
+            onClick={handleRefresh}
+            isLoading={loading}
           />
         </HStack>
 
@@ -148,28 +151,31 @@ export default function OrdersPage() {
                 align="center"
                 justify="center"
                 py={10}
-                bg="gray.50"
-                borderRadius="lg"
               >
                 <Text color="gray.500">
                   Không tìm thấy đơn hàng nào
                 </Text>
+                <Button
+                  mt={4}
+                  size="sm"
+                  onClick={handleRefresh}
+                >
+                  Đặt lại bộ lọc
+                </Button>
               </Flex>
             )}
           </CardBody>
         </Card>
 
         {/* Pagination */}
-        <Pagination
-          currentPage={pagination.currentPage}
-          totalPages={pagination.totalPages}
-          onPageChange={handlePageChange}
-        />
-
-        {/* Display total items and current page info */}
-        {/* <Text textAlign="center" color="gray.600" fontSize="sm">
-          Hiển thị {filteredOrders.length} / {pagination.totalItems} đơn hàng
-        </Text> */}
+        {filteredOrders.length > 0 && (
+          <ProductPagination
+            currentPage={pagination.currentPage}
+            totalPages={pagination.totalPages}
+            onPageChange={fetchOrders}
+            loading={loading}
+          />
+        )}
       </Stack>
 
       <OrderDetailModal

@@ -14,33 +14,31 @@ import {
   Flex,
   Button,
   Text,
-  Skeleton
+  Skeleton,
 } from '@chakra-ui/react';
 import { FiInfo, FiEdit2, FiTrash2 } from 'react-icons/fi';
-import { Product } from '@/utils/types/product.types';
+import { Product } from '@/utils/types/product';
 
 interface ProductListProps {
   products: Product[];
   loading: boolean;
-  onEdit?: (product: Product) => void;
-  onDelete?: (product: Product) => void;
+  onInfo: (product: Product) => void;
+  onEdit: (product: Product) => void;
+  onDelete: (product: Product) => void;
   onRefresh: () => void;
+  formatPrice: (price: number) => string;
+  formatDate: (date: string) => string;
 }
 
 export const ProductList: React.FC<ProductListProps> = ({
   products,
   loading,
+  onInfo,
   onEdit,
   onDelete,
-  onRefresh
+  onRefresh,
+  formatPrice,
 }) => {
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND'
-    }).format(price);
-  };
-
   if (loading) {
     return (
       <Box>
@@ -112,20 +110,21 @@ export const ProductList: React.FC<ProductListProps> = ({
                     icon={<Icon as={FiInfo} />}
                     size="sm"
                     variant="ghost"
+                    onClick={() => onInfo(product)}
                   />
                   <IconButton
                     aria-label="Edit"
                     icon={<Icon as={FiEdit2} />}
                     size="sm"
                     variant="ghost"
-                    onClick={() => onEdit?.(product)}
+                    onClick={() => onEdit(product)}
                   />
                   <IconButton
                     aria-label="Delete"
                     icon={<Icon as={FiTrash2} />}
                     size="sm"
                     variant="ghost"
-                    onClick={() => onDelete?.(product)}
+                    onClick={() => onDelete(product)}
                   />
                 </HStack>
               </Td>
@@ -136,5 +135,3 @@ export const ProductList: React.FC<ProductListProps> = ({
     </Box>
   );
 };
-
-export default ProductList;

@@ -48,3 +48,43 @@ export interface ProductFilters {
   groupName: string;
   status: string;
 }
+
+export interface ProductDetail {
+  id: string;
+  name: string;
+  descript: string;
+  quantity: number;
+  minQuantity: number;
+  price: number;
+  productImg: string;
+  productTypeId: string;
+  productTypeName: string;
+  productGroupId: string;
+  groupName: string;
+  storeId: string;
+  unitId: string;
+  unitName: string;
+  createdDate: string;
+  updatedDate: string | null;
+  status: string;
+}
+
+export interface ProductDetailResponse {
+  status: number;
+  message: string | null;
+  data: ProductDetail;
+}
+
+export interface UpdateProductDTO {
+  name: string;
+  descript: string;
+  quantity: number;
+  minQuantity: number;
+  price: number;
+  productImg: string;
+  productTypeId: string;
+  productGroupId: string;
+  unitId: string;
+  status: string;
+}
+

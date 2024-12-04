@@ -1,4 +1,4 @@
-import { Product, PaginatedResponse, ProductFilters, CreateProductDTO } from '@/utils/types/product.types';
+import { Product, PaginatedResponse, ProductFilters, CreateProductDTO, ProductDetailResponse, UpdateProductDTO } from '@/utils/types/product';
 import { jwtDecode } from 'jwt-decode';
 
 const BASE_URL = 'https://poollabwebapi20241008201316.azurewebsites.net/api';
@@ -82,33 +82,20 @@ export const productApi = {
     }
   },
 
-  updateProduct: async (id: string, data: Partial<Product>): Promise<PaginatedResponse<Product>> => {
+  updateProduct: async (id: string, data: UpdateProductDTO): Promise<any> => {
     try {
       const token = localStorage.getItem('token');
       if (!token) throw new Error('No token found');
 
-      const decoded = jwtDecode(token) as JWTPayload;
-      const storeId = decoded.storeId;
-
-      if (!storeId) throw new Error('No store ID found in token');
-
-      const product = await this.getProductById(id);
-      if (product.data.storeId !== storeId) {
-        throw new Error('Unauthorized: Product does not belong to this store');
-      }
-
       const response = await fetch(
-        `${BASE_URL}/Product/UpdateProduct/${id}`,
+        `${BASE_URL}/product/updateproduct/${id}`,
         {
           method: 'PUT',
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({
-            ...data,
-            storeId
-          })
+          body: JSON.stringify(data)
         }
       );
       return response.json();
@@ -150,7 +137,7 @@ export const productApi = {
     }
   },
 
-  getProductById: async (id: string): Promise<any> => {
+  getProductDetail: async (id: string): Promise<ProductDetailResponse> => {
     try {
       const token = localStorage.getItem('token');
       if (!token) throw new Error('No token found');
@@ -166,7 +153,7 @@ export const productApi = {
       );
       return response.json();
     } catch (error) {
-      console.error('Error in getProductById:', error);
+      console.error('Error in getProductDetail:', error);
       throw error;
     }
   },

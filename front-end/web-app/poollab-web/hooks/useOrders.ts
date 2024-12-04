@@ -17,37 +17,30 @@ export const useOrder = () => {
   });
   const toast = useToast();
 
-  const fetchOrders = useCallback(async (page: number = 1) => {
+  const fetchOrders = useCallback(async (pageNumber: number = 1) => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
       if (!token) throw new Error('No token found');
 
       const decoded = jwtDecode(token) as { storeId: string };
-      const response = await orderApi.getAllOrders(token);
+      const response = await orderApi.getAllOrders({
+        token,
+        pageNumber,
+        pageSize: pagination.pageSize
+      });
 
       if (response.status === 200) {
         // Lọc orders theo storeId
         const storeOrders = response.data.items.filter(
           order => order.storeId === decoded.storeId
         );
-
-        // Tính toán phân trang
-        const totalItems = storeOrders.length;
-        const totalPages = Math.ceil(totalItems / pagination.pageSize);
-        const startIndex = (page - 1) * pagination.pageSize;
-        const endIndex = startIndex + pagination.pageSize;
-        
-        // Lấy orders cho trang hiện tại
-        const paginatedOrders = storeOrders.slice(startIndex, endIndex);
-
-        // Cập nhật state
-        setOrders(paginatedOrders);
+        setOrders(storeOrders);
         setPagination({
-          currentPage: page,
-          totalPages,
-          totalItems,
-          pageSize: pagination.pageSize
+          currentPage: response.data.pageNumber,
+          totalPages: response.data.totalPages,
+          totalItems: response.data.totalItem,
+          pageSize: response.data.pageSize
         });
       }
     } catch (error) {
@@ -61,7 +54,7 @@ export const useOrder = () => {
     } finally {
       setLoading(false);
     }
-  }, [toast, pagination.pageSize]);
+  }, [pagination.pageSize, toast]);
 
   const fetchOrderDetail = async (orderId: string) => {
     try {
@@ -86,22 +79,6 @@ export const useOrder = () => {
     }
   };
 
-  const changePage = (newPage: number) => {
-    if (newPage >= 1 && newPage <= pagination.totalPages) {
-      fetchOrders(newPage);
-    }
-  };
-
-  const resetPagination = () => {
-    setPagination({
-      currentPage: 1,
-      totalPages: 1,
-      totalItems: 0,
-      pageSize: 10
-    });
-    fetchOrders(1);
-  };
-
   return {
     orders,
     selectedOrder,
@@ -110,7 +87,5 @@ export const useOrder = () => {
     pagination,
     fetchOrders,
     fetchOrderDetail,
-    changePage,
-    resetPagination
   };
 };

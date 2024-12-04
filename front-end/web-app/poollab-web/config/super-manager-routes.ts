@@ -37,12 +37,12 @@ export const superManagerRoutes: RouteConfig[] = [
     icon: FiDatabase,
     subRoutes: [
       {
-        path: '/supermanager/stores/list',
-        label: 'Danh sách cơ sở',
+        path: '/supermanager/stores/arealist',
+        label: 'Cơ sở',
       },
       {
-        path: '/supermanager/stores/management',
-        label: 'Quản lý cơ sở',
+        path: '/supermanager/stores/stafflist',
+        label: 'Nhân viên',
       },
     ],
   },

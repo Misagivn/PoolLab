@@ -21,5 +21,5 @@ export const typeApi = {
       console.error('Error in getAllTypes:', error);
       throw error;
     }
-  }
+  },
 };

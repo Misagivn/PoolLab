@@ -83,9 +83,7 @@ const qrScanner = () => {
           billiardTableId: data,
           customerId: customerId,
         };
-        console.log("data cua ban: ", openTableData);
         const response = await get_tables_by_QR(openTableData);
-        console.log("quet qr tra ve data:", response);
         if (response.data.status === 200) {
           AsyncStorage.multiSet([
             ["tableData", JSON.stringify(response.data)],

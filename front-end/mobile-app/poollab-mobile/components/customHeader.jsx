@@ -33,7 +33,6 @@ const CustomHeader = () => {
         paddingTop: 10,
         justifyContent: "center",
         alignItems: "center",
-        backgroundColor: theme.colors.background,
         marginHorizontal: 10,
       }}
     >

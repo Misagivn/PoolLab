@@ -54,7 +54,7 @@ const CustomDropdown = (props) => {
       <Modal
         transparent={true}
         visible={visible}
-        animationType="slide"
+        animationType="fade"
         onRequestClose={() => setVisible(false)}
       >
         <TouchableOpacity 

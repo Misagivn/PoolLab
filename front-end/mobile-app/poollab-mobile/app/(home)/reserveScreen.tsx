@@ -26,8 +26,8 @@ const ReserveScreen = () => {
   const [areaData, setAreaData] = useState([]);
   const [areaId, setAreaId] = useState("");
   const [bookingDate, setBookingDate] = useState("");
-  const [selectedStartTime, setSelectedStartTime] = useState("01:00");
-  const [selectedEndTime, setSelectedEndTime] = useState("00:00");
+  const [selectedStartTime, setSelectedStartTime] = useState("08:00");
+  const [selectedEndTime, setSelectedEndTime] = useState("22:00");
   const [userMessage, setUserMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [alertVisible, setAlertVisible] = useState(false);
@@ -37,6 +37,17 @@ const ReserveScreen = () => {
   const handleStartTimeSelect = (time) => {
     setSelectedStartTime(time);
     console.log("Selected start time:", time);
+  };
+  const resetInfo = () => {
+    console.log("Reset info", userMessage);
+    setStoreId("");
+    setSelectedStore(null);
+    setBillardTypeId("");
+    setAreaId("");
+    setUserMessage("");
+    setBookingDate("");
+    setSelectedStartTime("08:00");
+    setSelectedEndTime("22:00");
   };
 
   const handleEndTimeSelect = (time) => {
@@ -68,8 +79,9 @@ const ReserveScreen = () => {
     message: string | undefined,
     confirmText: string | undefined,
     cancelText: string | undefined,
-    successConfirm: boolean | undefined,
-    areaErrorConfirm: boolean | undefined
+    areaErrorConfirm: boolean | undefined,
+    errorConfirm: boolean | undefined,
+    successConfirm: boolean | undefined
   ) => {
     return (
       <CustomAlert
@@ -79,29 +91,43 @@ const ReserveScreen = () => {
         confirmText={confirmText}
         cancelText={cancelText}
         onConfirm={() => {
-          if (successConfirm || areaErrorConfirm === false) {
+          if (successConfirm !== undefined) {
             setSuccessResponse("");
+            setStoreId("");
+            setBillardTypeId("");
+            setAreaId("");
+            setCurrentDate();
+            setSelectedStartTime("08:00");
+            setSelectedEndTime("22.00");
             setAlertVisible(false);
             router.navigate("../(reserveTable)");
-          } else if (areaErrorConfirm || successConfirm === false) {
+          }
+          if (areaErrorConfirm !== undefined) {
             setAlertVisible(false);
             setStoreId("");
             setBillardTypeId("");
             setAreaId("");
             setAreaError("");
             setErrorResponse("");
+          }
+          if (errorConfirm !== undefined) {
+            setAlertVisible(false);
+            setErrorResponse("");
+            setCurrentDate();
+            setSelectedStartTime("08:00");
+            setSelectedEndTime("22.00");
           } else {
             setAlertVisible(false);
           }
         }}
-        onCancel={() => {
-          setAlertVisible(false);
-        }}
+        onCancel={() => {}}
       />
     );
   };
 
   const getArea = async (storeId: string, billardtypeId: any) => {
+    console.log("storeId: ", storeId);
+    console.log("billardtypeId: ", billardtypeId);
     try {
       const getAreaData = {
         storeId: storeId,
@@ -135,7 +161,7 @@ const ReserveScreen = () => {
         const rawdata = storedStore.data.data;
         const transformData = rawdata.map(
           (item: { name: any; id: any; address: any }) => ({
-            label: "Tên quán: " + item.name,
+            label: "Tên chi nhánh: " + item.name,
             value: item.id,
             address: "Địa chỉ: " + item.address,
           })
@@ -164,15 +190,15 @@ const ReserveScreen = () => {
       console.error("Error loading stored store:", error);
     }
   };
+  const setCurrentDate = () => {
+    const date = new Date();
+    if (!date) return "";
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    setBookingDate(`${year}-${month}-${day}`);
+  };
   useEffect(() => {
-    const setCurrentDate = () => {
-      const date = new Date();
-      if (!date) return "";
-      const day = String(date.getDate()).padStart(2, "0");
-      const month = String(date.getMonth() + 1).padStart(2, "0");
-      const year = date.getFullYear();
-      setBookingDate(`${year}-${month}-${day}`);
-    };
     setCurrentDate();
     getUserId();
     loadStore();
@@ -290,43 +316,36 @@ const ReserveScreen = () => {
       }
     }
   };
-  const resetInfo = () => {
-    console.log("Reset info", userMessage);
-    setUserMessage("");
-    loadStore();
-    loadBillardType();
-    getArea(storeId, billardtypeId);
-    setStoreId("");
-    setSelectedStore(null);
-  };
   if (alertVisible) {
     if (areaError) {
-      const successConfirm = false;
-      const areaErrorConfirm = true;
       return alertPopup(
         "Lỗi khu vực",
         areaError,
         "OK",
         "Hủy",
-        successConfirm,
-        areaErrorConfirm
+        true,
+        undefined,
+        undefined
       );
     } else if (errorResponse) {
       return alertPopup(
         "Thông Báo",
         `${errorResponse} Hãy thử lại với thời gian hoặc ngày đặt khác.`,
-        "OK"
+        "OK",
+        "Hủy",
+        undefined,
+        true,
+        undefined
       );
     } else if (successResponse) {
-      const successConfirm = true;
-      const areaErrorConfirm = false;
       return alertPopup(
         "Thành công",
         successResponse,
         "OK",
         "Hủy",
-        successConfirm,
-        areaErrorConfirm
+        undefined,
+        undefined,
+        true
       );
     }
   }
@@ -349,7 +368,9 @@ const ReserveScreen = () => {
               </Text>
             </View>
             <View style={styles.searchRow}>
-              <Text style={styles.inputTitle}>Chọn Quán, Loại, Khu vực:</Text>
+              <Text style={styles.inputTitle}>
+                Chọn Chi nhánh, Loại, Khu vực:
+              </Text>
               <CustomDropdown
                 icon={
                   <Icon
@@ -359,7 +380,7 @@ const ReserveScreen = () => {
                     color="black"
                   />
                 }
-                placeholder="Chọn vị trí"
+                placeholder="Chọn chi nhánh"
                 data={storeData}
                 onSelect={async (item) => {
                   setStoreId(item.value);
@@ -449,7 +470,7 @@ const ReserveScreen = () => {
                 initialHour={22}
                 initialMinute={0}
                 is24Hour={true}
-                minTime={selectedStartTime.toString()}
+                minTime={selectedStartTime}
                 maxTime="22:00"
               />
               <Text style={styles.inputTitle}>Lời nhắn cho quán</Text>
@@ -471,6 +492,14 @@ const ReserveScreen = () => {
                   onSubmit();
                 }}
                 loading={isLoading}
+                disabled={
+                  storeId === "" ||
+                  billardtypeId === "" ||
+                  areaId === "" ||
+                  selectedStartTime === "" ||
+                  selectedEndTime === "" ||
+                  bookingDate === ""
+                }
               />
             </View>
             <View style={styles.advanceReseveContainer}>
@@ -493,7 +522,8 @@ const ReserveScreen = () => {
                   style={{
                     color: theme.colors.primary,
                     fontSize: 20,
-                    fontWeight: "bold",
+                    fontStyle: "normal",
+                    fontWeight: "semibold",
                   }}
                 >
                   ĐẶT BÀN NGAY!

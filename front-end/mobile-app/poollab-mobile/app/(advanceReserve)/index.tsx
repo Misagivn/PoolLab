@@ -67,8 +67,9 @@ const index = () => {
     message: string | undefined,
     confirmText: string | undefined,
     cancelText: string | undefined,
-    successConfirm: boolean | undefined,
-    areaErrorConfirm: boolean | undefined
+    areaErrorConfirm: boolean | undefined,
+    errorConfirm: boolean | undefined,
+    successConfirm: boolean | undefined
   ) => {
     return (
       <CustomAlert
@@ -78,25 +79,34 @@ const index = () => {
         confirmText={confirmText}
         cancelText={cancelText}
         onConfirm={() => {
-          if (successConfirm || areaErrorConfirm === false) {
-            setAlertVisible(false);
+          if (successConfirm !== undefined) {
             setSuccessResponse("");
+            setStoreId("");
+            setBillardTypeId("");
+            setAreaId("");
+            setSelectedStartTime("08:00");
+            setSelectedEndTime("22.00");
             setAlertVisible(false);
-            router.back();
-          } else if (areaErrorConfirm || successConfirm === false) {
+            router.navigate("../(recurringManage)");
+          }
+          if (areaErrorConfirm !== undefined) {
             setAlertVisible(false);
             setStoreId("");
             setBillardTypeId("");
             setAreaId("");
             setAreaError("");
             setErrorResponse("");
+          }
+          if (errorConfirm !== undefined) {
+            setAlertVisible(false);
+            setErrorResponse("");
+            setSelectedStartTime("08:00");
+            setSelectedEndTime("22.00");
           } else {
             setAlertVisible(false);
           }
         }}
-        onCancel={() => {
-          setAlertVisible(false);
-        }}
+        onCancel={() => {}}
       />
     );
   };
@@ -124,7 +134,6 @@ const index = () => {
             address: "Địa chỉ: " + item.areaName,
           })
         );
-        console.log(rawdata);
         setAreaData(transformData);
         console.log(transformData);
       }
@@ -177,7 +186,6 @@ const index = () => {
     const result = await search_table(searchData);
     if (result.status === 200) {
       console.log("Search table success!");
-      console.log(result.data);
       setTableData(result.data.data);
       setIsLoading(false);
     } else {
@@ -220,28 +228,34 @@ const index = () => {
   }, []);
   if (alertVisible) {
     if (areaError) {
-      const successConfirm = false;
-      const areaErrorConfirm = true;
       return alertPopup(
         "Lỗi khu vực",
         areaError,
         "OK",
         "Hủy",
-        successConfirm,
-        areaErrorConfirm
+        true,
+        undefined,
+        undefined
       );
     } else if (errorResponse) {
-      return alertPopup("Thông Báo", `${errorResponse}.`, "OK");
+      return alertPopup(
+        "Thông Báo",
+        `${errorResponse} Hãy thử lại với thời gian hoặc ngày đặt khác.`,
+        "OK",
+        "Hủy",
+        undefined,
+        true,
+        undefined
+      );
     } else if (successResponse) {
-      const successConfirm = true;
-      const areaErrorConfirm = false;
       return alertPopup(
         "Thành công",
         successResponse,
         "OK",
         "Hủy",
-        successConfirm,
-        areaErrorConfirm
+        undefined,
+        undefined,
+        true
       );
     }
   }
@@ -267,7 +281,9 @@ const index = () => {
               </Text>
             </View>
             <View style={styles.searchRow}>
-              <Text style={styles.inputTitle}>Chọn Quán, Loại, Khu vực:</Text>
+              <Text style={styles.inputTitle}>
+                Chọn Chi nhánh, Loại, Khu vực:
+              </Text>
               <CustomDropdown
                 icon={
                   <Icon
@@ -277,7 +293,7 @@ const index = () => {
                     color="black"
                   />
                 }
-                placeholder="Chọn vị trí"
+                placeholder="Chọn chi nhánh"
                 data={storeData}
                 onSelect={async (item) => {
                   setStoreId(item.value);
@@ -566,7 +582,10 @@ const index = () => {
                     </View>
                     <View style={styles.infoBox2}>
                       <Text style={styles.infoBoxTitle}>Giá bàn:</Text>
-                      <Text style={styles.infoBoxText}>{item.bidaPrice}</Text>
+                      <Text style={styles.infoBoxText}>
+                        {/* {item.bidaPrice.toLocaleString("en-US")} */}
+                        {item.bidaPrice}
+                      </Text>
                     </View>
                   </View>
                   <IconButton

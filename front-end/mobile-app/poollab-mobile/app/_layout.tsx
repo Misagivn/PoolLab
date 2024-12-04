@@ -15,6 +15,7 @@ export default function RootLayout() {
       <Stack.Screen name="(walletManage)" options={{ headerShown: false }} />
       <Stack.Screen name="(advanceReserve)" options={{ headerShown: false }} />
       <Stack.Screen name="(recurringManage)" options={{ headerShown: false }} />
+      <Stack.Screen name="(calendar)" options={{ headerShown: false }} />
     </Stack>
   );
 }

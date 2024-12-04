@@ -4,6 +4,7 @@ export default function tableFunctionLayout() {
     <Stack>
       <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen name="product" options={{ headerShown: false }} />
+      <Stack.Screen name="review" options={{ headerShown: false }} />
     </Stack>
   );
 }

@@ -1,9 +1,7 @@
 import { Animated, ScrollView, StyleSheet, Text, View } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import {
-  cancel_booking,
   cancel_booking_recurring,
-  get_user_booking,
   get_user_booking_recurring,
 } from "@/api/booking_api";
 import { getStoredUser } from "@/api/tokenDecode";
@@ -33,8 +31,6 @@ const index = () => {
   const [areaId, setAreaId] = useState("");
   const [areaData, setAreaData] = useState([]);
   const [infoStatus, setInfoStatus] = useState("");
-  const scrollViewRef = useRef(null);
-  const scrollY = useRef(new Animated.Value(0)).current;
   const searchData = {
     CustomerId: customerId,
     billiardTypeId: billardtypeId,
@@ -104,6 +100,24 @@ const index = () => {
       value: "",
     },
   ];
+  const translateDays = (englishDays) => {
+    // Dictionary mapping English days to Vietnamese days
+    const dayTranslations = {
+      Monday: "Thứ Hai",
+      Tuesday: "Thứ Ba",
+      Wednesday: "Thứ Tư",
+      Thursday: "Thứ Năm",
+      Friday: "Thứ Sáu",
+      Saturday: "Thứ Bảy",
+      Sunday: "Chủ Nhật",
+    };
+
+    // Split the input string, translate each day, and join back
+    return englishDays
+      .split(",")
+      .map((day) => dayTranslations[day.trim()] || day.trim())
+      .join(",");
+  };
   const alertPopup = (title, message, confirmText, cancelText) => {
     return (
       <CustomAlert
@@ -168,7 +182,7 @@ const index = () => {
   };
   const searchFunction = async () => {
     try {
-      get_user_booking(searchData).then((response) => {
+      get_user_booking_recurring(searchData).then((response) => {
         if (response.data.status === 200) {
           setBookingData(response.data.data.items);
           setIsLoading(false);
@@ -194,7 +208,7 @@ const index = () => {
         cancelAnswer: "yes",
       });
       if (response.status === 200) {
-        console.log("success delete: ", response.message);
+        console.log("success delete:");
         setAlertVisible(true);
         setDeleteResponse("Thành công hủy đặt lịch");
       }
@@ -290,7 +304,7 @@ const index = () => {
           <BackButton />
           <View style={styles.titleBox}>
             <Text style={styles.title}>Tìm kiếm thông tin</Text>
-            <Text style={styles.subTitle}>bàn đặt</Text>
+            <Text style={styles.subTitle}>bàn đặt thường xuyên</Text>
             <Text style={styles.warning}>
               *Lưu ý: Người dùng có thể hủy đặt bàn sau khi đã đặt 20 phút để
               được hoàn tiền 100%. Sau khi quá thời gian 20 phút kể từ khi tạo
@@ -453,10 +467,13 @@ const index = () => {
                   <Text style={styles.infoBoxText}>{item.tableName}</Text>
                 </View>
                 <View style={styles.infoBox3}>
-                  <Text style={styles.infoBoxTitle}>Ngày chơi:</Text>
+                  <Text style={styles.infoBoxTitle}>Ngày bắt đầu:</Text>
                   <Text style={styles.infoBoxText}>
                     {formatTime(item.dateStart)}
                   </Text>
+                </View>
+                <View style={styles.infoBox3}>
+                  <Text style={styles.infoBoxTitle}>Ngày kết thúc:</Text>
                   <Text style={styles.infoBoxText}>
                     {formatTime(item.dateEnd)}
                   </Text>
@@ -469,7 +486,9 @@ const index = () => {
                 </View>
                 <View style={styles.infoBox3}>
                   <Text style={styles.infoBoxTitle}>Các ngày trong tuần:</Text>
-                  <Text style={styles.infoBoxText}>{item.dayOfWeek}</Text>
+                  <Text style={styles.infoBoxText}>
+                    {translateDays(item.dayOfWeek)}
+                  </Text>
                 </View>
                 <View style={styles.infoBox2}>
                   <Text style={styles.infoBoxTitle}>Tên quán:</Text>

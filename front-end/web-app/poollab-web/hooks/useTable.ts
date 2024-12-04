@@ -27,6 +27,12 @@ export const useBilliardManager = () => {
     searchQuery: '',
     statusFilter: 'all',
   });
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    pageSize: 10,
+    totalPages: 1,
+    totalItems: 0
+  });
   const toast = useToast();
 
   const fetchAreas = useCallback(async () => {
@@ -94,23 +100,32 @@ export const useBilliardManager = () => {
     }
   }, [toast]);
 
-  const fetchTables = useCallback(async () => {
+  const fetchTables = useCallback(async (pageNumber: number = 1) => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
       if (!token) throw new Error('No token found');
   
-      // Decode token để lấy storeId
       const decoded = jwtDecode(token) as { storeId: string };
       const storeId = decoded.storeId;
   
-      const response = await billiardTableApi.getAllTables(token);
+      const response = await billiardTableApi.getAllTables({
+        pageNumber,
+        pageSize: pagination.pageSize,
+        token
+      });
+
       if (response.status === 200) {
-        // Lọc bàn theo storeId
         const filteredTables = response.data.items.filter(
           (table: BilliardTable) => table.storeId === storeId
         );
         setTables(filteredTables);
+        setPagination({
+          currentPage: response.data.pageNumber,
+          pageSize: response.data.pageSize,
+          totalPages: response.data.totalPages,
+          totalItems: response.data.totalItems
+        });
       }
     } catch (error) {
       toast({
@@ -123,7 +138,11 @@ export const useBilliardManager = () => {
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, [pagination.pageSize, toast]);
+
+  const handlePageChange = (page: number) => {
+    fetchTables(page);
+  };
 
   const fetchTableDetail = useCallback(async (tableId: string) => {
     try {
@@ -314,5 +333,7 @@ export const useBilliardManager = () => {
     detailLoading,
     fetchTableDetail,
     refreshTables: fetchTables,
+    pagination,
+    handlePageChange
   };
 };

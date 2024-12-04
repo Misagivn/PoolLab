@@ -3,10 +3,16 @@ import { ApiResponse, TableDetail, UpdateTableData } from "@/utils/types/table.t
 const BASE_URL = 'https://poollabwebapi20241008201316.azurewebsites.net/api';
 
 export const billiardTableApi = {
-  getAllTables: async (token: string) => {
+  getAllTables: async (params: {
+    pageNumber?: number;
+    pageSize?: number;
+    token: string;
+  }) => {
     try {
+      const { pageNumber = 1, pageSize = 10, token } = params;
+      
       const response = await fetch(
-        `${BASE_URL}/BilliardTable/GetAllBilliardTable`,
+        `${BASE_URL}/BilliardTable/GetAllBilliardTable?PageNumber=${pageNumber}&PageSize=${pageSize}`,
         {
           headers: { 
             Authorization: `Bearer ${token}`,

@@ -13,6 +13,7 @@ import {
   Tr,
   Th,
   Text,
+  Button,
 } from '@chakra-ui/react';
 
 import { useBilliardManager } from '@/hooks/useTable';
@@ -20,6 +21,7 @@ import { TableHeader } from '@/components/tables/TableHeader';
 import { TableFiltersProps } from '@/components/tables/TableFilters';
 import { StatusLegend } from '@/components/tables/StatusLegend';
 import { BilliardTableRow } from '@/components/tables/BilliardTableRow';
+import { ProductPagination } from '@/components/common/paginations';
 
 export default function TablesPage() {
   const {
@@ -36,10 +38,20 @@ export default function TablesPage() {
     refreshTables,
     selectedTable,
     detailLoading,
-    fetchTableDetail
+    fetchTableDetail,
+    pagination,
+    handlePageChange
   } = useBilliardManager();
 
-  if (loading) {
+  const handleRefresh = () => {
+    setFilters({
+      searchQuery: '',
+      statusFilter: 'all'
+    });
+    handlePageChange(1);
+  };
+
+  if (loading && tables.length === 0) {
     return (
       <Flex h="100vh" align="center" justify="center">
         <Spinner size="xl" color="blue.500" />
@@ -54,17 +66,15 @@ export default function TablesPage() {
         <TableFiltersProps
           filters={filters}
           onFiltersChange={setFilters}
-          onRefresh={refreshTables}
+          onRefresh={handleRefresh}
         />
         <StatusLegend />
-
         <Card>
           <CardBody p={0}>
             <Table variant="simple">
               <Thead bg="gray.50">
                 <Tr>
                   <Th width="50px">STT</Th>
-                  {/* <Th width="100px">HÌNH ẢNH</Th> */}
                   <Th>TÊN BÀN</Th>
                   <Th>LOẠI BÀN</Th>
                   <Th>KHU VỰC</Th>
@@ -79,7 +89,7 @@ export default function TablesPage() {
                   <Tr key={table.id}>
                     <BilliardTableRow 
                       table={table}
-                      index={index}
+                      index={(pagination.currentPage - 1) * pagination.pageSize + index + 1}
                       onDelete={deleteTable}
                       onViewDetail={fetchTableDetail}
                       onUpdate={updateTable}         
@@ -105,10 +115,26 @@ export default function TablesPage() {
                 <Text color="gray.500">
                   Không tìm thấy bàn nào
                 </Text>
+                <Button
+                  mt={4}
+                  size="sm"
+                  onClick={handleRefresh}
+                >
+                  Đặt lại bộ lọc
+                </Button>
               </Flex>
             )}
           </CardBody>
         </Card>
+        {tables.length > 0 && (
+  <ProductPagination
+    currentPage={pagination.currentPage}
+    totalPages={pagination.totalPages}
+    onPageChange={handlePageChange}
+    loading={loading}
+  />
+)}
+
       </Stack>
     </Box>
   );

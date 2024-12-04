@@ -37,13 +37,14 @@ import { useStaff } from '@/hooks/useStaff';
 import { StaffFormModal } from '@/components/staff/StaffFormModal';
 import { StaffDetailModal } from '@/components/staff/StaffDetailModal';
 import { UpdateStaffModal } from '@/components/staff/UpdateStaffModal';
-import { Staff } from '@/utils/types/staff.types';
+import { ProductPagination } from '@/components/common/paginations';
 
 export default function StaffPage() {
   const { 
     staff, 
-    loading, 
-    fetchStaff, 
+    loading,
+    pagination,
+    fetchStaff,
     selectedStaff,
     selectStaff,
     getWorkingStatus 
@@ -51,8 +52,6 @@ export default function StaffPage() {
   
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState('all');
-  const [currentPage, setCurrentPage] = useState(1);
-  const ITEMS_PER_PAGE = 10;
   
   const { 
     isOpen: isDetailOpen, 
@@ -73,44 +72,25 @@ export default function StaffPage() {
   } = useDisclosure();
 
   useEffect(() => {
-    fetchStaff();
+    fetchStaff(1);
   }, [fetchStaff]);
 
+  // Fetch new data when search or filter changes
   useEffect(() => {
-    // Reset to first page when search query or filter changes
-    setCurrentPage(1);
-  }, [searchQuery, filter]);
-
-  const filteredStaff = staff
-    .sort((a, b) => new Date(b.joinDate).getTime() - new Date(a.joinDate).getTime())
-    .filter(member => {
-      const searchString = searchQuery.toLowerCase();
-      const matchesSearch = 
-        member.fullName.toLowerCase().includes(searchString) ||
-        member.email.toLowerCase().includes(searchString) ||
-        member.phoneNumber?.toLowerCase().includes(searchString);
-      
-      if (filter === 'all') return matchesSearch;
-      return matchesSearch && getWorkingStatus(member.status).toLowerCase() === filter.toLowerCase();
-    });
-
-  // Pagination calculations
-  const totalPages = Math.ceil(filteredStaff.length / ITEMS_PER_PAGE);
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const paginatedStaff = filteredStaff.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+    fetchStaff(1);
+  }, [searchQuery, filter, fetchStaff]);
 
   const handlePageChange = (page: number) => {
-    setCurrentPage(page);
+    fetchStaff(page);
   };
 
   const handleRefresh = () => {
     setSearchQuery('');
     setFilter('all');
-    setCurrentPage(1);
-    fetchStaff();
+    fetchStaff(1);
   };
 
-  if (loading) {
+  if (loading && staff.length === 0) {
     return (
       <Flex h="100%" align="center" justify="center" p={6}>
         <Spinner size="xl" color="blue.500" />
@@ -160,6 +140,7 @@ export default function StaffPage() {
             aria-label="Refresh"
             icon={<Icon as={FiRefreshCcw} />}
             onClick={handleRefresh}
+            isLoading={loading}
           />
         </HStack>
 
@@ -177,9 +158,11 @@ export default function StaffPage() {
               </Tr>
             </Thead>
             <Tbody>
-              {paginatedStaff.map((member, index) => (
+              {staff.map((member, index) => (
                 <Tr key={member.id}>
-                  <Td textAlign="center">{startIndex + index + 1}</Td>
+                  <Td textAlign="center">
+                    {(pagination.currentPage - 1) * pagination.pageSize + index + 1}
+                  </Td>
                   <Td>
                     <HStack spacing={3}>
                       <Avatar 
@@ -232,7 +215,7 @@ export default function StaffPage() {
           </Table>
         </Box>
 
-        {filteredStaff.length === 0 ? (
+        {staff.length === 0 ? (
           <Flex 
             direction="column" 
             align="center" 
@@ -253,27 +236,12 @@ export default function StaffPage() {
             </Button>
           </Flex>
         ) : (
-          <Flex justify="center" mt={4}>
-            <HStack>
-              <Button
-                size="sm"
-                disabled={currentPage === 1}
-                onClick={() => handlePageChange(currentPage - 1)}
-              >
-                Trước
-              </Button>
-              <Text>
-                Trang {currentPage} / {totalPages}
-              </Text>
-              <Button
-                size="sm"
-                disabled={currentPage === totalPages}
-                onClick={() => handlePageChange(currentPage + 1)}
-              >
-                Sau
-              </Button>
-            </HStack>
-          </Flex>
+          <ProductPagination
+            currentPage={pagination.currentPage}
+            totalPages={pagination.totalPages}
+            onPageChange={handlePageChange}
+            loading={loading}
+          />
         )}
 
         {/* Modals */}

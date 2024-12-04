@@ -4,17 +4,27 @@ const BASE_URL = 'https://poollabwebapi20241008201316.azurewebsites.net/api';
 const ROLE_ID = '21cfbbf3-ccd1-4394-b0e9-ee0e42564b87'; // Staff role ID
 
 export const staffApi = {
-  getAllStaff: async (storeId: string): Promise<PaginatedStaffResponse> => {
+  getAllStaff: async (params: {
+    pageNumber?: number;
+    pageSize?: number;
+    roleId?: string;
+    storeId?: string;
+  }): Promise<PaginatedStaffResponse> => {
+    const { pageNumber = 1, pageSize = 10, roleId = ROLE_ID, storeId } = params;
     const token = localStorage.getItem('token');
-    const response = await fetch(
-      `${BASE_URL}/Account/GetAllAccount?RoleId=${ROLE_ID}&StoreId=${storeId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+    
+    const url = new URL(`${BASE_URL}/Account/GetAllAccount`);
+    url.searchParams.append('PageNumber', pageNumber.toString());
+    url.searchParams.append('PageSize', pageSize.toString());
+    if (roleId) url.searchParams.append('RoleId', roleId);
+    if (storeId) url.searchParams.append('StoreId', storeId);
+
+    const response = await fetch(url.toString(), {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
       }
-    );
+    });
     return response.json();
   },
 

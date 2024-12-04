@@ -8,19 +8,35 @@ export const useStaff = () => {
   const [staff, setStaff] = useState<Staff[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null);
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    totalItems: 0,
+    pageSize: 10
+  });
   const toast = useToast();
 
-  const fetchStaff = useCallback(async () => {
+  const fetchStaff = useCallback(async (pageNumber: number = 1) => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
       if (!token) throw new Error('No token found');
 
       const decoded = jwtDecode(token) as JWTPayload;
-      const response = await staffApi.getAllStaff(decoded.storeId);
+      const response = await staffApi.getAllStaff({
+        pageNumber,
+        pageSize: pagination.pageSize,
+        storeId: decoded.storeId
+      });
 
       if (response.status === 200) {
         setStaff(response.data.items);
+        setPagination({
+          currentPage: response.data.pageNumber,
+          totalPages: response.data.totalPages,
+          totalItems: response.data.totalItem,
+          pageSize: response.data.pageSize
+        });
       } else {
         throw new Error(response.message || 'Failed to fetch staff');
       }
@@ -36,7 +52,7 @@ export const useStaff = () => {
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, [toast, pagination.pageSize]);
 
   const createStaff = async (data: StaffFormData) => {
     try {
@@ -59,7 +75,7 @@ export const useStaff = () => {
           duration: 3000,
           isClosable: true,
         });
-        await fetchStaff();
+        await fetchStaff(pagination.currentPage);
         return true;
       }
       throw new Error(response.message || 'Thêm nhân viên thất bại');
@@ -124,7 +140,7 @@ export const useStaff = () => {
         });
 
         // Fetch fresh data in background
-        fetchStaff();
+        fetchStaff(pagination.currentPage);
         return true;
       }
       throw new Error(response.message || 'Cập nhật thông tin thất bại');
@@ -152,6 +168,7 @@ export const useStaff = () => {
     staff,
     loading,
     selectedStaff,
+    pagination,
     fetchStaff,
     createStaff,
     updateStaff,

@@ -8,34 +8,21 @@ export interface Product {
   productImg: string;
   storeId: string;
   productTypeId: string;
-  productTypeName: string;
+  productTypeName?: string;
   productGroupId: string;
-  groupName: string;
+  groupName?: string;
   unitId: string;
-  unitName: string;
+  unitName?: string;
   createdDate: string;
   updatedDate: string | null;
   status: string;
 }
 
-export interface CreateProductDTO {
-  name: string;
-  descript: string;
-  quantity: number;
-  minQuantity: number;
-  price: number;
-  productImg: string;
-  productTypeId: string;
-  productGroupId: string;
-  storeId: string;
-  unitId: string;
-}
-
-export interface PaginatedResponse<T> {
+export interface ProductResponse {
   status: number;
   message: string | null;
   data: {
-    items: T[];
+    items: Product[];
     totalItem: number;
     pageSize: number;
     totalPages: number;
@@ -43,14 +30,7 @@ export interface PaginatedResponse<T> {
   };
 }
 
-export interface ProductFilters {
-  search: string;
-  groupName: string;
-  status: string;
-}
-
-export interface ProductDetail {
-  id: string;
+export interface CreateProductPayload {
   name: string;
   descript: string;
   quantity: number;
@@ -58,33 +38,16 @@ export interface ProductDetail {
   price: number;
   productImg: string;
   productTypeId: string;
-  productTypeName: string;
   productGroupId: string;
-  groupName: string;
   storeId: string;
   unitId: string;
-  unitName: string;
-  createdDate: string;
-  updatedDate: string | null;
+}
+
+export interface UpdateProductPayload extends Omit<CreateProductPayload, 'storeId'> {
   status: string;
 }
 
-export interface ProductDetailResponse {
-  status: number;
-  message: string | null;
-  data: ProductDetail;
+export interface JWTPayload {
+  storeId: string;
+  [key: string]: any;
 }
-
-export interface UpdateProductDTO {
-  name: string;
-  descript: string;
-  quantity: number;
-  minQuantity: number;
-  price: number;
-  productImg: string;
-  productTypeId: string;
-  productGroupId: string;
-  unitId: string;
-  status: string;
-}
-

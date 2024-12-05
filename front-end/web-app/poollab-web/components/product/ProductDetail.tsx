@@ -1,206 +1,167 @@
-import React from 'react';
 import {
   Modal,
   ModalOverlay,
   ModalContent,
   ModalHeader,
-  ModalFooter,
   ModalBody,
   ModalCloseButton,
-  Button,
-  VStack,
-  Text,
-  Image,
-  Skeleton,
-  Badge,
-  Divider,
   Box,
+  Image,
+  Text,
+  VStack,
+  Badge,
+  Button,
   Grid,
   GridItem,
+  Divider,
 } from '@chakra-ui/react';
-import { useProduct } from '@/hooks/useProduct';
-import { useGroup } from '@/hooks/useGroup';
-import { useType } from '@/hooks/useType';
-import { useUnit } from '@/hooks/useUnit';
+import { EditIcon } from '@chakra-ui/icons';
+import { Product } from '@/utils/types/product';
 
 interface ProductDetailProps {
   isOpen: boolean;
   onClose: () => void;
-  productId: string;
+  product: Product | null;
+  onEdit: (product: Product) => void;
+  types: any[];
+  groups: any[];
+  units: any[];
 }
 
-const DetailItem = ({ label, value }: { label: string; value: React.ReactNode }) => (
-  <Box>
-    <Text fontSize="sm" color="gray.500" mb={1}>
-      {label}
-    </Text>
-    <Text fontSize="md" fontWeight="medium">
-      {value || 'Không có thông tin'}
-    </Text>
-  </Box>
-);
+export const ProductDetail = ({ 
+  isOpen, 
+  onClose, 
+  product, 
+  onEdit,
+  types,
+  groups,
+  units 
+}: ProductDetailProps) => {
+  if (!product) return null;
 
-export const ProductDetail: React.FC<ProductDetailProps> = ({
-  isOpen,
-  onClose,
-  productId
-}) => {
-  const { 
-    fetchProductDetail, 
-    selectedProduct, 
-    detailLoading,
-    formatPrice, 
-    formatDate 
-  } = useProduct();
-
-  const { groups, fetchGroups } = useGroup();
-  const { types, fetchTypes } = useType();
-  const { units, fetchUnits } = useUnit();
-
-  React.useEffect(() => {
-    if (isOpen && productId) {
-      fetchProductDetail(productId);
-      fetchGroups();
-      fetchTypes();
-      fetchUnits();
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'Còn Hàng':
+        return 'green';
+      case 'Hết Hàng':
+        return 'red';
+      case 'Ngừng Kinh Doanh':
+        return 'gray';
+      default:
+        return 'blue';
     }
-  }, [isOpen, productId, fetchProductDetail, fetchGroups, fetchTypes, fetchUnits]);
-
-  const getGroupName = (groupId: string) => {
-    return groups.find(group => group.id === groupId)?.name || 'Không xác định';
   };
 
-  const getTypeName = (typeId: string) => {
-    return types.find(type => type.id === typeId)?.name || 'Không xác định';
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('vi-VN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
-  const getUnitName = (unitId: string) => {
-    return units.find(unit => unit.id === unitId)?.name || 'Không xác định';
-  };
+  const typeName = types.find(t => t.id === product.productTypeId)?.name || 'Chưa có';
+  const groupName = groups.find(g => g.id === product.productGroupId)?.name || 'Chưa có';
+  const unitName = units.find(u => u.id === product.unitId)?.name || 'Chưa có';
 
   return (
-    <Modal 
-      isOpen={isOpen} 
-      onClose={onClose} 
-      size="xl"
-      scrollBehavior="inside"
-    >
+    <Modal isOpen={isOpen} onClose={onClose} size="xl">
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Chi tiết sản phẩm</ModalHeader>
         <ModalCloseButton />
+        
+        <ModalBody pb={6}>
+          <VStack spacing={6} align="stretch">
+            <Box display="flex" justifyContent="center">
+              <Image
+                src={product.productImg}
+                alt={product.name}
+                maxH="200px"
+                objectFit="contain"
+                fallbackSrc="https://via.placeholder.com/200"
+              />
+            </Box>
 
-        <ModalBody>
-          {detailLoading ? (
-            <VStack spacing={4}>
-              <Skeleton height="200px" width="100%" />
-              <Skeleton height="20px" width="100%" />
-              <Skeleton height="20px" width="100%" />
-            </VStack>
-          ) : selectedProduct ? (
-            <VStack spacing={6} align="stretch">
-              {/* Product Image */}
-              <Box position="relative">
-                <Image
-                  src={selectedProduct.productImg || '/placeholder-image.jpg'}
-                  alt={selectedProduct.name}
-                  fallbackSrc="/placeholder-image.jpg"
-                  objectFit="cover"
-                  width="100%"
-                  height="300px"
-                  borderRadius="md"
-                />
-                <Badge
-                  position="absolute"
-                  top={4}
-                  right={4}
-                  colorScheme={
-                    selectedProduct.status === 'Còn Hàng' ? 'green'
-                    : selectedProduct.status === 'Hết Hàng' ? 'red'
-                    : 'yellow'
-                  }
-                  fontSize="md"
-                  px={3}
-                  py={1}
-                >
-                  {selectedProduct.status}
+            <Grid templateColumns="repeat(2, 1fr)" gap={4}>
+              <GridItem>
+                <Text fontWeight="bold">Tên sản phẩm</Text>
+                <Text>{product.name}</Text>
+              </GridItem>
+
+              <GridItem>
+                <Text fontWeight="bold">Trạng thái</Text>
+                <Badge colorScheme={getStatusColor(product.status)}>
+                  {product.status}
                 </Badge>
-              </Box>
+              </GridItem>
 
-              {/* Product Basic Info */}
-              <VStack align="stretch" spacing={4}>
-                <Text fontSize="2xl" fontWeight="bold">
-                  {selectedProduct.name}
-                </Text>
-                <Text color="gray.600">
-                  {selectedProduct.descript || 'Không có mô tả'}
-                </Text>
-              </VStack>
+              <GridItem>
+                <Text fontWeight="bold">Giá</Text>
+                <Text>{product.price.toLocaleString()}đ</Text>
+              </GridItem>
 
-              <Divider />
+              <GridItem>
+                <Text fontWeight="bold">Số lượng</Text>
+                <Text>{product.quantity}</Text>
+              </GridItem>
 
-              {/* Product Details Grid */}
-              <Grid templateColumns="repeat(2, 1fr)" gap={6}>
-                <GridItem>
-                  <DetailItem
-                    label="Giá"
-                    value={formatPrice(selectedProduct.price)}
-                  />
-                </GridItem>
-                <GridItem>
-                  <DetailItem
-                    label="Số lượng hiện tại"
-                    value={`${selectedProduct.quantity} ${getUnitName(selectedProduct.unitId)}`}
-                  />
-                </GridItem>
-                <GridItem>
-                  <DetailItem
-                    label="Số lượng tối thiểu"
-                    value={`${selectedProduct.minQuantity} ${getUnitName(selectedProduct.unitId)}`}
-                  />
-                </GridItem>
-                <GridItem>
-                  <DetailItem
-                    label="Nhóm sản phẩm"
-                    value={getGroupName(selectedProduct.productGroupId)}
-                  />
-                </GridItem>
-                <GridItem>
-                  <DetailItem
-                    label="Loại sản phẩm"
-                    value={getTypeName(selectedProduct.productTypeId)}
-                  />
-                </GridItem>
-                <GridItem>
-                  <DetailItem
-                    label="Đơn vị tính"
-                    value={getUnitName(selectedProduct.unitId)}
-                  />
-                </GridItem>
-                <GridItem>
-                  <DetailItem
-                    label="Ngày tạo"
-                    value={formatDate(selectedProduct.createdDate)}
-                  />
-                </GridItem>
-                {selectedProduct.updatedDate && (
-                  <GridItem>
-                    <DetailItem
-                      label="Ngày cập nhật"
-                      value={formatDate(selectedProduct.updatedDate)}
-                    />
-                  </GridItem>
-                )}
-              </Grid>
-            </VStack>
-          ) : (
-            <Text>Không tìm thấy thông tin sản phẩm</Text>
-          )}
+              <GridItem>
+                <Text fontWeight="bold">Số lượng tối thiểu</Text>
+                <Text>{product.minQuantity}</Text>
+              </GridItem>
+
+              <GridItem>
+                <Text fontWeight="bold">Đơn vị</Text>
+                <Text>{unitName}</Text>
+              </GridItem>
+
+              <GridItem>
+                <Text fontWeight="bold">Loại sản phẩm</Text>
+                <Text>{typeName}</Text>
+              </GridItem>
+
+              <GridItem>
+                <Text fontWeight="bold">Nhóm sản phẩm</Text>
+                <Text>{groupName}</Text>
+              </GridItem>
+            </Grid>
+
+            <Divider />
+
+            <Box>
+              <Text fontWeight="bold" mb={2}>Mô tả</Text>
+              <Text whiteSpace="pre-wrap">{product.descript || 'Chưa có mô tả'}</Text>
+            </Box>
+
+            <Divider />
+
+            <Grid templateColumns="repeat(2, 1fr)" gap={4}>
+              <GridItem>
+                <Text fontWeight="bold">Ngày tạo</Text>
+                <Text>{formatDate(product.createdDate)}</Text>
+              </GridItem>
+
+              <GridItem>
+                <Text fontWeight="bold">Lần cập nhật cuối</Text>
+                <Text>{product.updatedDate ? formatDate(product.updatedDate) : 'Chưa cập nhật'}</Text>
+              </GridItem>
+            </Grid>
+
+            <Box>
+              <Button
+                leftIcon={<EditIcon />}
+                colorScheme="blue"
+                onClick={() => onEdit(product)}
+                width="full"
+              >
+                Chỉnh sửa sản phẩm
+              </Button>
+            </Box>
+          </VStack>
         </ModalBody>
-
-        <ModalFooter>
-          <Button onClick={onClose}>Đóng</Button>
-        </ModalFooter>
       </ModalContent>
     </Modal>
   );

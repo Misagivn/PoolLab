@@ -1,128 +1,119 @@
-// import React from 'react';
-// import {
-//   Table,
-//   Thead,
-//   Tbody,
-//   Tr,
-//   Th,
-//   Td,
-//   Image,
-//   Text,
-//   Badge,
-//   Flex,
-//   IconButton,
-//   Menu,
-//   MenuButton,
-//   MenuList,
-//   MenuItem,
-//   Icon,
-//   Skeleton,
-//   Box,
-// } from '@chakra-ui/react';
-// import { FiMoreVertical, FiEdit2, FiTrash2 } from 'react-icons/fi';
-// import { Product } from '@/utils/types/product';
+'use client';
 
-// interface ProductTableProps {
-//   products: Product[];
-//   loading: boolean;
-//   onEdit?: (product: Product) => void;
-//   onDelete?: (product: Product) => void;
-//   formatPrice: (price: number) => string;
-//   formatDate: (date: string) => string;
-// }
+import {
+  Table,
+  Thead,
+  Tbody,
+  Tr,
+  Th,
+  Td,
+  Image,
+  IconButton,
+  HStack,
+  Badge,
+  Tooltip
+} from '@chakra-ui/react';
+import { FiInfo, FiEdit2, FiTrash2 } from 'react-icons/fi';
+import { Product } from '@/utils/types/product';
 
-// export const ProductTable: React.FC<ProductTableProps> = ({
-//   products,
-//   loading,
-//   onEdit,
-//   onDelete,
-//   formatPrice,
-//   formatDate,
-// }) => {
-//   if (loading) {
-//     return Array(5).fill(0).map((_, index) => (
-//       <Skeleton key={index} height="50px" my={2} />
-//     ));
-//   }
+interface ProductTableProps {
+  products: Product[];
+  onEdit: (product: Product) => void;
+  onDelete: (id: string) => void;
+  onViewDetail: (id: string) => void;
+}
 
-//   if (!products.length) {
-//     return (
-//       <Box textAlign="center" py={8}>
-//         <Text color="gray.500">Không có sản phẩm nào</Text>
-//       </Box>
-//     );
-//   }
+export const ProductTable = ({ products, onEdit, onDelete, onViewDetail }: ProductTableProps) => {
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'Còn Hàng':
+        return 'green';
+      case 'Hết Hàng':
+        return 'red';
+      case 'Ngừng Kinh Doanh':
+        return 'gray';
+      case 'string':
+        return 'blue';
+      default:
+        return 'blue';
+    }
+  };
 
-//   return (
-//     <Table variant="simple">
-//       <Thead>
-//         <Tr>
-//           <Th>Sản phẩm</Th>
-//           <Th>Nhóm</Th>
-//           <Th>Số lượng</Th>
-//           <Th>Giá</Th>
-//           <Th>Trạng thái</Th>
-//           <Th>Thao tác</Th>
-//         </Tr>
-//       </Thead>
-//       <Tbody>
-//         {products.map((product) => (
-//           <Tr key={product.id}>
-//             <Td>
-//               <Flex align="center" gap={3}>
-//                 <Image
-//                   src={product.productImg || '/placeholder.png'}
-//                   alt={product.name}
-//                   boxSize="40px"
-//                   objectFit="cover"
-//                   borderRadius="md"
-//                 />
-//                 <Box>
-//                   <Text fontWeight="medium">{product.name}</Text>
-//                   <Text fontSize="sm" color="gray.500">
-//                     {formatDate(product.createdDate)}
-//                   </Text>
-//                 </Box>
-//               </Flex>
-//             </Td>
-//             <Td>{product.groupName}</Td>
-//             <Td>{product.quantity}</Td>
-//             <Td>{formatPrice(product.price)}</Td>
-//             <Td>
-//               <Badge
-//                 colorScheme={product.status === 'Còn Hàng' ? 'green' : 'red'}
-//               >
-//                 {product.status}
-//               </Badge>
-//             </Td>
-//             <Td>
-//               <Menu>
-//                 <MenuButton
-//                   as={IconButton}
-//                   icon={<Icon as={FiMoreVertical} />}
-//                   variant="ghost"
-//                   size="sm"
-//                 />
-//                 <MenuList>
-//                   <MenuItem 
-//                     icon={<Icon as={FiEdit2} />}
-//                     onClick={() => onEdit?.(product)}
-//                   >
-//                     Chỉnh sửa
-//                   </MenuItem>
-//                   <MenuItem 
-//                     icon={<Icon as={FiTrash2} />}
-//                     color="red.500"
-//                     onClick={() => onDelete?.(product)}
-//                   >
-//                     Xóa
-//                   </MenuItem>
-//                 </MenuList>
-//               </Menu>
-//             </Td>
-//           </Tr>
-//         ))}
-//       </Tbody>
-//     </Table>
-//   );
-// };
+  return (
+    <Table variant="simple">
+      <Thead>
+        <Tr>
+          <Th>HÌNH ẢNH</Th>
+          <Th>TÊN SẢN PHẨM</Th>
+          <Th>LOẠI</Th>
+          <Th>NHÓM</Th>
+          <Th>ĐƠN VỊ</Th>
+          <Th>SỐ LƯỢNG</Th>
+          <Th>GIÁ</Th>
+          <Th>TRẠNG THÁI</Th>
+          <Th>THAO TÁC</Th>
+        </Tr>
+      </Thead>
+      <Tbody>
+        {products.map((product) => (
+          <Tr key={product.id}>
+            <Td>
+              <Image
+                src={product.productImg}
+                alt={product.name}
+                boxSize="50px"
+                objectFit="cover"
+                borderRadius="md"
+                fallbackSrc="https://via.placeholder.com/50"
+              />
+            </Td>
+            <Td>{product.name}</Td>
+            <Td>{product.productTypeName}</Td>
+            <Td>{product.groupName}</Td>
+            <Td>{product.unitName}</Td>
+            <Td isNumeric>{product.quantity}</Td>
+            <Td isNumeric>{product.price.toLocaleString()}đ</Td>
+            <Td>
+              <Badge colorScheme={getStatusColor(product.status)}>
+                {product.status}
+              </Badge>
+            </Td>
+            <Td>
+              <HStack spacing={2}>
+                {/* <Tooltip label="Xem chi tiết"> */}
+                  <IconButton
+                    aria-label="View detail"
+                    icon={<FiInfo />}
+                    onClick={() => onViewDetail(product.id)}
+                    size="sm"
+                    variant="ghost"
+                    colorScheme="blue"
+                  />
+                {/* </Tooltip> */}
+                {/* <Tooltip label="Chỉnh sửa"> */}
+                  <IconButton
+                    aria-label="Edit"
+                    icon={<FiEdit2 />}
+                    onClick={() => onEdit(product)}
+                    size="sm"
+                    variant="ghost"
+                  />
+                {/* </Tooltip> */}
+                {/* <Tooltip label="Xóa"> */}
+                  <IconButton
+                    aria-label="Delete"
+                    icon={<FiTrash2 />}
+                    onClick={() => onDelete(product.id)}
+                    size="sm"
+                    variant="ghost"
+                    colorScheme="red"
+                  />
+                {/* </Tooltip> */}
+              </HStack>
+            </Td>
+          </Tr>
+        ))}
+      </Tbody>
+    </Table>
+  );
+};

@@ -141,9 +141,9 @@ export const UpdateTableModal = ({
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
               >
-                <option value="bàn trống">Bàn trống</option>
-                <option value="đang sử dụng">Đang sử dụng</option>
-                <option value="đang bảo trì">Đang bảo trì</option>
+                <option value="Bàn Trống">Bàn Trống</option>
+                <option value="Có Khách">Có Khách</option>
+                <option value="Đã Đặt">Đã Đặt</option>
               </Select>
             </FormControl>
 

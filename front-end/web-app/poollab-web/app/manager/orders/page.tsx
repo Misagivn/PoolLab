@@ -66,7 +66,12 @@ export default function OrdersPage() {
     return amount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
   };
 
-  const filteredOrders = orders.filter(order =>
+  // Sort orders by date in descending order (newest first)
+  const sortedOrders = [...orders].sort((a, b) => 
+    new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime()
+  );
+
+  const filteredOrders = sortedOrders.filter(order =>
     order.orderCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
     order.username.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -167,7 +172,6 @@ export default function OrdersPage() {
           </CardBody>
         </Card>
 
-        {/* Pagination */}
         {filteredOrders.length > 0 && (
           <ProductPagination
             currentPage={pagination.currentPage}

@@ -9,8 +9,16 @@ export const orderApi = {
     pageSize?: number;
   }): Promise<OrderResponse> => {
     const { token, pageNumber = 1, pageSize = 10 } = params;
+    
+    const queryParams = new URLSearchParams({
+      PageNumber: pageNumber.toString(),
+      PageSize: pageSize.toString(),
+      OrderBy: 'orderDate',
+      OrderByDesc: 'true'
+    });
+
     const response = await fetch(
-      `${BASE_URL}/Order/GetAllOrder?PageNumber=${pageNumber}&PageSize=${pageSize}`, 
+      `${BASE_URL}/Order/GetAllOrder?${queryParams.toString()}`, 
       {
         headers: {
           Authorization: `Bearer ${token}`,

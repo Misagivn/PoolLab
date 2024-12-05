@@ -31,10 +31,10 @@ export const useOrder = () => {
       });
 
       if (response.status === 200) {
-        // Lọc orders theo storeId
         const storeOrders = response.data.items.filter(
           order => order.storeId === decoded.storeId
         );
+
         setOrders(storeOrders);
         setPagination({
           currentPage: response.data.pageNumber,
@@ -55,6 +55,7 @@ export const useOrder = () => {
       setLoading(false);
     }
   }, [pagination.pageSize, toast]);
+
 
   const fetchOrderDetail = async (orderId: string) => {
     try {

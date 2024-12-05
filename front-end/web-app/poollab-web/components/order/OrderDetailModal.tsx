@@ -11,7 +11,13 @@ import {
   Badge,
   Divider,
   Box,
-  Spinner
+  Spinner,
+  Table,
+  Thead,
+  Tbody,
+  Tr,
+  Th,
+  Td
 } from '@chakra-ui/react';
 import { OrderDetail } from '@/utils/types/order.types';
 
@@ -97,6 +103,35 @@ export const OrderDetailModal = ({
                   )}
                   <Text>Tổng thời gian: {order.playTime.totalTime} giờ</Text>
                   <Text>Thành tiền: {formatCurrency(order.playTime.totalPrice)}</Text>
+                </VStack>
+                <Divider />
+              </>
+            )}
+
+            {order.orderDetails && order.orderDetails.length > 0 && (
+              <>
+                <VStack align="stretch" spacing={2}>
+                  <Text fontWeight="bold">Chi tiết đơn hàng</Text>
+                  <Table size="sm">
+                    <Thead>
+                      <Tr>
+                        <Th>Sản phẩm</Th>
+                        <Th isNumeric>Số lượng</Th>
+                        <Th isNumeric>Đơn giá</Th>
+                        <Th isNumeric>Thành tiền</Th>
+                      </Tr>
+                    </Thead>
+                    <Tbody>
+                      {order.orderDetails.map((detail) => (
+                        <Tr key={detail.id}>
+                          <Td>{detail.productName}</Td>
+                          <Td isNumeric>{detail.quantity}</Td>
+                          <Td isNumeric>{formatCurrency(detail.price)}</Td>
+                          <Td isNumeric>{formatCurrency(detail.price * detail.quantity)}</Td>
+                        </Tr>
+                      ))}
+                    </Tbody>
+                  </Table>
                 </VStack>
                 <Divider />
               </>

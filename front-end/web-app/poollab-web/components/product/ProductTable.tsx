@@ -11,7 +11,10 @@ import {
   IconButton,
   HStack,
   Badge,
-  Tooltip
+  Tooltip,
+  Box,
+  CardBody,
+  Card
 } from '@chakra-ui/react';
 import { FiInfo, FiEdit2, FiTrash2 } from 'react-icons/fi';
 import { Product } from '@/utils/types/product';
@@ -40,7 +43,10 @@ export const ProductTable = ({ products, onEdit, onDelete, onViewDetail }: Produ
   };
 
   return (
-    <Table variant="simple">
+    <Box>
+        <Card variant={'outline'} mb={6}>
+          <CardBody>
+          <Table variant="simple">
       <Thead>
         <Tr>
           <Th>HÌNH ẢNH</Th>
@@ -115,5 +121,9 @@ export const ProductTable = ({ products, onEdit, onDelete, onViewDetail }: Produ
         ))}
       </Tbody>
     </Table>
+          </CardBody>
+
+        </Card>
+    </Box>
   );
 };

@@ -177,6 +177,14 @@ const CourseScreen = () => {
               <Text style={styles.title}>Nhập thông tin</Text>
               <Text style={styles.subTitle}>tìm kiếm khóa học</Text>
             </View>
+            <View style={styles.warningBox}>
+              <Text style={styles.warning}>
+                *Lưu ý: Chúng tôi không thu phí khóa học. Mọi chi phí trong khóa
+                sẽ được học viên trả trực tiếp cho giáo viên. Bạn có thể hủy
+                đăng ký học. Đồng thời khóa học cũng có thể bị hủy vì nhiều lý
+                do. Mong bạn nên kiểm tra trangh thái khóa học thường xuyên.
+              </Text>
+            </View>
             <View style={styles.searchRow}>
               <Text style={styles.inputTitle}>Chọn chi nhánh:</Text>
               <CustomDropdown
@@ -220,9 +228,11 @@ const CourseScreen = () => {
                     <View style={styles.imageBox}>
                       <Image
                         style={styles.image}
-                        source={{
-                          uri: item.accountAvatar,
-                        }}
+                        source={
+                          item.accountAvatar
+                            ? { uri: item.accountAvatar }
+                            : require("../../assets/images/eda492de2906a8827a6266e32bcd3ffb.webp")
+                        }
                       />
                     </View>
                     <View style={styles.infoBox3}>
@@ -335,6 +345,11 @@ const styles = StyleSheet.create({
     fontSize: 30,
     fontWeight: "bold",
     color: "black",
+  },
+  warningBox: {},
+  warning: {
+    color: "red",
+    fontSize: 10,
   },
   searchRow: {
     gap: 10,

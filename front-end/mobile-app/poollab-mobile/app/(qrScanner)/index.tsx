@@ -41,8 +41,6 @@ const index = () => {
         console.error("Error loading stored user:", error);
       }
     };
-    getStoredTableData();
-    getAccountId();
     loadStat();
   }, []);
 
@@ -122,7 +120,14 @@ const index = () => {
             </View>
           </View>
           <View style={styles.imageBox}>
-            <Image style={styles.image} source={{ uri: tableData.image }} />
+            <Image
+              style={styles.image}
+              source={
+                tableData.image
+                  ? { uri: tableData.image }
+                  : require("../../assets/images/eda492de2906a8827a6266e32bcd3ffb.webp")
+              }
+            />
           </View>
           <View style={styles.timeInput}>
             <Text style={styles.infoBoxTitle}>Thời gian chơi (HH:MM):</Text>
@@ -143,7 +148,7 @@ const index = () => {
               initialHour={1}
               initialMinute={0}
               minTime="00:30"
-              maxTime="12:00"
+              maxTime="14:00"
             />
           </View>
           <View style={styles.buttonBox}>

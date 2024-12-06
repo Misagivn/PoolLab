@@ -330,7 +330,7 @@ const ReserveScreen = () => {
     } else if (errorResponse) {
       return alertPopup(
         "Thông Báo",
-        `${errorResponse} Hãy thử lại với thời gian hoặc ngày đặt khác.`,
+        `${errorResponse}.`,
         "OK",
         "Hủy",
         undefined,

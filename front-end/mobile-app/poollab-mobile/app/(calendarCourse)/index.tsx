@@ -2,7 +2,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { theme } from "@/constants/theme";
-import { get_all_booking } from "@/api/booking_api";
+import { get_course_enroll_by_id } from "@/api/course_api";
 import { Agenda } from "react-native-calendars";
 import BackButton from "@/components/backButton";
 import { getAccountId } from "@/data/userData";
@@ -15,27 +15,31 @@ const index = () => {
     const userId = await getAccountId();
     const data = {
       id: userId,
-      status: "Đã Đặt",
+      status: "Kích hoạt",
     };
 
     try {
-      const response = await get_all_booking(data);
+      const response = await get_course_enroll_by_id(data);
 
       if (response?.data?.data) {
         const rawData = response.data.data.items;
-        const bookingDateData = rawData.map((item: any) => item.bookingDate);
+        const bookingDateData = rawData.map((item: any) => item.courseDate);
+        const title = rawData.map((item: any) => item.title);
+        const mentorName = rawData.map((item: any) => item.mentorName);
         const timeStart = rawData.map((item: any) => item.timeStart);
         const timeEnd = rawData.map((item: any) => item.timeEnd);
         const address = rawData.map((item: any) => item.address);
         const storeName = rawData.map((item: any) => item.storeName);
-        const tableName = rawData.map((item: any) => item.tableName);
+        const price = rawData.map((item: any) => item.price);
         const calendarData = await createCalendarsData(
           bookingDateData,
+          title,
+          mentorName,
           timeStart,
           timeEnd,
           address,
           storeName,
-          tableName
+          price
         );
         return calendarData;
       }
@@ -46,13 +50,14 @@ const index = () => {
   };
   const createCalendarsData = (
     bookingDateData: string[],
+    title: string[],
+    mentorName: string[],
     timeStart: string[],
     timeEnd: string[],
     address: string[],
     storeName: string[],
-    tableName: string[]
+    price: string[]
   ) => {
-    console.log("createCalendarsData");
     const calendarData: { [key: string]: any[] } = {};
     // Use the length of bookingDateData to iterate
     bookingDateData.forEach((date, index) => {
@@ -60,8 +65,11 @@ const index = () => {
         calendarData[date] = [];
       }
       calendarData[date].push({
+        title: `Khóa: ${title[index]}`,
+        description: `Mentor: ${mentorName[index]}`,
         name: `Thời gian chơi: ${timeStart[index]} - ${timeEnd[index]}`,
-        data: `Địa điểm: ${address[index]} - ${storeName[index]} - ${tableName[index]}`,
+        data: `Địa điểm: ${address[index]} - ${storeName[index]}`,
+        price: `Giá buổi học: ${price[index]}`,
       });
     });
     return calendarData;
@@ -89,8 +97,11 @@ const index = () => {
         renderItem={(item, isFirst) => (
           <TouchableOpacity>
             <View style={styles.item}>
+              <Text>{item.title}</Text>
+              <Text>{item.description}</Text>
               <Text>{item.name}</Text>
               <Text>{item.data}</Text>
+              <Text>{item.price}</Text>
             </View>
           </TouchableOpacity>
         )}

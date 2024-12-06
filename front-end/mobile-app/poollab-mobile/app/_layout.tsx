@@ -17,6 +17,7 @@ export default function RootLayout() {
       <Stack.Screen name="(recurringManage)" options={{ headerShown: false }} />
       <Stack.Screen name="(calendar)" options={{ headerShown: false }} />
       <Stack.Screen name="(courseManage)" options={{ headerShown: false }} />
+      <Stack.Screen name="(calendarCourse)" options={{ headerShown: false }} />
     </Stack>
   );
 }

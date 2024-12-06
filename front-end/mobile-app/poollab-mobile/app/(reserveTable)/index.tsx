@@ -474,7 +474,7 @@ const index = () => {
             />
           </View>
           {bookingData.length === 0 ? (
-            <Text style={styles.title}>Không tìm thấy khóa học.</Text>
+            <Text style={styles.subTitle}>Không tìm thấy lịch đặt bàn.</Text>
           ) : (
             bookingData.map((item) => (
               <View

@@ -184,44 +184,52 @@ const index = () => {
               loading={isLoading}
             />
           </View>
-          {transactionData.map((item) => (
-            <View
-              key={item.id}
-              style={[
-                styles.dataBox,
-                item.typeCode === 1 ? styles.confirmedBox : styles.pendingBox,
-              ]}
-            >
-              <View style={styles.innerBox}>
-                <View style={styles.infoBox2}>
-                  <Text style={styles.infoBoxTitle}>
-                    Phương thức giao dịch:
-                  </Text>
-                  <Text style={styles.infoBoxText}>{item.paymentMethod}</Text>
-                </View>
-                <View style={styles.infoBox2}>
-                  <Text style={styles.infoBoxTitle}>Thông tin giao dịch:</Text>
-                  <Text style={styles.infoBoxText}>{item.paymentInfo}</Text>
-                </View>
-                <View style={styles.infoBox2}>
-                  <Text style={styles.infoBoxTitle}>Tên người giao dich:</Text>
-                  <Text style={styles.infoBoxText}>{item.username}</Text>
-                </View>
-                <View style={styles.infoBox2}>
-                  <Text style={styles.infoBoxTitle}>Giá trị giao dịch:</Text>
-                  <Text style={styles.infoBoxText}>
-                    {Number(JSON.parse(item.amount)).toLocaleString("en-US")}
-                  </Text>
-                </View>
-                <View style={styles.infoBox3}>
-                  <Text style={styles.infoBoxTitle}>Ngày tạo giao dịch:</Text>
-                  <Text style={styles.infoBoxText}>
-                    {formatTime(item.paymentDate)}
-                  </Text>
+          {transactionData.length === 0 ? (
+            <Text style={styles.title2}>Không tìm thấy giao dịch.</Text>
+          ) : (
+            transactionData.map((item) => (
+              <View
+                key={item.id}
+                style={[
+                  styles.dataBox,
+                  item.typeCode === 1 ? styles.confirmedBox : styles.pendingBox,
+                ]}
+              >
+                <View style={styles.innerBox}>
+                  <View style={styles.infoBox2}>
+                    <Text style={styles.infoBoxTitle}>
+                      Phương thức giao dịch:
+                    </Text>
+                    <Text style={styles.infoBoxText}>{item.paymentMethod}</Text>
+                  </View>
+                  <View style={styles.infoBox2}>
+                    <Text style={styles.infoBoxTitle}>
+                      Thông tin giao dịch:
+                    </Text>
+                    <Text style={styles.infoBoxText}>{item.paymentInfo}</Text>
+                  </View>
+                  <View style={styles.infoBox2}>
+                    <Text style={styles.infoBoxTitle}>
+                      Tên người giao dich:
+                    </Text>
+                    <Text style={styles.infoBoxText}>{item.username}</Text>
+                  </View>
+                  <View style={styles.infoBox2}>
+                    <Text style={styles.infoBoxTitle}>Giá trị giao dịch:</Text>
+                    <Text style={styles.infoBoxText}>
+                      {Number(JSON.parse(item.amount)).toLocaleString("en-US")}
+                    </Text>
+                  </View>
+                  <View style={styles.infoBox3}>
+                    <Text style={styles.infoBoxTitle}>Ngày tạo giao dịch:</Text>
+                    <Text style={styles.infoBoxText}>
+                      {formatTime(item.paymentDate)}
+                    </Text>
+                  </View>
                 </View>
               </View>
-            </View>
-          ))}
+            ))
+          )}
         </View>
       </ScrollView>
     </SafeAreaView>

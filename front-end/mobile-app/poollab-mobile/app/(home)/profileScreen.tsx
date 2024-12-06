@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import React, { useState, useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Image } from "react-native";
@@ -39,62 +39,77 @@ const ProfileScreen = () => {
   }, []);
   return (
     <SafeAreaView>
-      <CustomHeader />
-      <View style={styles.header}>
-        <Image style={styles.headerImage} source={{ uri: image.toString() }} />
-        <View style={styles.basicInfo}>
-          <Text style={styles.infoName}>{userFullName}</Text>
-          <Text style={styles.infoEmail}>{userEmail}</Text>
+      <ScrollView>
+        <CustomHeader />
+        <View style={styles.header}>
+          <Image
+            style={styles.headerImage}
+            source={{ uri: image.toString() }}
+          />
+          <View style={styles.basicInfo}>
+            <Text style={styles.infoName}>{userFullName}</Text>
+            <Text style={styles.infoEmail}>{userEmail}</Text>
+          </View>
         </View>
-      </View>
-      <View style={styles.quickFunction}>
-        <Pressable
-          style={styles.functionBox}
-          onPress={() => router.push("../(userProfile)")}
-        >
-          <Text style={styles.functionName}>Quản lý tài khoản</Text>
-          <Icon name="arrowRight" size={20} strokeWidth={3} color="black" />
-        </Pressable>
-        <Pressable
-          style={styles.functionBox}
-          onPress={() => router.push("../(walletManage)")}
-        >
-          <Text style={styles.functionName}>Quản lý ví tiền</Text>
-          <Icon name="arrowRight" size={20} strokeWidth={3} color="black" />
-        </Pressable>
-        <Pressable
-          style={styles.functionBox}
-          onPress={() => router.push("../(reserveTable)")}
-        >
-          <Text style={styles.functionName}>Quản lý đặt bàn</Text>
-          <Icon name="arrowRight" size={20} strokeWidth={3} color="black" />
-        </Pressable>
-        <Pressable
-          style={styles.functionBox}
-          onPress={() => router.push("../(recurringManage)")}
-        >
-          <Text style={styles.functionName}>Quản lý đặt bàn thường xuyên</Text>
-          <Icon name="arrowRight" size={20} strokeWidth={3} color="black" />
-        </Pressable>
-        <Pressable
-          style={styles.functionBox}
-          onPress={() => router.push("../(courseManage)")}
-        >
-          <Text style={styles.functionName}>Quản lý khóa học</Text>
-          <Icon name="arrowRight" size={20} strokeWidth={3} color="black" />
-        </Pressable>
-        <Pressable
-          style={styles.functionBox}
-          onPress={() => router.push("../(calendar)")}
-        >
-          <Text style={styles.functionName}>Lịch đặt bàn/khóa học</Text>
-          <Icon name="arrowRight" size={20} strokeWidth={3} color="black" />
-        </Pressable>
-        <View style={styles.functionBox}>
-          <Text style={styles.functionName}>Ví voucher</Text>
-          <Icon name="arrowRight" size={20} strokeWidth={3} color="black" />
+        <View style={styles.quickFunction}>
+          <Pressable
+            style={styles.functionBox}
+            onPress={() => router.push("../(userProfile)")}
+          >
+            <Text style={styles.functionName}>Quản lý tài khoản</Text>
+            <Icon name="arrowRight" size={20} strokeWidth={3} color="black" />
+          </Pressable>
+          <Pressable
+            style={styles.functionBox}
+            onPress={() => router.push("../(walletManage)")}
+          >
+            <Text style={styles.functionName}>Quản lý ví tiền</Text>
+            <Icon name="arrowRight" size={20} strokeWidth={3} color="black" />
+          </Pressable>
+          <Pressable
+            style={styles.functionBox}
+            onPress={() => router.push("../(reserveTable)")}
+          >
+            <Text style={styles.functionName}>Quản lý đặt bàn</Text>
+            <Icon name="arrowRight" size={20} strokeWidth={3} color="black" />
+          </Pressable>
+          <Pressable
+            style={styles.functionBox}
+            onPress={() => router.push("../(recurringManage)")}
+          >
+            <Text style={styles.functionName}>
+              Quản lý đặt bàn thường xuyên
+            </Text>
+            <Icon name="arrowRight" size={20} strokeWidth={3} color="black" />
+          </Pressable>
+          <Pressable
+            style={styles.functionBox}
+            onPress={() => router.push("../(courseManage)")}
+          >
+            <Text style={styles.functionName}>Quản lý khóa học</Text>
+            <Icon name="arrowRight" size={20} strokeWidth={3} color="black" />
+          </Pressable>
+          <Pressable
+            style={styles.functionBox}
+            onPress={() => router.push("../(calendar)")}
+          >
+            <Text style={styles.functionName}>Lịch đặt bàn</Text>
+            <Icon name="arrowRight" size={20} strokeWidth={3} color="black" />
+          </Pressable>
+          <Pressable
+            style={styles.functionBox}
+            onPress={() => router.push("../(calendarCourse)")}
+          >
+            <Text style={styles.functionName}>Lịch học</Text>
+            <Icon name="arrowRight" size={20} strokeWidth={3} color="black" />
+          </Pressable>
+          <View style={styles.functionBox}>
+            <Text style={styles.functionName}>Ví voucher</Text>
+            <Icon name="arrowRight" size={20} strokeWidth={3} color="black" />
+          </View>
         </View>
-      </View>
+        <View style={styles.customDivider}></View>
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -168,5 +183,8 @@ const styles = StyleSheet.create({
   },
   functionName: {
     fontSize: 20,
+  },
+  customDivider: {
+    padding: 50,
   },
 });

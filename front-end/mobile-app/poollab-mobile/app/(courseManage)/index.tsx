@@ -274,7 +274,7 @@ const index = () => {
             />
           </View>
           {courseData.length === 0 ? (
-            <Text style={styles.title2}>Không tìm thấy khóa học.</Text>
+            <Text style={styles.subTitle}>Không tìm thấy khóa học.</Text>
           ) : (
             courseData.map((item) => (
               <View

@@ -78,6 +78,13 @@ const ProfileScreen = () => {
         </Pressable>
         <Pressable
           style={styles.functionBox}
+          onPress={() => router.push("../(courseManage)")}
+        >
+          <Text style={styles.functionName}>Quản lý khóa học</Text>
+          <Icon name="arrowRight" size={20} strokeWidth={3} color="black" />
+        </Pressable>
+        <Pressable
+          style={styles.functionBox}
           onPress={() => router.push("../(calendar)")}
         >
           <Text style={styles.functionName}>Lịch đặt bàn/khóa học</Text>

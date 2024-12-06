@@ -152,3 +152,24 @@ export const wallet_manage = async (userId, data) => {
     }
   }
 };
+
+export const add_balance_vnpay = async (data) => {
+  try {
+    const response = await ApiManager.post(`/vnpay/createpayment/`, data);
+    return response;
+  } catch (error) {
+    if (error.response) {
+      console.log("error response:", error.response);
+      // Server responded with an error status (4xx, 5xx)
+      return error.response;
+    } else if (error.request) {
+      // Request was made but no response received
+      console.log("Request error:", error.request);
+      return error.request;
+    } else {
+      // Error occurred while setting up the request
+      console.log("Error:", error.message);
+      return error;
+    }
+  }
+};

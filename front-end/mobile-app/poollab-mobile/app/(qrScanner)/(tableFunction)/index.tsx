@@ -7,7 +7,7 @@ import {
   View,
 } from "react-native";
 import React, { useEffect, useState } from "react";
-import { getStoredTableData, get_user_products } from "@/api/tokenDecode";
+import { getStoredTableData } from "@/api/tokenDecode";
 import { theme } from "@/constants/theme";
 import { StatusBar } from "expo-status-bar";
 import Button from "@/components/roundButton";
@@ -17,6 +17,7 @@ import { deactive_table } from "@/api/billard_table";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import CountdownTimer from "@/components/countDownTimer";
 import Icon from "@/assets/icons/icons";
+import { get_user_order_product } from "@/api/product_api";
 const index = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [tableData, setTableData] = useState([]);
@@ -28,12 +29,17 @@ const index = () => {
   const [havePlay, setHavePlay] = useState("");
   const [productOrder, setProductOrder] = useState([]);
   const [userProducts, setUserProducts] = useState<string[]>([]);
+  const [tableId, setTableId] = useState("");
   const getProductData = async () => {
+    const data = {
+      id: tableId,
+    };
+    console.log("data: ", data);
     try {
-      const userProducts = get_user_products();
-      if (userProducts) {
-        setProductOrder(await userProducts);
-        console.log("User products: ", userProducts);
+      const response = await get_user_order_product(data);
+      if (response) {
+        console.log("userProducts: ", response.data.data);
+        setProductOrder(response.data.data);
       }
     } catch (error) {
       console.error("Error loading stored user:", error);
@@ -44,6 +50,7 @@ const index = () => {
       try {
         const storedTableData = await getStoredTableData();
         if (storedTableData) {
+          setTableId(storedTableData.data.bidaTable.id);
           setTableData(storedTableData.data.bidaTable);
           setTimeCanPlay(storedTableData.data.timeCus);
         }
@@ -338,7 +345,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   infoBoxText: {
-    fontSize: 15,
+    fontSize: 20,
   },
   imageBox: {
     marginTop: 10,

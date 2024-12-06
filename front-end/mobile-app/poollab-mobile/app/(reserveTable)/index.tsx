@@ -242,6 +242,7 @@ const index = () => {
       }
     } catch (error) {
       console.error("Error loading stored user:", error);
+      setIsLoading(false);
     }
   };
   const loadBillardType = async () => {
@@ -472,74 +473,78 @@ const index = () => {
               loading={isLoading}
             />
           </View>
-          {bookingData.map((item) => (
-            <View
-              key={item.id}
-              style={[
-                styles.dataBox,
-                item.status === "Đã Đặt"
-                  ? styles.confirmedBox
-                  : item.status === "Đã Huỷ"
-                  ? styles.pendingBox
-                  : styles.completeBox,
-              ]}
-            >
-              <View style={styles.innerBox}>
-                <View style={styles.infoBox2}>
-                  <Text style={styles.infoBoxTitle}>Tên bàn:</Text>
-                  <Text style={styles.infoBoxText}>{item.tableName}</Text>
-                </View>
-                <View style={styles.infoBox2}>
-                  <Text style={styles.infoBoxTitle}>Ngày chơi:</Text>
-                  <Text style={styles.infoBoxText}>{item.bookingDate}</Text>
-                </View>
-                <View style={styles.infoBox2}>
-                  <Text style={styles.infoBoxTitle}>Thời gian chơi:</Text>
-                  <Text style={styles.infoBoxText}>
-                    {item.timeStart} - {item.timeEnd}
-                  </Text>
-                </View>
-                <View style={styles.infoBox2}>
-                  <Text style={styles.infoBoxTitle}>Tên quán:</Text>
-                  <Text style={styles.infoBoxText}>{item.storeName}</Text>
-                </View>
-                <View style={styles.infoBox2}>
-                  <Text style={styles.infoBoxTitle}>Địa chỉ:</Text>
-                  <Text style={styles.infoBoxText}>{item.address}</Text>
-                </View>
-                <View style={styles.infoBox2}>
-                  <Text style={styles.infoBoxTitle}>Tiền cọc:</Text>
-                  <Text style={styles.infoBoxText}>
-                    {Number(JSON.parse(item.deposit)).toLocaleString("en-US")}
-                  </Text>
-                </View>
-                <View style={styles.infoBox3}>
-                  <Text style={styles.infoBoxTitle}>Ngày tạo:</Text>
-                  <Text style={styles.infoBoxText}>
-                    {formatTime(item.createdDate)}
-                  </Text>
-                </View>
-                {item.status === "Đã Đặt" && (
-                  <View
-                    style={{
-                      justifyContent: "center",
-                      alignItems: "center",
-                      alignSelf: "flex-end",
-                      marginTop: 5,
-                    }}
-                  >
-                    <IconButton
-                      iconName={"trashIcon"}
-                      textStyles={{ fontSize: 13, color: "white" }}
-                      buttonStyles={styles.cancelButton}
-                      title={"HỦY BÀN"}
-                      onPress={() => handleCancelBooking(item.id)}
-                    />
+          {bookingData.length === 0 ? (
+            <Text style={styles.title}>Không tìm thấy khóa học.</Text>
+          ) : (
+            bookingData.map((item) => (
+              <View
+                key={item.id}
+                style={[
+                  styles.dataBox,
+                  item.status === "Đã Đặt"
+                    ? styles.confirmedBox
+                    : item.status === "Đã Huỷ"
+                    ? styles.pendingBox
+                    : styles.completeBox,
+                ]}
+              >
+                <View style={styles.innerBox}>
+                  <View style={styles.infoBox2}>
+                    <Text style={styles.infoBoxTitle}>Tên bàn:</Text>
+                    <Text style={styles.infoBoxText}>{item.tableName}</Text>
                   </View>
-                )}
+                  <View style={styles.infoBox2}>
+                    <Text style={styles.infoBoxTitle}>Ngày chơi:</Text>
+                    <Text style={styles.infoBoxText}>{item.bookingDate}</Text>
+                  </View>
+                  <View style={styles.infoBox2}>
+                    <Text style={styles.infoBoxTitle}>Thời gian chơi:</Text>
+                    <Text style={styles.infoBoxText}>
+                      {item.timeStart} - {item.timeEnd}
+                    </Text>
+                  </View>
+                  <View style={styles.infoBox2}>
+                    <Text style={styles.infoBoxTitle}>Tên quán:</Text>
+                    <Text style={styles.infoBoxText}>{item.storeName}</Text>
+                  </View>
+                  <View style={styles.infoBox2}>
+                    <Text style={styles.infoBoxTitle}>Địa chỉ:</Text>
+                    <Text style={styles.infoBoxText}>{item.address}</Text>
+                  </View>
+                  <View style={styles.infoBox2}>
+                    <Text style={styles.infoBoxTitle}>Tiền cọc:</Text>
+                    <Text style={styles.infoBoxText}>
+                      {Number(JSON.parse(item.deposit)).toLocaleString("en-US")}
+                    </Text>
+                  </View>
+                  <View style={styles.infoBox3}>
+                    <Text style={styles.infoBoxTitle}>Ngày tạo:</Text>
+                    <Text style={styles.infoBoxText}>
+                      {formatTime(item.createdDate)}
+                    </Text>
+                  </View>
+                  {item.status === "Đã Đặt" && (
+                    <View
+                      style={{
+                        justifyContent: "center",
+                        alignItems: "center",
+                        alignSelf: "flex-end",
+                        marginTop: 5,
+                      }}
+                    >
+                      <IconButton
+                        iconName={"trashIcon"}
+                        textStyles={{ fontSize: 13, color: "white" }}
+                        buttonStyles={styles.cancelButton}
+                        title={"HỦY BÀN"}
+                        onPress={() => handleCancelBooking(item.id)}
+                      />
+                    </View>
+                  )}
+                </View>
               </View>
-            </View>
-          ))}
+            ))
+          )}
         </ScrollView>
       </View>
     </SafeAreaView>

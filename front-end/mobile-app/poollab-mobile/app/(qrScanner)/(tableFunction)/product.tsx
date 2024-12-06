@@ -258,7 +258,7 @@ const product = () => {
               <Text style={styles.infoBoxText}>Giỏ hàng rỗng.</Text>
             )}
             <Button
-              title="ĐẶT SẢN PHẨM"
+              title="ĐẶT DỊCH VỤ"
               buttonStyles={styles.updateButton}
               textStyles={styles.updateButtonText}
               onPress={() => {

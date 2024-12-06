@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "poollab-mobile",
-    "slug": "poollab-mobile",
+    "name": "poollab",
+    "slug": "poollab",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/logo_icon.png",
@@ -45,6 +45,15 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "11a8ca17-f846-43f5-aef0-3cf5bf82d9a6"
+      }
+    },
+    "owner": "h3av3n"
   }
 }

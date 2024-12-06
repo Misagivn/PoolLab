@@ -27,6 +27,7 @@ const review = () => {
     store_rating(data).then((response) => {
       if (response.data.status === 200) {
         console.log("Review submitted successfully!");
+        router.replace("../../(home)");
         setGaveReview(true);
       } else {
         console.log("Error submitting review:", response.data.message);

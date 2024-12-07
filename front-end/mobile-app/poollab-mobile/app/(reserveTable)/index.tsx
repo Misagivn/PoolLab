@@ -28,8 +28,6 @@ const index = () => {
   const [areaId, setAreaId] = useState("");
   const [areaData, setAreaData] = useState([]);
   const [infoStatus, setInfoStatus] = useState("");
-  const scrollViewRef = useRef(null);
-  const scrollY = useRef(new Animated.Value(0)).current;
   const searchData = {
     CustomerId: customerId,
     billiardTypeId: billardtypeId,
@@ -141,24 +139,6 @@ const index = () => {
       />
     );
   };
-  const alertPopup2 = (title, message, confirmText, cancelText) => {
-    return (
-      <CustomAlert
-        visible={alertVisible}
-        title={title}
-        message={message}
-        confirmText={confirmText}
-        cancelText={cancelText}
-        onConfirm={() => {
-          setAlertVisible(false);
-          fetchData();
-        }}
-        onCancel={() => {
-          setAlertVisible(false);
-        }}
-      />
-    );
-  };
   const getArea = async (storeId: string, billardtypeId: any) => {
     try {
       const getAreaData = {
@@ -237,6 +217,9 @@ const index = () => {
           if (response.data.status === 200) {
             setBookingData(response.data.data.items);
             setIsLoading(false);
+          } else {
+            setIsLoading(false);
+            console.log("Error fetch: ", response.data);
           }
         });
       }

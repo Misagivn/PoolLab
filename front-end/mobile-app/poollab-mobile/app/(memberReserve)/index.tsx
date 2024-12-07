@@ -16,9 +16,28 @@ import { router } from "expo-router";
 import { getAccountId, getUserName } from "@/data/userData";
 import { activate_table } from "@/api/billard_table";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import CustomAlert from "@/components/alertCustom";
 const index = () => {
   const [tableData, setTableData] = useState([]);
   const [userId, setUserId] = useState("");
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [errorResponse, setErrorResponse] = useState("");
+  const alertPopup = (title, message, confirmText, cancelText) => {
+    return (
+      <CustomAlert
+        visible={alertVisible}
+        title={title}
+        message={message}
+        confirmText={confirmText}
+        cancelText={cancelText}
+        onConfirm={() => {
+          setAlertVisible(false);
+          setErrorResponse("");
+        }}
+        onCancel={() => {}}
+      />
+    );
+  };
   useEffect(() => {
     const loadStat = async () => {
       try {
@@ -53,16 +72,20 @@ const index = () => {
     try {
       console.log("start table data: ", startTableData);
       const response = await activate_table(startTableData);
-      if (response.status === 200) {
+      if (response.data.status === 200) {
         AsyncStorage.setItem("userPlayTimeReserve", response.data.data);
         router.replace("./(tableFunction)");
-      } else {
-        console.error("Error starting table:", response.data);
+      } else if (response.data.status === 400) {
+        setAlertVisible(true);
+        setErrorResponse(response.data.message);
       }
     } catch (error) {
       console.error("Error starting table:", error);
     }
   };
+  if (alertVisible) {
+    return alertPopup("Lỗi", errorResponse, "OK", "Huy");
+  }
   return (
     <SafeAreaView style={{ marginTop: 30 }}>
       <StatusBar hidden={false} style="dark" />

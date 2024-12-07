@@ -236,6 +236,9 @@ const index = () => {
           if (response.data.status === 200) {
             setBookingData(response.data.data.items);
             setIsLoading(false);
+          } else {
+            setIsLoading(false);
+            console.log("Error fetch: ", response.data);
           }
         });
       }

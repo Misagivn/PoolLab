@@ -134,6 +134,9 @@ const index = () => {
         setIsLoading(false);
         if (response.data.status === 200) {
           setCourseData(response.data.data.items);
+        } else {
+          console.log(response.errors);
+          setIsLoading(false);
         }
       });
     } catch (error) {

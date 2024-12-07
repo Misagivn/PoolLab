@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet, Text, View, Image } from "react-native";
+import { ScrollView, StyleSheet, Text, View, Image, Alert } from "react-native";
 import React, { useEffect, useState } from "react";
 import CustomHeader from "@/components/customHeader";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -7,48 +7,68 @@ import CustomDropdown from "@/components/customDropdown";
 import Icon from "@/assets/icons/icons";
 import { get_all_Store } from "@/api/store_api";
 import Button from "@/components/roundButton";
-import { get_courses } from "@/api/course_api";
+import { get_courses, register_course } from "@/api/course_api";
 import IconButton from "@/components/iconButton";
 import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
+import { getAccountId } from "@/data/userData";
+import CustomAlert from "@/components/alertCustom";
+import { router } from "expo-router";
 const CourseScreen = () => {
+  const [userId, setUserId] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [storeData, setStoreData] = useState([]);
   const [storeId, setStoreId] = useState("");
   const [courseData, setCourseData] = useState([]);
-  const formatTime = (isoString: string) => {
-    const date = new Date(isoString);
+  const [registerSuccess, setRegisterSuccess] = useState(false);
+  const [alertVisible, setAlertVisible] = useState(false);
+  const getUserId = async () => {
+    try {
+      const userId = await getAccountId();
+      setUserId(userId);
+    } catch (error) {
+      console.error("Error loading user id:", error);
+    }
+  };
+  const alertPopup = (title, message, confirmText, cancelText) => {
+    return (
+      <CustomAlert
+        visible={alertVisible}
+        title={title}
+        message={message}
+        confirmText={confirmText}
+        cancelText={cancelText}
+        onConfirm={() => {
+          setAlertVisible(false);
+          router.push("../(courseManage)");
+        }}
+        onCancel={() => {}}
+      />
+    );
+  };
+  const convertScheduleToVietnamese = (scheduleString) => {
+    // Create a mapping of English day names to Vietnamese
+    const dayMapping = {
+      Monday: "Thứ Hai",
+      Tuesday: "Thứ Ba",
+      Wednesday: "Thứ Tư",
+      Thursday: "Thứ Năm",
+      Friday: "Thứ Sáu",
+      Saturday: "Thứ Bảy",
+      Sunday: "Chủ Nhật",
+    };
 
-    // Vietnamese day names
-    const daysOfWeek = [
-      "Chủ Nhật",
-      "Thứ Hai",
-      "Thứ Ba",
-      "Thứ Tư",
-      "Thứ Năm",
-      "Thứ Sáu",
-      "Thứ Bảy",
-    ];
+    // Split the schedule string into an array of days
+    const days = scheduleString.split(",");
 
-    // Vietnamese month names
-    const monthNames = [
-      "Tháng 1",
-      "Tháng 2",
-      "Tháng 3",
-      "Tháng 4",
-      "Tháng 5",
-      "Tháng 6",
-      "Tháng 7",
-      "Tháng 8",
-      "Tháng 9",
-      "Tháng 10",
-      "Tháng 11",
-      "Tháng 12",
-    ];
+    // Convert each day to Vietnamese
+    const vietnameseDays = days.map((day) => {
+      // Trim any whitespace and get the Vietnamese translation
+      const trimmedDay = day.trim();
+      return dayMapping[trimmedDay] || trimmedDay;
+    });
 
-    // Format: "Thứ Hai, 27 Tháng 11, 2024"
-    return `${daysOfWeek[date.getDay()]}, ${date.getDate()} ${
-      monthNames[date.getMonth()]
-    }, ${date.getFullYear()}`;
+    // Join the days back into a string
+    return vietnameseDays.join(", ");
   };
   const loadStore = async () => {
     try {
@@ -71,6 +91,7 @@ const CourseScreen = () => {
   const onSubmit = () => {
     const searchData = {
       storeId: storeId,
+      status: "Kích Hoạt",
     };
     if (storeId === "") {
       console.log("Store id is empty");
@@ -95,15 +116,34 @@ const CourseScreen = () => {
       }
     }
   };
+  const registerCourse = async (courseId) => {
+    const data = {
+      studentId: userId,
+      courseId: courseId,
+    };
+    console.log("data: ", data);
+    try {
+      register_course(data).then((response) => {
+        if (response.status === 200) {
+          setRegisterSuccess(true);
+          setAlertVisible(true);
+        } else {
+          Alert.alert("Lỗi", response.data.message);
+        }
+      });
+    } catch (error) {
+      console.log("Error: ", error);
+    }
+  };
   const fetchData = async () => {
     const searchData = {
       storeId: "",
+      status: "Kích Hoạt",
     };
     try {
       setIsLoading(true);
       get_courses(searchData).then((response) => {
         if (response?.data.status === 200) {
-          const rawdata = response.data.data;
           setCourseData(response.data.data.items);
           setIsLoading(false);
         } else {
@@ -116,9 +156,17 @@ const CourseScreen = () => {
     }
   };
   useEffect(() => {
+    getUserId();
     fetchData();
     loadStore();
   }, []);
+  if (alertVisible) {
+    return alertPopup(
+      "Thông báo",
+      "Đã thực hiện thêm khóa học thành công",
+      "OK"
+    );
+  }
   return (
     <SafeAreaView>
       <ScrollView>
@@ -128,6 +176,14 @@ const CourseScreen = () => {
             <View style={styles.titleBox}>
               <Text style={styles.title}>Nhập thông tin</Text>
               <Text style={styles.subTitle}>tìm kiếm khóa học</Text>
+            </View>
+            <View style={styles.warningBox}>
+              <Text style={styles.warning}>
+                *Lưu ý: Chúng tôi không thu phí khóa học. Mọi chi phí trong khóa
+                sẽ được học viên trả trực tiếp cho giáo viên. Bạn có thể hủy
+                đăng ký học. Đồng thời khóa học cũng có thể bị hủy vì nhiều lý
+                do. Mong bạn nên kiểm tra trangh thái khóa học thường xuyên.
+              </Text>
             </View>
             <View style={styles.searchRow}>
               <Text style={styles.inputTitle}>Chọn chi nhánh:</Text>
@@ -172,7 +228,11 @@ const CourseScreen = () => {
                     <View style={styles.imageBox}>
                       <Image
                         style={styles.image}
-                        source={{ uri: item.accountAvatar }}
+                        source={
+                          item.accountAvatar
+                            ? { uri: item.accountAvatar }
+                            : require("../../assets/images/eda492de2906a8827a6266e32bcd3ffb.webp")
+                        }
                       />
                     </View>
                     <View style={styles.infoBox3}>
@@ -184,6 +244,16 @@ const CourseScreen = () => {
                       <Text style={styles.infoBoxText}>{item.accountName}</Text>
                     </View>
                     <View style={styles.infoBox2}>
+                      <Text style={styles.infoBoxTitle}>
+                        Đánh giá khóa học:
+                      </Text>
+                      <Text style={styles.infoBoxText}>{item.level}</Text>
+                    </View>
+                    <View style={styles.infoBox3}>
+                      <Text style={styles.infoBoxTitle}>Mô tả khóa học:</Text>
+                      <Text style={styles.infoBoxText}>{item.descript}</Text>
+                    </View>
+                    <View style={styles.infoBox2}>
                       <Text style={styles.infoBoxTitle}>Tên chi nhánh:</Text>
                       <Text style={styles.infoBoxText}>{item.storeName}</Text>
                     </View>
@@ -192,12 +262,24 @@ const CourseScreen = () => {
                       <Text style={styles.infoBoxText}>{item.address}</Text>
                     </View>
                     <View style={styles.infoBox3}>
-                      <Text style={styles.infoBoxTitle}>Ngày bắt đầu:</Text>
-                      <Text style={styles.infoBoxText}>{item.startDate}</Text>
+                      <Text style={styles.infoBoxTitle}>
+                        Ngày bắt đầu - kết thúc:
+                      </Text>
+                      <Text style={styles.infoBoxText}>
+                        {item.startDate} đến {item.endDate}
+                      </Text>
+                    </View>
+                    <View style={styles.infoBox2}>
+                      <Text style={styles.infoBoxTitle}>Thời gian học:</Text>
+                      <Text style={styles.infoBoxText}>
+                        {item.startTime} - {item.endTime}
+                      </Text>
                     </View>
                     <View style={styles.infoBox3}>
-                      <Text style={styles.infoBoxTitle}>Ngày kết thúc:</Text>
-                      <Text style={styles.infoBoxText}>{item.endDate}</Text>
+                      <Text style={styles.infoBoxTitle}>Các buổi học:</Text>
+                      <Text style={styles.infoBoxText}>
+                        {convertScheduleToVietnamese(item.schedule)}
+                      </Text>
                     </View>
                     <View style={styles.infoBox2}>
                       <Text style={styles.infoBoxTitle}>Giá khóa học:</Text>
@@ -218,7 +300,7 @@ const CourseScreen = () => {
                     buttonStyles={styles.submitButton}
                     title={"ĐẶT KHÓA HỌC"}
                     onPress={() => {
-                      console.log("Đăng ký khóa: " + item.id);
+                      registerCourse(item.id);
                     }}
                   />
                 </View>
@@ -263,6 +345,11 @@ const styles = StyleSheet.create({
     fontSize: 30,
     fontWeight: "bold",
     color: "black",
+  },
+  warningBox: {},
+  warning: {
+    color: "red",
+    fontSize: 10,
   },
   searchRow: {
     gap: 10,

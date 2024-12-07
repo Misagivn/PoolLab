@@ -181,7 +181,6 @@ const index = () => {
     ) {
       if (!emailFormat) {
         setAlertVisible(true);
-        // alertPopup("Lỗi", errorMessage, "OK", "Hủy");
       } else {
         setErrorMessage("Xin hãy nhập tất cả các trường");
       }
@@ -189,7 +188,6 @@ const index = () => {
       setIsLoading(true);
       try {
         update_user(updateData, userId, userToken).then((response) => {
-          console.log("response: ", response);
           if (response.status === 200) {
             setAlertVisible(true);
             setSuccessResponse("Cập nhật thành công");
@@ -229,7 +227,11 @@ const index = () => {
             <View style={styles.imageBox}>
               <Image
                 style={styles.image}
-                source={{ uri: imageSource.toString() }}
+                source={
+                  imageSource
+                    ? { uri: imageSource.toString() }
+                    : require("../../assets/images/eda492de2906a8827a6266e32bcd3ffb.webp")
+                }
               />
               <View style={styles.cameraIconOverlay}>
                 <Icon size={24} name="cameraIcon" />

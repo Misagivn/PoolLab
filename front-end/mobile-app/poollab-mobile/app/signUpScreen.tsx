@@ -86,7 +86,15 @@ const SignUpScreen = () => {
         confirmText={confirmText}
         cancelText={cancelText}
         onConfirm={() => {
-          setAlertVisible(false);
+          if (successResponse) {
+            setAlertVisible(false);
+            setSuccessResponse("");
+            router.push("loginScreen");
+          } else if (errorResponse) {
+            setAlertVisible(false);
+            setErrorMessage("");
+            setErrorResponse("");
+          }
         }}
         onCancel={() => {
           setAlertVisible(false);
@@ -127,8 +135,6 @@ const SignUpScreen = () => {
           if (response?.data.status === 200) {
             setAlertVisible(true);
             setSuccessResponse("Đăng ký thành công, xin hãy đăng nhập.");
-            //alert("Đăng ký thành công, xin hãy đăng nhập.");
-            router.push("loginScreen");
             setIsLoading(false);
           } else {
             setAlertVisible(true);
@@ -142,23 +148,11 @@ const SignUpScreen = () => {
     }
   };
   if (alertVisible) {
-    if (!errorMessage && !errorMessage1 && !errorResponse && !successResponse) {
-      return alertPopup("Lỗi", "Vui lòng nhập tất cả các trường", "OK", "Hủy");
-    } else if (!errorMessage && !errorResponse && !successResponse) {
-      return alertPopup("Lỗi", errorMessage1, "OK", "Hủy");
-    } else if (!errorMessage1 && !errorResponse && !successResponse) {
-      return alertPopup("Lỗi", errorMessage, "OK", "Hủy");
-    } else if (
-      errorMessage &&
-      errorMessage1 &&
-      !errorResponse &&
-      !successResponse
-    ) {
-      return alertPopup("Lỗi", "Vui lòng nhập tất cả đúng format", "OK", "Hủy");
-    } else if (errorResponse && !successResponse) {
+    if (successResponse) {
+      return alertPopup("Thành công", successResponse, "OK", "Hủy");
+    }
+    if (errorResponse) {
       return alertPopup("Lỗi", errorResponse, "OK", "Hủy");
-    } else if (successResponse) {
-      return alertPopup("Lỗi", successResponse, "OK", "Hủy");
     }
   }
   return (

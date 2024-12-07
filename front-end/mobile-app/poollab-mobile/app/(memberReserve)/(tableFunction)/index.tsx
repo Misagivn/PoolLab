@@ -1,4 +1,11 @@
-import { SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  Pressable,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import React, { useEffect, useState, useRef } from "react";
 import { getStoredTableDataReserve } from "@/api/tokenDecode";
 import { theme } from "@/constants/theme";
@@ -10,6 +17,7 @@ import { deactive_table } from "@/api/billard_table";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import CountdownTimer from "@/components/countDownTimer";
 import product from "./product";
+import { get_user_order_product } from "@/api/product_api";
 const index = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [tableData, setTableData] = useState([]);
@@ -19,11 +27,24 @@ const index = () => {
   const [userName, setUserName] = useState("");
   const [timeRemaining, setTimeRemaining] = useState("");
   const [havePlay, setHavePlay] = useState("");
+  const [tableId, setTableId] = useState("");
+  const [productOrder, setProductOrder] = useState([]);
+  const getProductData = async () => {
+    try {
+      const userProducts = get_user_order_product(tableId);
+      if (userProducts) {
+        setProductOrder(await userProducts);
+      }
+    } catch (error) {
+      console.error("Error loading stored user:", error);
+    }
+  };
   useEffect(() => {
     const loadStat = async () => {
       try {
         const storedTableData = await getStoredTableDataReserve();
         if (storedTableData) {
+          setTableId(storedTableData.data.bidaTable.id);
           setTableData(storedTableData.data);
           setTimeCanPlay(storedTableData.data.timeCus);
         }
@@ -223,15 +244,46 @@ const index = () => {
           <View style={styles.titleBox}>
             <Text style={styles.title}>Mua sản phẩm</Text>
             <Text style={styles.subTitle}>có trong hệ thống</Text>
-            <Button
-              title="ĐẶT SẢN PHẨM"
-              buttonStyles={styles.productButton}
-              textStyles={styles.ButtonText}
+            <Pressable
               onPress={() => {
-                router.push("./product");
+                getProductData();
               }}
-              loading={isLoading}
-            />
+            >
+              <Icon
+                name="refreshIcon"
+                size={30}
+                strokeWidth={3}
+                color="black"
+              />
+            </Pressable>
+            <View style={styles.titleBox}>
+              {productOrder.length > 0 ? (
+                productOrder.map((item) => (
+                  <View key={item.id} style={styles.dataBox}>
+                    <View style={styles.innerBox}>
+                      <View style={styles.infoBox2}>
+                        <Text style={styles.infoBoxTitle}>Tên mặt hàng:</Text>
+                        <Text style={styles.infoBoxText}>
+                          {item.productName}
+                        </Text>
+                      </View>
+                      <View style={styles.infoBox2}>
+                        <Text style={styles.infoBoxTitle}>Số lượng:</Text>
+                        <Text style={styles.infoBoxText}>{item.quantity}</Text>
+                      </View>
+                      <View style={styles.infoBox2}>
+                        <Text style={styles.infoBoxTitle}>Giá mặt hàng:</Text>
+                        <Text style={styles.infoBoxText}>
+                          {item.price.toLocaleString("en-US")}
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+                ))
+              ) : (
+                <Text style={styles.infoBoxText}>Giỏ hàng rỗng.</Text>
+              )}
+            </View>
           </View>
         </View>
       </ScrollView>
@@ -327,5 +379,31 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.greenCheck,
     borderRadius: 10,
     marginTop: 10,
+  },
+  dataBox: {
+    backgroundColor: theme.colors.background,
+    marginVertical: 5,
+    marginHorizontal: 5,
+    padding: 10,
+    shadowColor: "black",
+    shadowOffset: {
+      width: 5,
+      height: 10,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 6,
+    borderRadius: 20,
+    borderCurve: "continuous",
+  },
+  innerBox: {
+    backgroundColor: theme.colors.background,
+    padding: 15,
+    borderRadius: 10,
+    borderCurve: "continuous",
+  },
+  infoBox2: {
+    flexDirection: "row",
+    gap: 10,
   },
 });

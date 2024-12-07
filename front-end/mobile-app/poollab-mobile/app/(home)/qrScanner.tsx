@@ -77,7 +77,8 @@ const qrScanner = () => {
   async function onBarcodeScanned({ data }: BarcodeScanningResult) {
     if (!scanningEnable) return;
     try {
-      Vibration.vibrate(1000);
+      Vibration.vibrate(500);
+      setScanningEnable(false);
       try {
         const openTableData = {
           billiardTableId: data,

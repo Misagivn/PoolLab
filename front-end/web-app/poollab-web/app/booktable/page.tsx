@@ -47,7 +47,7 @@ export default function StaffPage() {
   const [activeLeftTab, setActiveLeftTab] = useState("table");
   const [tables, setTables] = useState<Table[]>([]);
   const [menus, setMenus] = useState<Menu[]>([]);
-  const [bidaType, setbidaType] = useState<BidaType[]>([]);
+  const [bidaType, setBidaType] = useState<BidaType[]>([]);
   const [area, setArea] = useState<Area[]>([]);
   const [selectedTable, setSelectedTable] = useState<Table | null>(null);
   const [selectedBidaType, setSelectedBidaType] = useState<string>("");
@@ -70,6 +70,7 @@ export default function StaffPage() {
     }
   }, [activeLeftTab]);
 
+  // Fetch all bida types
   const fetchBidaType = async () => {
     try {
       const response = await fetch(
@@ -81,20 +82,24 @@ export default function StaffPage() {
       );
 
       const data = await response.json();
-
       if (data.status === 404) {
         toast({
           status: "error",
           description: data.message,
         });
       } else {
-        setbidaType(data.data);
+        setBidaType(data.data);
       }
     } catch (error) {
       console.log(error);
+      toast({
+        status: "error",
+        description: "Có lỗi xảy ra khi lấy thông tin loại bàn",
+      });
     }
   };
 
+  // Fetch all areas
   const fetchArea = async () => {
     try {
       const response = await fetch(
@@ -106,7 +111,6 @@ export default function StaffPage() {
       );
 
       const data = await response.json();
-
       if (data.status === 404) {
         toast({
           status: "error",
@@ -117,9 +121,14 @@ export default function StaffPage() {
       }
     } catch (error) {
       console.log(error);
+      toast({
+        status: "error",
+        description: "Có lỗi xảy ra khi lấy thông tin khu vực",
+      });
     }
   };
 
+  // Fetch all tables
   const fetchTables = async () => {
     try {
       const response = await fetch(
@@ -141,9 +150,14 @@ export default function StaffPage() {
       }
     } catch (error) {
       console.log(error);
+      toast({
+        status: "error",
+        description: "Có lỗi xảy ra khi lấy thông tin bàn",
+      });
     }
   };
 
+  // Fetch all foods
   const fetchFoods = async () => {
     try {
       const response = await fetch(
@@ -165,9 +179,14 @@ export default function StaffPage() {
       }
     } catch (error) {
       console.log(error);
+      toast({
+        status: "error",
+        description: "Có lỗi xảy ra khi lấy thông tin thực đơn",
+      });
     }
   };
 
+  // Handle filtering tables
   const handleFilter = async () => {
     try {
       const response = await fetch(
@@ -178,9 +197,6 @@ export default function StaffPage() {
         }
       );
 
-      console.log(storeId);
-      console.log(selectedArea);
-      console.log(selectedBidaType);
       const data = await response.json();
       if (data.status === 404) {
         toast({
@@ -192,6 +208,10 @@ export default function StaffPage() {
       }
     } catch (error) {
       console.log(error);
+      toast({
+        status: "error",
+        description: "Có lỗi xảy ra khi lọc bàn",
+      });
     }
   };
 
@@ -218,8 +238,11 @@ export default function StaffPage() {
           <div className={styles.left_main}>
             <div className={styles.filter_container}>
               {activeLeftTab === "table" && (
-                <form className={styles.table_filter} action={handleFilter}>
-                  <div className="">
+                <form className={styles.table_filter} onSubmit={(e) => {
+                  e.preventDefault();
+                  handleFilter();
+                }}>
+                  <div>
                     <select
                       value={selectedBidaType}
                       onChange={(e) => setSelectedBidaType(e.target.value)}
@@ -238,7 +261,7 @@ export default function StaffPage() {
                     <i className="bx bxs-down-arrow"></i>
                   </div>
 
-                  <div className="">
+                  <div>
                     <select
                       value={selectedArea}
                       onChange={(e) => setSelectedArea(e.target.value)}
@@ -257,7 +280,7 @@ export default function StaffPage() {
                     <i className="bx bxs-down-arrow"></i>
                   </div>
 
-                  <div className="">
+                  <div>
                     <select
                       value={selectedStatus}
                       onChange={(e) => setSelectedStatus(e.target.value)}
@@ -274,11 +297,12 @@ export default function StaffPage() {
                     <i className="bx bxs-down-arrow"></i>
                   </div>
 
-                  <button className={styles.filter_btn}>Tìm kiếm</button>
+                  <button type="submit" className={styles.filter_btn}>Tìm kiếm</button>
                 </form>
               )}
             </div>
-            <div className="">
+
+            <div>
               {activeLeftTab === "table" && (
                 <div className={styles.card_container}>
                   {Array.isArray(tables) &&
@@ -293,7 +317,7 @@ export default function StaffPage() {
                             src={table.image}
                             alt="Table image"
                             className={styles.card_img}
-                          ></img>
+                          />
                         </div>
 
                         <div className={styles.card_content}>
@@ -324,14 +348,13 @@ export default function StaffPage() {
                       <div
                         key={menu.id}
                         className={styles.card}
-                        //onClick={() => setSelectedTable(menu)}
                       >
                         <div>
                           <img
                             src={menu.productImg}
                             alt="Menu image"
                             className={styles.card_img}
-                          ></img>
+                          />
                         </div>
 
                         <div className={styles.card_content}>
@@ -363,7 +386,7 @@ export default function StaffPage() {
           <button className="profile">Profile</button>
         </div>
         <div className={styles.right_content}>
-          <RightTab selectedTable={selectedTable} />
+          <RightTab selectedTable={selectedTable} menus={menus} />
         </div>
       </div>
     </div>

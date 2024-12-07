@@ -150,7 +150,7 @@ export const ProductDetail = ({
               </GridItem>
             </Grid>
 
-            <Box>
+            {/* <Box>
               <Button
                 leftIcon={<EditIcon />}
                 colorScheme="blue"
@@ -159,7 +159,7 @@ export const ProductDetail = ({
               >
                 Chỉnh sửa sản phẩm
               </Button>
-            </Box>
+            </Box> */}
           </VStack>
         </ModalBody>
       </ModalContent>

@@ -89,7 +89,7 @@ export default function TablesPage() {
                   <Tr key={table.id}>
                     <BilliardTableRow 
                       table={table}
-                      index={(pagination.currentPage - 1) * pagination.pageSize + index + 1}
+                      index={(pagination.currentPage - 1) * pagination.pageSize + index}
                       onDelete={deleteTable}
                       onViewDetail={fetchTableDetail}
                       onUpdate={updateTable}         

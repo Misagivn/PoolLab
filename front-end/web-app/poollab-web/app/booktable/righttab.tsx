@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import styles from "./layout.module.css";
 import { useToast } from "@chakra-ui/react";
 
 interface Table {
   id: string;
   name: string;
+  descript: string;
+  image: string;
   storeId: string;
   areaId: string;
   billiardTypeId: string;
@@ -15,6 +17,33 @@ interface Table {
   createdDate: string;
   updatedDate: string;
   status: string;
+}
+
+interface Menu {
+  id: string;
+  name: string;
+  descript: string;
+  quantity: number;
+  minQuantity: number;
+  price: number;
+  productImg: string;
+  storeId: string;
+  productTypeId: string;
+  productTypeName: string;
+  productGroupId: string;
+  groupName: string;
+  unitId: string;
+  unitName: string;
+  createdDate: string;
+  updatedDate: string;
+  status: string;
+}
+
+interface OrderItem {
+  productName: string;
+  productId: string;
+  quantity: number;
+  price: number;
 }
 
 interface Playtime {
@@ -47,68 +76,63 @@ interface Order {
   status: string;
 }
 
-interface Menu {
+interface OrderDetail {
   id: string;
-  name: string;
-  descript: string;
+  productName: string;
   quantity: number;
-  minQuantity: number;
   price: number;
-  productImg: string;
-  status: string;
 }
 
-interface OrderDetail {
-  productName: string;
-  productId: string;
-  quantity: number;
-  price: number;
+interface RightTabProps {
+  selectedTable: Table | null;
+  menus: Menu[];
+  orderItems: OrderItem[];
+  onUpdateOrderItems: (items: OrderItem[]) => void;
 }
 
 const storeId = sessionStorage.getItem("storeId");
 const username = sessionStorage.getItem("username");
 
-function RightTab({ selectedTable, menus }: { selectedTable: Table | null; menus: Menu[] }) {
+function RightTab({ selectedTable, menus, orderItems, onUpdateOrderItems }: RightTabProps) {
   const toast = useToast();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [showFoodDialog, setShowFoodDialog] = useState(false);
   const [order, setOrder] = useState<Order | null>(null);
   const [customerPaid, setCustomerPaid] = useState<number>(0);
   const [change, setChange] = useState<number>(0);
   const [stop, setStop] = useState<boolean>(false);
-  const [selectedFoods, setSelectedFoods] = useState<OrderDetail[]>([]);
-
-  // Handle quantity change for a food item
-  const handleQuantityChange = (menuId: string, menuName: string, price: number, quantity: number) => {
-    setSelectedFoods(prev => {
-      const existing = prev.find(f => f.productId === menuId);
-      if (existing) {
-        if (quantity === 0) {
-          return prev.filter(f => f.productId !== menuId);
-        }
-        return prev.map(f => 
-          f.productId === menuId 
-            ? { ...f, quantity: quantity }
-            : f
-        );
-      } else if (quantity > 0) {
-        return [...prev, {
-          productId: menuId,
-          productName: menuName,
-          quantity: quantity,
-          price: price
-        }];
-      }
-      return prev;
-    });
+  const formatCurrency = (amount: number): string => {
+    return amount.toLocaleString('vi-VN', { style: 'decimal' }) + ' ₫';
   };
 
-  // Handle serving foods to table
-  const handleServeFood = async () => {
-    if (!selectedTable || selectedFoods.length === 0) {
+  useEffect(() => {
+    // Reset states when table changes
+    setStop(false);
+    setCustomerPaid(0);
+    setChange(0);
+    setOrder(null);
+    onUpdateOrderItems([]);
+  }, [selectedTable]);
+
+  const handleUpdateQuantity = (productId: string, quantity: number) => {
+    onUpdateOrderItems(
+      orderItems.map(item =>
+        item.productId === productId
+          ? { ...item, quantity: Math.max(1, quantity) }
+          : item
+      )
+    );
+  };
+
+  const handleRemoveItem = (productId: string) => {
+    onUpdateOrderItems(orderItems.filter(item => item.productId !== productId));
+  };
+
+  const handleServeOrder = async () => {
+    if (!selectedTable || !orderItems.length) {
       toast({
-        title: "Vui lòng chọn món",
-        status: "warning",
+        title: "Không thể đặt món",
+        description: "Vui lòng chọn món trước khi phục vụ",
+        status: "warning"
       });
       return;
     }
@@ -119,45 +143,45 @@ function RightTab({ selectedTable, menus }: { selectedTable: Table | null; menus
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(selectedFoods)
+          body: JSON.stringify(orderItems)
         }
       );
 
       const data = await response.json();
-      if (data.status === 404 || data.status === 400) {
+      
+      if (response.ok) {
         toast({
-          status: "error",
-          description: data.message,
+          title: "Đặt món thành công",
+          status: "success"
         });
+        onUpdateOrderItems([]);
       } else {
         toast({
-          title: "Phục vụ thành công",
-          status: "success",
+          title: "Đặt món thất bại",
+          description: data.message,
+          status: "error"
         });
-        setSelectedFoods([]);
-        setShowFoodDialog(false);
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
       toast({
-        status: "error",
-        description: "Có lỗi xảy ra khi phục vụ món",
+        title: "Lỗi",
+        description: "Không thể kết nối với máy chủ",
+        status: "error"
       });
     }
   };
 
   const handlePaymentOrder = async () => {
-    if (!order) return;
-    
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_LOCAL_URL}/order/updatecuspayorder/${order.id}`,
+        `${process.env.NEXT_PUBLIC_LOCAL_URL}/order/updatecuspayorder/${order?.id}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            discount: order.discount,
-            totalPrice: order.totalPrice,
+            discount: order?.discount,
+            totalPrice: order?.totalPrice,
             customerPay: customerPaid,
             excessCash: change,
             status: "Hoàn Thành",
@@ -179,15 +203,12 @@ function RightTab({ selectedTable, menus }: { selectedTable: Table | null; menus
         });
         setCustomerPaid(0);
         setChange(0);
-        setIsDialogOpen(false);
+        setStop(false);
       }
     } catch (error) {
-      console.log(error);
-      toast({
-        status: "error",
-        description: "Có lỗi xảy ra khi thanh toán",
-      });
+      console.error(error);
     }
+    setIsDialogOpen(false);
   };
 
   const handleOrder = async () => {
@@ -212,11 +233,7 @@ function RightTab({ selectedTable, menus }: { selectedTable: Table | null; menus
           setIsDialogOpen(true);
         }
       } catch (error) {
-        console.log(error);
-        toast({
-          status: "error",
-          description: "Có lỗi xảy ra khi lấy thông tin hoá đơn",
-        });
+        console.error(error);
       }
     } else {
       toast({
@@ -228,77 +245,69 @@ function RightTab({ selectedTable, menus }: { selectedTable: Table | null; menus
   };
 
   const handleActivate = async () => {
-    if (selectedTable) {
-      try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_LOCAL_URL}/billiardtable/activatetableforguest/${selectedTable.id}`,
-          {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ storeId: storeId, staffName: username }),
-          }
-        );
-
-        const data = await response.json();
-        if (data.status === 404 || data.status === 400) {
-          toast({
-            status: "error",
-            description: data.message,
-          });
-        } else {
-          toast({
-            title: "Kích Hoạt Thành Công",
-            description: data.message,
-            status: "success",
-          });
+    if (!selectedTable) return;
+    
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_LOCAL_URL}/billiardtable/activatetableforguest/${selectedTable.id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ storeId: storeId, staffName: username }),
         }
-      } catch (error) {
-        console.log(error);
+      );
+
+      const data = await response.json();
+      if (data.status === 404 || data.status === 400) {
         toast({
           status: "error",
-          description: "Có lỗi xảy ra khi kích hoạt bàn",
+          description: data.message,
+        });
+      } else {
+        toast({
+          title: "Kích Hoạt Thành Công",
+          description: data.message,
+          status: "success",
         });
       }
+    } catch (error) {
+      console.error(error);
     }
   };
 
   const handleStop = async () => {
-    if (selectedTable) {
-      try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_LOCAL_URL}/playtime/stopplaytime`,
-          {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              billiardTableID: selectedTable.id,
-              customerID: null,
-              customerTime: null,
-            }),
-          }
-        );
+    if (!selectedTable) return;
 
-        const data = await response.json();
-        if (data.status === 404 || data.status === 400) {
-          toast({
-            status: "error",
-            description: data.message,
-          });
-        } else {
-          toast({
-            title: "Dừng Chơi Thành Công",
-            description: data.message,
-            status: "success",
-          });
-          setStop(true);
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_LOCAL_URL}/playtime/stopplaytime`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            billiardTableID: selectedTable.id,
+            customerID: null,
+            customerTime: null,
+          }),
         }
-      } catch (error) {
-        console.log(error);
+      );
+
+      const data = await response.json();
+      if (data.status === 404 || data.status === 400) {
         toast({
           status: "error",
-          description: "Có lỗi xảy ra khi dừng chơi",
+          description: data.message,
         });
+      } else {
+        toast({
+          title: "Dừng Chơi Thành Công",
+          description: data.message,
+          status: "success",
+        });
+        setStop(true);
       }
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -314,9 +323,114 @@ function RightTab({ selectedTable, menus }: { selectedTable: Table | null; menus
         </div>
       </div>
 
-      <div className={styles.table_order}>
-        <p></p>
+      {/* <div className={styles.table_order}>
+        {selectedTable.status === "Có Khách" && (
+          <div className={styles.order_section}>
+            <h3>Đặt món</h3>
+            <div className={styles.selected_items}>
+              {orderItems.length > 0 ? (
+                <>
+                  {orderItems.map((item) => (
+                    <div key={item.productId} className={styles.selected_item}>
+                      <span>{item.productName}</span>
+                      <div className={styles.item_controls}>
+                        <input
+                          type="number"
+                          min="1"
+                          value={item.quantity}
+                          onChange={(e) => handleUpdateQuantity(item.productId, parseInt(e.target.value) || 1)}
+                          className={styles.quantity_input}
+                        />
+                        <button
+                          onClick={() => handleRemoveItem(item.productId)}
+                          className={styles.remove_button}
+                        >
+                          Xóa
+                        </button>
+                      </div>
+                      <span>{item.price * item.quantity} đ</span>
+                    </div>
+                  ))}
+                  <div className={styles.order_total}>
+                    Tổng cộng: {orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0)} đ
+                  </div>
+                  <button
+                    className={styles.serve_button}
+                    onClick={handleServeOrder}
+                  >
+                    Phục vụ
+                  </button>
+                </>
+              ) : (
+                <p>Chưa có món nào được chọn</p>
+              )}
+            </div>
+          </div>
+        )}
+      </div> */}
+
+<div className={styles.table_order}>
+  {selectedTable.status === "Có Khách" && (
+    <div className={styles.order_section}>
+      <h3>Đặt món</h3>
+      <div className={styles.order_items_container}>
+        {orderItems.length > 0 ? (
+          orderItems.map((item) => (
+            <div key={item.productId} className={styles.order_item}>
+              <div className={styles.item_info}>
+                <div className={styles.item_name}>{item.productName}</div>
+                <div className={styles.item_price}>{formatCurrency(item.price * item.quantity)}</div>
+              </div>
+              <div className={styles.quantity_controls}>
+                <button
+                  className={styles.quantity_btn}
+                  onClick={() => handleUpdateQuantity(item.productId, item.quantity - 1)}
+                  disabled={item.quantity <= 1}
+                >
+                  -
+                </button>
+                <input
+                  type="number"
+                  value={item.quantity}
+                  onChange={(e) => handleUpdateQuantity(item.productId, parseInt(e.target.value) || 1)}
+                  className={styles.quantity_input}
+                  min="1"
+                />
+                <button
+                  className={styles.quantity_btn}
+                  onClick={() => handleUpdateQuantity(item.productId, item.quantity + 1)}
+                >
+                  +
+                </button>
+                <button
+                  className={styles.remove_btn}
+                  onClick={() => handleRemoveItem(item.productId)}
+                >
+                  Xóa
+                </button>
+              </div>
+            </div>
+          ))
+        ) : (
+          <p>Chưa có món nào được chọn</p>
+        )}
       </div>
+
+      {orderItems.length > 0 && (
+        <div className={styles.order_summary}>
+          <div className={styles.total_amount}>
+          Tổng cộng: {formatCurrency(
+                    orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
+                  )}
+          </div>
+          <button className={styles.serve_button} onClick={handleServeOrder}>
+            Phục vụ
+          </button>
+        </div>
+      )}
+    </div>
+  )}
+</div>
 
       {selectedTable.status === "Bàn Trống" && (
         <div className={styles.table_btn}>
@@ -328,9 +442,6 @@ function RightTab({ selectedTable, menus }: { selectedTable: Table | null; menus
 
       {selectedTable.status === "Có Khách" && (
         <div className={styles.table_btn}>
-          <button className={styles.add_food_btn} onClick={() => setShowFoodDialog(true)}>
-            Thêm món
-          </button>
           <button className={styles.stop_btn} onClick={handleStop}>
             Dừng Chơi
           </button>
@@ -340,8 +451,7 @@ function RightTab({ selectedTable, menus }: { selectedTable: Table | null; menus
         </div>
       )}
 
-      {/* Payment Dialog */}
-      {isDialogOpen && order && (
+      {isDialogOpen && (
         <div className={styles.dialog_container}>
           <div className={styles.dialog_content}>
             <div className={styles.wrap_head}>
@@ -350,9 +460,9 @@ function RightTab({ selectedTable, menus }: { selectedTable: Table | null; menus
             </div>
 
             <div className={styles.order_header}>
-              <h2>Khách hàng: {order.username}</h2>
-              <p>{order.orderCode}</p>
-              <p>{order.orderDate}</p>
+              <h2>Khách hàng: {order?.username}</h2>
+              <p>{order?.orderCode}</p>
+              <p>{order?.orderDate}</p>
             </div>
 
             <div className={styles.dialog_table}>
@@ -363,24 +473,21 @@ function RightTab({ selectedTable, menus }: { selectedTable: Table | null; menus
                     <th>Tên</th>
                     <th>Số Lượng</th>
                     <th>Giá</th>
-                    <th>Thành tiền</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
                     <td>1</td>
-                    <td>{order.playTime.name}</td>
-                    <td>{order.playTime.totalTime}</td>
-                    <td>{order.playTime.totalPrice}</td>
-                    <td>{order.playTime.totalPrice}</td>
+                    <td>{order?.playTime.name}</td>
+                    <td>{order?.playTime.totalTime}</td>
+                    <td>{formatCurrency(order?.playTime.totalPrice || 0)}</td>
                   </tr>
-                  {order.orderDetails.map((detail, index) => (
-                    <tr key={index}>
+                  {order?.orderDetails.map((detail, index) => (
+                    <tr key={detail.id}>
                       <td>{index + 2}</td>
                       <td>{detail.productName}</td>
                       <td>{detail.quantity}</td>
-                      <td>{detail.price}</td>
-                      <td>{detail.price * detail.quantity}</td>
+                      <td>{formatCurrency(detail.price)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -388,7 +495,7 @@ function RightTab({ selectedTable, menus }: { selectedTable: Table | null; menus
             </div>
 
             <div className={styles.payment_info}>
-              <h2>Tổng tiền: {order.totalPrice}</h2>
+              <h2>Tổng tiền: {order?.totalPrice} đ</h2>
               <div className={styles.payment_input}>
                 <label>Khách thanh toán: </label>
                 <input
@@ -396,7 +503,7 @@ function RightTab({ selectedTable, menus }: { selectedTable: Table | null; menus
                   value={customerPaid}
                   onChange={(e) => {
                     const paid = parseFloat(e.target.value) || 0;
-                    const price = order.totalPrice ?? 0;
+                    const price = order?.totalPrice ?? 0;
                     setCustomerPaid(paid);
                     setChange(paid - price);
                   }}
@@ -414,55 +521,6 @@ function RightTab({ selectedTable, menus }: { selectedTable: Table | null; menus
 
             <div className={styles.payment1_btn}>
               <button onClick={handlePaymentOrder}>Thanh toán</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Food Dialog */}
-      {showFoodDialog && (
-        <div className={styles.dialog_container}>
-          <div className={styles.dialog_content}>
-            <div className={styles.wrap_head}>
-              <h2>Thêm món</h2>
-              <button onClick={() => setShowFoodDialog(false)}>X</button>
-            </div>
-
-            <div className={styles.dialog_table}>
-              <table className={styles.content_table}>
-                <thead>
-                  <tr>
-                    <th>Tên món</th>
-                    <th>Giá</th>
-                    <th>Số lượng</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {menus?.map((menu) => (
-                    <tr key={menu.id}>
-                      <td>{menu.name}</td>
-                      <td>{menu.price}</td>
-                      <td>
-                        <input 
-                          type="number"
-                          min="0"
-                          value={selectedFoods.find(f => f.productId === menu.id)?.quantity || 0}
-                          onChange={(e) => handleQuantityChange(
-                            menu.id, 
-                            menu.name,
-                            menu.price,
-                            parseInt(e.target.value) || 0
-                          )}
-                        />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            <div className={styles.payment1_btn}>
-              <button onClick={handleServeFood}>Phục vụ</button>
             </div>
           </div>
         </div>

@@ -448,25 +448,198 @@
   color: white;
 }
 
-.add_food_btn {
-  color: #fafafa;
-  background-color: #017d49;
-  padding: 10px 20px;
-  text-align: center;
-  font-weight: 700;
+/* order */
+.order_section {
+  margin-top: 20px;
+  padding: 15px;
+  background: #fafafa;
   border-radius: 10px;
-  font-size: 20px;
-  font-weight: 700;
-  height: auto;
-  margin-right: 20px;
-  width: 30%;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.add_food_btn:hover {
-  background-color: #56c596;
+.order_items {
+  margin-top: 15px;
+  max-height: 300px;
+  overflow-y: auto;
 }
 
-/* Adjust other button widths */
-.stop_btn, .payment_btn {
-  width: 30%;
+.order_item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.quantity_input {
+  width: 60px;
+  padding: 5px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  text-align: center;
+}
+
+.add_button {
+  background-color: #017d49;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+}
+
+.add_button:hover {
+  background-color: #015d35;
+}
+
+.remove_button {
+  background-color: #b8001f;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+}
+
+.remove_button:hover {
+  background-color: #8a0017;
+}
+
+.order_total {
+  margin-top: 15px;
+  font-weight: bold;
+  text-align: right;
+  font-size: 18px;
+}
+
+.serve_button {
+  width: 100%;
+  background-color: #017d49;
+  color: white;
+  padding: 10px;
+  border-radius: 5px;
+  border: none;
+  margin-top: 15px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.serve_button:hover {
+  background-color: #015d35;
+}
+
+.table_order {
+  padding: 15px;
+  flex: 4;
+  display: flex;
+  flex-direction: column;
+}
+
+
+.order_section {
+  margin-top: 20px;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.order_items_container {
+  max-height: 280px; /* Giới hạn chiều cao */
+  overflow-y: auto;
+  margin-bottom: 20px;
+}
+
+.order_item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.item_info {
+  flex: 1;
+}
+
+.item_name {
+  font-weight: 500;
+  margin-bottom: 5px;
+}
+
+.item_price {
+  color: #666;
+}
+
+.quantity_controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.quantity_btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  border: 1px solid #017d49;
+  background: white;
+  color: #017d49;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.quantity_btn:hover {
+  background: #e6f4ef;
+}
+
+.quantity_input {
+  width: 40px;
+  text-align: center;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 2px;
+}
+
+.remove_btn {
+  padding: 4px 8px;
+  background-color: #b8001f;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  margin-left: 10px;
+  cursor: pointer;
+}
+
+.remove_btn:hover {
+  background-color: #8a0017;
+}
+
+.order_summary {
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 1px solid #eee;
+}
+
+.total_amount {
+  font-size: 18px;
+  font-weight: bold;
+  text-align: right;
+  margin-bottom: 10px;
+}
+
+.serve_button {
+  width: 100%;
+  padding: 12px;
+  background-color: #017d49;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.serve_button:hover {
+  background-color: #015d35;
 }

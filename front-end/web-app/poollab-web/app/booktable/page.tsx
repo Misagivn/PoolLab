@@ -43,25 +43,30 @@ interface Menu {
   status: string;
 }
 
+interface OrderItem {
+  productName: string;
+  productId: string;
+  quantity: number;
+  price: number;
+}
+
 export default function StaffPage() {
   const [activeLeftTab, setActiveLeftTab] = useState("table");
   const [tables, setTables] = useState<Table[]>([]);
   const [menus, setMenus] = useState<Menu[]>([]);
-  const [bidaType, setBidaType] = useState<BidaType[]>([]);
+  const [bidaType, setbidaType] = useState<BidaType[]>([]);
   const [area, setArea] = useState<Area[]>([]);
   const [selectedTable, setSelectedTable] = useState<Table | null>(null);
   const [selectedBidaType, setSelectedBidaType] = useState<string>("");
   const [selectedArea, setSelectedArea] = useState<string>("");
   const [selectedStatus, setSelectedStatus] = useState<string>("");
+  const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
   const toast = useToast();
 
   const storeId = sessionStorage.getItem("storeId");
 
   useEffect(() => {
     if (activeLeftTab === "table") {
-      setSelectedArea("");
-      setSelectedBidaType("");
-      setSelectedStatus("");
       fetchBidaType();
       fetchArea();
       fetchTables();
@@ -70,7 +75,59 @@ export default function StaffPage() {
     }
   }, [activeLeftTab]);
 
-  // Fetch all bida types
+  // Auto refresh data every 30 seconds
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      if (activeLeftTab === "table") {
+        fetchTables();
+      }
+    }, 30000);
+
+    return () => clearInterval(intervalId);
+  }, [activeLeftTab]);
+
+  const handleAddToOrder = (menu: Menu) => {
+    if (!selectedTable) {
+      toast({
+        title: "Chưa chọn bàn",
+        description: "Vui lòng chọn bàn trước khi đặt món",
+        status: "warning"
+      });
+      return;
+    }
+
+    if (selectedTable.status !== "Có Khách") {
+      toast({
+        title: "Không thể đặt món",
+        description: "Chỉ có thể đặt món cho bàn đang có khách",
+        status: "warning"
+      });
+      return;
+    }
+
+    const existingItem = orderItems.find(item => item.productId === menu.id);
+    if (existingItem) {
+      setOrderItems(orderItems.map(item =>
+        item.productId === menu.id
+          ? { ...item, quantity: item.quantity + 1 }
+          : item
+      ));
+    } else {
+      setOrderItems([...orderItems, {
+        productId: menu.id,
+        productName: menu.name,
+        quantity: 1,
+        price: menu.price
+      }]);
+    }
+
+    toast({
+      title: "Đã thêm món",
+      description: `Đã thêm ${menu.name} vào order`,
+      status: "success"
+    });
+  };
+
   const fetchBidaType = async () => {
     try {
       const response = await fetch(
@@ -88,18 +145,13 @@ export default function StaffPage() {
           description: data.message,
         });
       } else {
-        setBidaType(data.data);
+        setbidaType(data.data);
       }
     } catch (error) {
-      console.log(error);
-      toast({
-        status: "error",
-        description: "Có lỗi xảy ra khi lấy thông tin loại bàn",
-      });
+      console.error(error);
     }
   };
 
-  // Fetch all areas
   const fetchArea = async () => {
     try {
       const response = await fetch(
@@ -120,15 +172,10 @@ export default function StaffPage() {
         setArea(data.data);
       }
     } catch (error) {
-      console.log(error);
-      toast({
-        status: "error",
-        description: "Có lỗi xảy ra khi lấy thông tin khu vực",
-      });
+      console.error(error);
     }
   };
 
-  // Fetch all tables
   const fetchTables = async () => {
     try {
       const response = await fetch(
@@ -147,17 +194,21 @@ export default function StaffPage() {
         });
       } else {
         setTables(data.data.items);
+        // Update selected table if it exists in new data
+        if (selectedTable) {
+          const updatedTable = data.data.items.find(
+            (table: Table) => table.id === selectedTable.id
+          );
+          if (updatedTable) {
+            setSelectedTable(updatedTable);
+          }
+        }
       }
     } catch (error) {
-      console.log(error);
-      toast({
-        status: "error",
-        description: "Có lỗi xảy ra khi lấy thông tin bàn",
-      });
+      console.error(error);
     }
   };
 
-  // Fetch all foods
   const fetchFoods = async () => {
     try {
       const response = await fetch(
@@ -178,15 +229,10 @@ export default function StaffPage() {
         setMenus(data.data.items);
       }
     } catch (error) {
-      console.log(error);
-      toast({
-        status: "error",
-        description: "Có lỗi xảy ra khi lấy thông tin thực đơn",
-      });
+      console.error(error);
     }
   };
 
-  // Handle filtering tables
   const handleFilter = async () => {
     try {
       const response = await fetch(
@@ -207,11 +253,7 @@ export default function StaffPage() {
         setTables(data.data.items);
       }
     } catch (error) {
-      console.log(error);
-      toast({
-        status: "error",
-        description: "Có lỗi xảy ra khi lọc bàn",
-      });
+      console.error(error);
     }
   };
 
@@ -227,7 +269,7 @@ export default function StaffPage() {
           </button>
 
           <button
-            onClick={() => setActiveLeftTab("food")}
+            onClick={() => setActiveLeftTab("food")} 
             className={activeLeftTab === "food" ? styles.active : ""}
           >
             Thực Đơn
@@ -242,7 +284,7 @@ export default function StaffPage() {
                   e.preventDefault();
                   handleFilter();
                 }}>
-                  <div>
+                  <div className="">
                     <select
                       value={selectedBidaType}
                       onChange={(e) => setSelectedBidaType(e.target.value)}
@@ -261,7 +303,7 @@ export default function StaffPage() {
                     <i className="bx bxs-down-arrow"></i>
                   </div>
 
-                  <div>
+                  <div className="">
                     <select
                       value={selectedArea}
                       onChange={(e) => setSelectedArea(e.target.value)}
@@ -280,7 +322,7 @@ export default function StaffPage() {
                     <i className="bx bxs-down-arrow"></i>
                   </div>
 
-                  <div>
+                  <div className="">
                     <select
                       value={selectedStatus}
                       onChange={(e) => setSelectedStatus(e.target.value)}
@@ -297,7 +339,9 @@ export default function StaffPage() {
                     <i className="bx bxs-down-arrow"></i>
                   </div>
 
-                  <button type="submit" className={styles.filter_btn}>Tìm kiếm</button>
+                  <button type="submit" className={styles.filter_btn}>
+                    Tìm kiếm
+                  </button>
                 </form>
               )}
             </div>
@@ -348,6 +392,7 @@ export default function StaffPage() {
                       <div
                         key={menu.id}
                         className={styles.card}
+                        onClick={() => handleAddToOrder(menu)}
                       >
                         <div>
                           <img
@@ -386,7 +431,12 @@ export default function StaffPage() {
           <button className="profile">Profile</button>
         </div>
         <div className={styles.right_content}>
-          <RightTab selectedTable={selectedTable} menus={menus} />
+          <RightTab 
+            selectedTable={selectedTable} 
+            menus={menus} 
+            orderItems={orderItems} 
+            onUpdateOrderItems={setOrderItems}
+          />
         </div>
       </div>
     </div>

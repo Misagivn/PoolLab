@@ -5,8 +5,6 @@ import { useToast } from "@chakra-ui/react";
 interface Table {
   id: string;
   name: string;
-  descript: string;
-  image: string;
   storeId: string;
   areaId: string;
   billiardTypeId: string;
@@ -42,6 +40,16 @@ interface Menu {
 interface OrderItem {
   productName: string;
   productId: string;
+  quantity: number;
+  price: number;
+}
+
+interface OrderedItem {
+  id: string;
+  productName: string;
+  productId: string;
+  orderId: string;
+  billiardTableId: string;
   quantity: number;
   price: number;
 }
@@ -96,28 +104,59 @@ const username = sessionStorage.getItem("username");
 function RightTab({ selectedTable, menus, orderItems, onUpdateOrderItems }: RightTabProps) {
   const toast = useToast();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isOrderedItemsDialogOpen, setIsOrderedItemsDialogOpen] = useState(false);
   const [order, setOrder] = useState<Order | null>(null);
+  const [orderedItems, setOrderedItems] = useState<OrderedItem[]>([]);
+  const [currentOrderedItems, setCurrentOrderedItems] = useState<OrderedItem[]>([]);
   const [customerPaid, setCustomerPaid] = useState<number>(0);
   const [change, setChange] = useState<number>(0);
   const [stop, setStop] = useState<boolean>(false);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+
   const formatCurrency = (amount: number): string => {
     return amount.toLocaleString('vi-VN', { style: 'decimal' }) + ' ₫';
   };
 
   useEffect(() => {
-    // Reset states when table changes
     setStop(false);
     setCustomerPaid(0);
     setChange(0);
     setOrder(null);
     onUpdateOrderItems([]);
+    if (selectedTable?.status === "Có Khách") {
+      fetchCurrentOrderedItems();
+    } else {
+      setCurrentOrderedItems([]);
+    }
   }, [selectedTable]);
 
+  const fetchCurrentOrderedItems = async () => {
+    if (!selectedTable) return;
+    
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_LOCAL_URL}/orderdetail/getallorderdetailbytableid/${selectedTable.id}`,
+        {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+
+      const data = await response.json();
+      if (data.status === 200) {
+        setCurrentOrderedItems(data.data);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   const handleUpdateQuantity = (productId: string, quantity: number) => {
+    if (quantity < 1) return;
     onUpdateOrderItems(
       orderItems.map(item =>
         item.productId === productId
-          ? { ...item, quantity: Math.max(1, quantity) }
+          ? { ...item, quantity }
           : item
       )
     );
@@ -125,6 +164,38 @@ function RightTab({ selectedTable, menus, orderItems, onUpdateOrderItems }: Righ
 
   const handleRemoveItem = (productId: string) => {
     onUpdateOrderItems(orderItems.filter(item => item.productId !== productId));
+  };
+
+  const handleOrderedItems = async () => {
+    if (!selectedTable) return;
+    
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_LOCAL_URL}/orderdetail/getallorderdetailbytableid/${selectedTable.id}`,
+        {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+
+      const data = await response.json();
+      if (data.status === 200) {
+        setOrderedItems(data.data);
+        setIsOrderedItemsDialogOpen(true);
+      } else {
+        toast({
+          status: "error",
+          description: data.message,
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: "Lỗi",
+        description: "Không thể kết nối với máy chủ",
+        status: "error",
+      });
+    }
   };
 
   const handleServeOrder = async () => {
@@ -137,24 +208,32 @@ function RightTab({ selectedTable, menus, orderItems, onUpdateOrderItems }: Righ
       return;
     }
 
+    const itemsToOrder = orderItems.map(item => ({
+      productName: item.productName,
+      productId: item.productId,
+      quantity: item.quantity,
+      price: item.price * item.quantity
+    }));
+
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_LOCAL_URL}/orderdetail/addnewproducttoorder/${selectedTable.id}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(orderItems)
+          body: JSON.stringify(itemsToOrder)
         }
       );
 
       const data = await response.json();
       
       if (response.ok) {
-        toast({
-          title: "Đặt món thành công",
-          status: "success"
-        });
+        setShowSuccessMessage(true);
+        setTimeout(() => {
+          setShowSuccessMessage(false);
+        }, 3000);
         onUpdateOrderItems([]);
+        fetchCurrentOrderedItems();
       } else {
         toast({
           title: "Đặt món thất bại",
@@ -321,38 +400,59 @@ function RightTab({ selectedTable, menus, orderItems, onUpdateOrderItems }: Righ
           <h2>{selectedTable.bidaTypeName}</h2>
           <h2>{selectedTable.areaName}</h2>
         </div>
+        {/* {selectedTable.status === "Có Khách" && (
+          <button 
+            className={styles.view_orders_btn}
+            onClick={handleOrderedItems}
+          >
+            Xem món đã đặt
+          </button>
+        )} */}
       </div>
 
-      {/* <div className={styles.table_order}>
+      <div className={styles.table_order}>
         {selectedTable.status === "Có Khách" && (
           <div className={styles.order_section}>
             <h3>Đặt món</h3>
-            <div className={styles.selected_items}>
-              {orderItems.length > 0 ? (
-                <>
-                  {orderItems.map((item) => (
-                    <div key={item.productId} className={styles.selected_item}>
-                      <span>{item.productName}</span>
-                      <div className={styles.item_controls}>
-                        <input
-                          type="number"
-                          min="1"
-                          value={item.quantity}
-                          onChange={(e) => handleUpdateQuantity(item.productId, parseInt(e.target.value) || 1)}
-                          className={styles.quantity_input}
-                        />
-                        <button
-                          onClick={() => handleRemoveItem(item.productId)}
-                          className={styles.remove_button}
-                        >
-                          Xóa
-                        </button>
+            {orderItems.length > 0 ? (
+              <div className={styles.order_items_container}>
+                {orderItems.map((item) => (
+                  <div key={item.productId} className={styles.order_item}>
+                    <div className={styles.item_name}>
+                      {item.productName}
+                      <div className={styles.item_price}>
+                        {formatCurrency(item.price)}
                       </div>
-                      <span>{item.price * item.quantity} đ</span>
                     </div>
-                  ))}
-                  <div className={styles.order_total}>
-                    Tổng cộng: {orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0)} đ
+                    <div className={styles.quantity_controls}>
+                      <button
+                        className={styles.quantity_btn}
+                        onClick={() => handleUpdateQuantity(item.productId, item.quantity - 1)}
+                        disabled={item.quantity <= 1}
+                      >
+                        -
+                      </button>
+                      <span className={styles.quantity}>{item.quantity}</span>
+                      <button
+                        className={styles.quantity_btn}
+                        onClick={() => handleUpdateQuantity(item.productId, item.quantity + 1)}
+                      >
+                        +
+                      </button>
+                      <button
+                        onClick={() => handleRemoveItem(item.productId)}
+                        className={styles.remove_btn}
+                      >
+                        Xóa
+                      </button>
+                    </div>
+                  </div>
+                ))}
+                <div className={styles.order_summary}>
+                  <div className={styles.total_amount}>
+                    Tổng cộng: {formatCurrency(
+                      orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+                    )}
                   </div>
                   <button
                     className={styles.serve_button}
@@ -360,77 +460,31 @@ function RightTab({ selectedTable, menus, orderItems, onUpdateOrderItems }: Righ
                   >
                     Phục vụ
                   </button>
-                </>
-              ) : (
-                <p>Chưa có món nào được chọn</p>
-              )}
-            </div>
+                </div>
+              </div>
+            ) : (
+              <div className={styles.ordered_items_container}>
+                {currentOrderedItems.length > 0 ? (
+                  <>
+                    <div className={styles.ordered_items_list}>
+                      {currentOrderedItems.map((item) => (
+                        <div key={item.id} className={styles.ordered_item}>
+                          <div className={styles.item_info}>
+                            <span className={styles.item_name}>{item.productName}x{item.quantity}</span>
+                          </div>
+                          <span className={styles.item_price}>{formatCurrency(item.price)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <p>Chưa có món nào được đặt</p>
+                )}
+              </div>
+            )}
           </div>
-        )}
-      </div> */}
-
-<div className={styles.table_order}>
-  {selectedTable.status === "Có Khách" && (
-    <div className={styles.order_section}>
-      <h3>Đặt món</h3>
-      <div className={styles.order_items_container}>
-        {orderItems.length > 0 ? (
-          orderItems.map((item) => (
-            <div key={item.productId} className={styles.order_item}>
-              <div className={styles.item_info}>
-                <div className={styles.item_name}>{item.productName}</div>
-                <div className={styles.item_price}>{formatCurrency(item.price * item.quantity)}</div>
-              </div>
-              <div className={styles.quantity_controls}>
-                <button
-                  className={styles.quantity_btn}
-                  onClick={() => handleUpdateQuantity(item.productId, item.quantity - 1)}
-                  disabled={item.quantity <= 1}
-                >
-                  -
-                </button>
-                <input
-                  type="number"
-                  value={item.quantity}
-                  onChange={(e) => handleUpdateQuantity(item.productId, parseInt(e.target.value) || 1)}
-                  className={styles.quantity_input}
-                  min="1"
-                />
-                <button
-                  className={styles.quantity_btn}
-                  onClick={() => handleUpdateQuantity(item.productId, item.quantity + 1)}
-                >
-                  +
-                </button>
-                <button
-                  className={styles.remove_btn}
-                  onClick={() => handleRemoveItem(item.productId)}
-                >
-                  Xóa
-                </button>
-              </div>
-            </div>
-          ))
-        ) : (
-          <p>Chưa có món nào được chọn</p>
         )}
       </div>
-
-      {orderItems.length > 0 && (
-        <div className={styles.order_summary}>
-          <div className={styles.total_amount}>
-          Tổng cộng: {formatCurrency(
-                    orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
-                  )}
-          </div>
-          <button className={styles.serve_button} onClick={handleServeOrder}>
-            Phục vụ
-          </button>
-        </div>
-      )}
-    </div>
-  )}
-</div>
 
       {selectedTable.status === "Bàn Trống" && (
         <div className={styles.table_btn}>
@@ -495,7 +549,7 @@ function RightTab({ selectedTable, menus, orderItems, onUpdateOrderItems }: Righ
             </div>
 
             <div className={styles.payment_info}>
-              <h2>Tổng tiền: {order?.totalPrice} đ</h2>
+              <h2>Tổng tiền: {formatCurrency(order?.totalPrice || 0)}</h2>
               <div className={styles.payment_input}>
                 <label>Khách thanh toán: </label>
                 <input
@@ -523,6 +577,53 @@ function RightTab({ selectedTable, menus, orderItems, onUpdateOrderItems }: Righ
               <button onClick={handlePaymentOrder}>Thanh toán</button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* {isOrderedItemsDialogOpen && (
+        <div className={styles.dialog_container}>
+          <div className={styles.dialog_content}>
+            <div className={styles.wrap_head}>
+              <h2>Danh sách món đã đặt</h2>
+              <button onClick={() => setIsOrderedItemsDialogOpen(false)}>X</button>
+            </div>
+
+            <div className={styles.dialog_table}>
+              <table className={styles.content_table}>
+                <thead>
+                  <tr>
+                    <th>STT</th>
+                    <th>Tên món</th>
+                    <th>Số lượng</th>
+                    <th>Giá</th>
+                    <th>Thành tiền</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {orderedItems.map((item, index) => (
+                    <tr key={item.id}>
+                      <td>{index + 1}</td>
+                      <td>{item.productName}</td>
+                      <td>{item.quantity}</td>
+                      <td>{formatCurrency(item.price)}</td>
+                      <td>{formatCurrency(item.price * item.quantity)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div className={styles.total_amount}>
+                Tổng cộng: {formatCurrency(
+                  orderedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )} */}
+
+      {showSuccessMessage && (
+        <div className={styles.success_message}>
+          Đặt món thành công
         </div>
       )}
     </div>

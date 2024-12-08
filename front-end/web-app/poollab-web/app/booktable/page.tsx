@@ -353,7 +353,7 @@ export default function StaffPage() {
                     tables.map((table) => (
                       <div
                         key={table.id}
-                        className={styles.card}
+                        className={`${styles.card} ${selectedTable?.id === table.id ? styles.selected : ''}`}
                         onClick={() => setSelectedTable(table)}
                       >
                         <div>

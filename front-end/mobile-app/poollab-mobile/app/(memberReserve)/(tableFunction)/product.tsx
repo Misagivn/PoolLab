@@ -51,10 +51,14 @@ const product = () => {
       const getProductData = {
         ProductTypeId: "",
         ProductGroupId: "",
+        Status: "Còn Hàng",
       };
       const response = await get_all_product(getProductData);
-      if (response.status === 200) {
+      if (response.data.status === 200) {
         setProduct(response.data.data.items);
+        setIsLoading(false);
+      } else if (response.data.status === 400) {
+        Alert.alert("Error", response.data.message);
         setIsLoading(false);
       }
     } catch (error) {
@@ -102,10 +106,14 @@ const product = () => {
     searchFunction();
   };
   const searchFunction = async () => {
-    console.log("search data: ", productTypeId + "," + productGroupId);
+    const getProductData = {
+      ProductTypeId: productTypeId,
+      ProductGroupId: productGroupId,
+      Status: "Còn Hàng",
+    };
     try {
       const response = await get_all_product(getProductData);
-      if (response.status === 200) {
+      if (response.data.status === 200) {
         setProduct(response.data.data.items);
         setIsLoading(false);
       } else if (response.status === 404) {
@@ -254,6 +262,19 @@ const product = () => {
             ) : (
               <Text style={styles.infoBoxText}>Giỏ hàng rỗng.</Text>
             )}
+            {/* Total Price View */}
+            <View style={styles.totalPriceContainer}>
+              <Text style={styles.totalPriceTitle}>Tổng cộng:</Text>
+              <Text style={styles.totalPriceText}>
+                {productOrder
+                  .reduce(
+                    (total, item) => total + item.price * item.quantity,
+                    0
+                  )
+                  .toLocaleString("en-US")}{" "}
+                đ
+              </Text>
+            </View>
             <Button
               title="ĐẶT SẢN PHẨM"
               buttonStyles={styles.updateButton}
@@ -463,5 +484,23 @@ const styles = StyleSheet.create({
   },
   buttonBox: {
     alignSelf: "flex-end",
+  },
+  totalPriceContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 10,
+    backgroundColor: "#f0f0f0",
+    borderRadius: 5,
+    marginTop: 10,
+  },
+  totalPriceTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  totalPriceText: {
+    fontSize: 16,
+    color: "red",
+    fontWeight: "bold",
   },
 });

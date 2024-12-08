@@ -3,7 +3,7 @@ import ApiManager from "./ApiManager";
 export const get_all_product = async (data) => {
   try {
     const response = await ApiManager.get(
-      `/Product/GetAllProducts?ProductTypeId=${data.ProductTypeId}&ProductGroupId=${data.ProductGroupId}`
+      `/Product/GetAllProducts?ProductTypeId=${data.ProductTypeId}&ProductGroupId=${data.ProductGroupId}&Status=${data.Status}`
     );
     return response;
   } catch (error) {

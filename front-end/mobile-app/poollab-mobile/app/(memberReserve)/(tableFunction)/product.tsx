@@ -285,71 +285,69 @@ const product = () => {
               loading={isLoading}
             />
           </View>
-          {product.map((item) => (
-            <View
-              key={item.id}
-              style={[
-                styles.dataBox,
-                item.status === "Còn Hàng"
-                  ? styles.confirmedBox
-                  : styles.pendingBox,
-              ]}
-            >
-              <View style={styles.innerBox}>
-                <View style={styles.infoBox2}>
-                  <Text style={styles.infoBoxTitle}>Tên mặt hàng:</Text>
-                  <Text style={styles.infoBoxText}>{item.name}</Text>
-                </View>
-                <View style={styles.infoBox2}>
-                  <Text style={styles.infoBoxTitle}>Tên loại mặt hàng:</Text>
-                  <Text style={styles.infoBoxText}>{item.productTypeName}</Text>
-                </View>
-                <View style={styles.infoBox2}>
-                  <Text style={styles.infoBoxTitle}>Tên nhóm mặt hàng:</Text>
-                  <Text style={styles.infoBoxText}>{item.groupName}</Text>
-                </View>
-                <View style={styles.infoBox2}>
-                  <Text style={styles.infoBoxTitle}>Giá mặt hàng:</Text>
-                  <Text style={styles.infoBoxText}>{item.price}</Text>
-                </View>
-                {/* <View style={styles.infoBox2}>
-                    <View style={styles.imageBox}>
-                      <Image
-                        style={styles.image}
-                        source={{ uri: item.productImg.toString() }}
-                      />
-                    </View>
-                  </View> */}
-                <View style={styles.QuantitySelectorContainer}>
-                  <QuantitySelector
-                    initialQuantity={quantity}
-                    maxQuantity={item.quantity}
-                    onQuantityChange={(newQuantity) => {
-                      console.log("newQuantity: ", newQuantity);
-                      setQuantity(newQuantity);
+          {product.length === 0 ? (
+            <Text style={styles.subTitle}>Không có dịch vụ nào.</Text>
+          ) : (
+            product.map((item) => (
+              <View
+                key={item.id}
+                style={[
+                  styles.dataBox,
+                  item.status === "Còn Hàng"
+                    ? styles.confirmedBox
+                    : styles.pendingBox,
+                ]}
+              >
+                <View style={styles.innerBox}>
+                  <View style={styles.infoBox2}>
+                    <Text style={styles.infoBoxTitle}>Tên mặt hàng:</Text>
+                    <Text style={styles.infoBoxText}>{item.name}</Text>
+                  </View>
+                  <View style={styles.infoBox2}>
+                    <Text style={styles.infoBoxTitle}>Tên loại mặt hàng:</Text>
+                    <Text style={styles.infoBoxText}>
+                      {item.productTypeName}
+                    </Text>
+                  </View>
+                  <View style={styles.infoBox2}>
+                    <Text style={styles.infoBoxTitle}>Tên nhóm mặt hàng:</Text>
+                    <Text style={styles.infoBoxText}>{item.groupName}</Text>
+                  </View>
+                  <View style={styles.infoBox2}>
+                    <Text style={styles.infoBoxTitle}>Giá mặt hàng:</Text>
+                    <Text style={styles.infoBoxText}>{item.price}</Text>
+                  </View>
+                  <View style={styles.QuantitySelectorContainer}>
+                    <QuantitySelector
+                      initialQuantity={quantity}
+                      maxQuantity={item.quantity}
+                      onQuantityChange={(newQuantity) => {
+                        console.log("newQuantity: ", newQuantity);
+                        setQuantity(newQuantity);
+                      }}
+                      containerStyle={undefined}
+                      buttonStyle={undefined}
+                      buttonTextStyle={undefined}
+                      quantityTextStyle={undefined}
+                    />
+                  </View>
+                  <Button
+                    title="THÊM VÀO GIỎ"
+                    buttonStyles={styles.updateButton}
+                    textStyles={styles.updateButtonText}
+                    onPress={() => {
+                      addItemToOrder({
+                        productId: item.id,
+                        productName: item.name,
+                        price: item.price,
+                        quantity: quantity,
+                      });
                     }}
-                    containerStyle={undefined}
-                    buttonStyle={undefined}
-                    buttonTextStyle={undefined}
-                    quantityTextStyle={undefined}
                   />
                 </View>
-                <Button
-                  title="THÊM VÀO GIỎ"
-                  buttonStyles={styles.updateButton}
-                  textStyles={styles.updateButtonText}
-                  onPress={() => {
-                    addItemToOrder({
-                      productId: item.id,
-                      productName: item.name,
-                      price: item.price,
-                      quantity: quantity,
-                    });
-                  }}
-                />
               </View>
-            </View>
-          ))}
+            ))
+          )}
         </ScrollView>
       </View>
     </SafeAreaView>

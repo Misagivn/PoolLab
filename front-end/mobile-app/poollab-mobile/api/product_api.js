@@ -1,9 +1,12 @@
 import ApiManager from "./ApiManager";
+import { getStoredTableInfo } from "./tokenDecode";
 
 export const get_all_product = async (data) => {
+  const tableData = await getStoredTableInfo();
+  console.log("tableData: ", tableData);
   try {
     const response = await ApiManager.get(
-      `/Product/GetAllProducts?ProductTypeId=${data.ProductTypeId}&ProductGroupId=${data.ProductGroupId}&Status=${data.Status}`
+      `/Product/GetAllProducts?ProductTypeId=${data.ProductTypeId}&ProductGroupId=${data.ProductGroupId}&Status=${data.Status}?StoreId=${tableData.storeId}`
     );
     return response;
   } catch (error) {

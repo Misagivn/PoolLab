@@ -132,7 +132,7 @@ const index = () => {
         Alert.alert("Thông báo", "Thanh toán thất bại: " + result.message);
       }
 
-      router.push("/(home)");
+      router.back();
     } catch (error) {
       console.error("Lỗi khi lấy kết quả thanh toán:", error);
       Alert.alert("Lỗi", "Đã xảy ra lỗi khi xử lý thanh toán.");

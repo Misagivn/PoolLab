@@ -1,7 +1,7 @@
 import { CreateStaffRequest, PaginatedStaffResponse, StaffResponse, UpdateStaffRequest } from '@/utils/types/staff.types';
 
 const BASE_URL = 'https://poollabwebapi20241008201316.azurewebsites.net/api';
-const ROLE_ID = '21cfbbf3-ccd1-4394-b0e9-ee0e42564b87'; // Staff role ID
+const ROLE_ID = '21cfbbf3-ccd1-4394-b0e9-ee0e42564b87'; 
 
 export const staffApi = {
   getAllStaff: async (params: {

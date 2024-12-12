@@ -8,7 +8,7 @@ const ProfileDropdown = () => {
   const handleLogout = () => {
     // Xử lý đăng xuất
     sessionStorage.clear();
-    window.location.href = '/login';
+    window.location.href = '/';
   };
 
   return (
@@ -35,22 +35,12 @@ const ProfileDropdown = () => {
           
           <button className={styles.dropdown_item}>
             <User size={20} />
-            <span>Xem tất cả trang cá nhân</span>
+            <span>trang cá nhân</span>
           </button>
           
           <button className={styles.dropdown_item}>
             <Settings size={20} />
-            <span>Cài đặt & quyền riêng tư</span>
-          </button>
-          
-          <button className={styles.dropdown_item}>
-            <HelpCircle size={20} />
-            <span>Trợ giúp & hỗ trợ</span>
-          </button>
-          
-          <button className={styles.dropdown_item}>
-            <Moon size={20} />
-            <span>Màn hình & trợ năng</span>
+            <span>Thông tin đặt bàn</span>
           </button>
           
           <button className={styles.dropdown_item}>

@@ -63,7 +63,7 @@ const ProfileScreen = () => {
             style={styles.functionBox}
             onPress={() => router.push("../(walletManage)")}
           >
-            <Text style={styles.functionName}>Quản lý ví tiền</Text>
+            <Text style={styles.functionName}>Quản lý giao dịch</Text>
             <Icon name="arrowRight" size={20} strokeWidth={3} color="black" />
           </Pressable>
           <Pressable

@@ -5,6 +5,7 @@ import { useToast } from "@chakra-ui/react";
 import RightTab from "./righttab";
 import { BidaType } from "@/utils/types/billiardType.types";
 import { Area } from "@/utils/types/area.types";
+import ProfileDropdown from "@/app/booktable/ProfileDropdown";
 
 interface Table {
   id: string;
@@ -428,7 +429,8 @@ export default function StaffPage() {
       <div className={styles.right}>
         <div className={styles.tab2}>
           <button className={styles.right_btn}>Thông Tin</button>
-          <button className="profile">Profile</button>
+          {/* <button className="profile">Profile</button> */}
+          <ProfileDropdown />
         </div>
         <div className={styles.right_content}>
           <RightTab 

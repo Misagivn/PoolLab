@@ -165,7 +165,7 @@
 }
 
 .card.selected {
-  outline: 3px solid #00FFA9;
+  outline: 3px solid #00ffa9;
   outline-offset: 3px;
 }
 
@@ -460,7 +460,7 @@
   padding: 15px;
   background: #fafafa;
   border-radius: 10px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .order_items {
@@ -540,7 +540,6 @@
   display: flex;
   flex-direction: column;
 }
-
 
 .order_section {
   margin-top: 20px;
@@ -650,8 +649,6 @@
   background-color: #015d35;
 }
 
-
-
 .view_orders_btn {
   width: 100%;
   padding: 12px;
@@ -729,4 +726,82 @@
   font-weight: 500;
 }
 
+.profile_container {
+  position: relative;
+  display: inline-block;
+}
 
+.profile_button {
+  background: transparent;
+  border: none;
+  color: #333;
+  cursor: pointer;
+  padding: 8px 12px;
+  font-size: 14px;
+}
+
+.dropdown_menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: white;
+  min-width: 300px;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+  padding: 8px 0;
+  z-index: 1000;
+}
+
+.user_info {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid #eee;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #f0f2f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+}
+
+.username {
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.dropdown_item {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  width: 100%;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.dropdown_item:hover {
+  background-color: #f0f2f5;
+}
+
+.dropdown_item svg {
+  margin-right: 12px;
+  color: #666;
+}
+
+.dropdown_item span {
+  font-size: 14px;
+  color: #333;
+}
+
+.dropdown_divider {
+  height: 1px;
+  background-color: #eee;
+  margin: 8px 0;
+}

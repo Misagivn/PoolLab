@@ -1,4 +1,4 @@
-// app/manager/dashpage/page.tsx
+
 "use client";
 
 import { 
@@ -102,28 +102,28 @@ export default function DashboardPage() {
       {/* Stats Grid */}
       <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing="6" mb="6">
         <StatCard
-          title="Total Sales"
-          value="$654.66k"
+          title="Tổng Doanh Số"
+          value="20.000.000 ₫"
           percentage={16.24}
           icon={FiDollarSign}
           isIncrease={true}
         />
         <StatCard
-          title="Total Orders"
-          value="$854.66k"
+          title="Tổng Số Đơn Hàng "
+          value="500 đơn"
           percentage={4.82}
           icon={FiShoppingBag}
           isIncrease={false}
         />
         <StatCard
-          title="Daily Visitors"
-          value="$987.21M"
+          title="Khách Mỗi Ngày"
+          value="500"
           percentage={2.45}
           icon={FiUsers}
           isIncrease={true}
         />
         <StatCard
-          title="Conversion Rate"
+          title="Đánh Giá"
           value="1.75%"
           percentage={1.75}
           icon={FiBarChart}
@@ -134,20 +134,20 @@ export default function DashboardPage() {
       {/* Charts Grid */}
       <SimpleGrid columns={{ base: 1, lg: 2 }} spacing="6" mb="6">
         <Box bg={cardBg} p="6" borderRadius="lg" shadow="sm">
-          <Text fontSize="lg" fontWeight="medium" mb="4">Monthly Progress</Text>
+          <Text fontSize="lg" fontWeight="medium" mb="4">Tiến độ hàng tháng</Text>
           <Stack spacing="4">
-            <ProgressStat label="Revenue" value={75} />
-            <ProgressStat label="Sales" value={65} />
-            <ProgressStat label="Users" value={85} />
+            <ProgressStat label="Doanh thu" value={75} />
+            <ProgressStat label="bán hàng" value={65} />
+            <ProgressStat label="Người dụng" value={85} />
           </Stack>
         </Box>
 
         <Box bg={cardBg} p="6" borderRadius="lg" shadow="sm">
-          <Text fontSize="lg" fontWeight="medium" mb="4">Monthly Statistics</Text>
+          <Text fontSize="lg" fontWeight="medium" mb="4">Thống kê hàng tháng</Text>
           <SimpleGrid columns={3} spacing="4">
-            <CircularStatCard label="Profit" value={68} />
-            <CircularStatCard label="Revenue" value={75} />
-            <CircularStatCard label="Expenses" value={55} />
+            <CircularStatCard label="Lợi nhuận" value={68} />
+            <CircularStatCard label="Doanh thu" value={75} />
+            <CircularStatCard label="Chi phí" value={55} />
           </SimpleGrid>
         </Box>
       </SimpleGrid>
@@ -155,20 +155,20 @@ export default function DashboardPage() {
       {/* Bottom Grid */}
       <SimpleGrid columns={{ base: 1, lg: 2 }} spacing="6">
         <Box bg={cardBg} p="6" borderRadius="lg" shadow="sm">
-          <Text fontSize="lg" fontWeight="medium" mb="4">Earning Updates</Text>
+          <Text fontSize="lg" fontWeight="medium" mb="4">Cập nhật thu nhập</Text>
           <Stack spacing="4">
-            <ProgressStat label="Marketing" value={50} color="blue" />
-            <ProgressStat label="Payments" value={70} color="green" />
-            <ProgressStat label="Sales" value={85} color="purple" />
+            <ProgressStat label="Tiếp thị" value={50} color="blue" />
+            <ProgressStat label="Thanh toán" value={70} color="green" />
+            <ProgressStat label="Doanh thu" value={85} color="purple" />
           </Stack>
         </Box>
 
         <Box bg={cardBg} p="6" borderRadius="lg" shadow="sm">
-          <Text fontSize="lg" fontWeight="medium" mb="4">Performance Overview</Text>
+          <Text fontSize="lg" fontWeight="medium" mb="4">Tổng quan về hiệu suất</Text>
           <Flex justify="space-around" align="center" h="full">
-            <CircularStatCard label="Completed" value={75} color="green" />
-            <CircularStatCard label="Pending" value={45} color="orange" />
-            <CircularStatCard label="Canceled" value={25} color="red" />
+            <CircularStatCard label="Hoàn thành" value={75} color="green" />
+            <CircularStatCard label="Chưa giải quyết" value={45} color="orange" />
+            <CircularStatCard label="Đã hủy" value={25} color="red" />
           </Flex>
         </Box>
       </SimpleGrid>

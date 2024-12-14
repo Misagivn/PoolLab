@@ -58,4 +58,33 @@ export const accountApi = {
     );
     return response.json();
   },
+
+  uploadAvatar: async (file: File): Promise<AccountResponse> => {
+    const token = localStorage.getItem('token');
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await fetch(
+      `${BASE_URL}/account/uploadfileavatar`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      }
+    );
+    return response.json();
+  },
+
+  getAllRoles: async (): Promise<AccountResponse> => {
+    const token = localStorage.getItem('token');
+    const response = await fetch(
+      `${BASE_URL}/role/getallrole`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    return response.json();
+  },
 };

@@ -280,6 +280,7 @@ const index = () => {
             />
             <InputCustom
               placeholder="Số điện thoại"
+              keyboardType="number-pad"
               icon={
                 <Icon
                   name="phoneIcon"

@@ -217,96 +217,91 @@ const CourseScreen = () => {
               />
             </View>
           </View>
-          <View style={styles.searchBox}>
-            <Text style={styles.title}>Thông tin khóa học.</Text>
-            {courseData.length === 0 ? (
-              <Text style={styles.title2}>Không tìm thấy khóa học.</Text>
-            ) : (
-              courseData.map((item) => (
-                <View key={item.id} style={styles.dataBox}>
-                  <View style={styles.innerBox}>
-                    <View style={styles.imageBox}>
-                      <Image
-                        style={styles.image}
-                        source={
-                          item.accountAvatar
-                            ? { uri: item.accountAvatar }
-                            : require("../../assets/images/eda492de2906a8827a6266e32bcd3ffb.webp")
-                        }
-                      />
-                    </View>
-                    <View style={styles.infoBox3}>
-                      <Text style={styles.infoBoxTitle}>Tên khóa học:</Text>
-                      <Text style={styles.infoBoxText}>{item.title}</Text>
-                    </View>
-                    <View style={styles.infoBox2}>
-                      <Text style={styles.infoBoxTitle}>Tên giáo viên:</Text>
-                      <Text style={styles.infoBoxText}>{item.accountName}</Text>
-                    </View>
-                    <View style={styles.infoBox2}>
-                      <Text style={styles.infoBoxTitle}>
-                        Đánh giá khóa học:
-                      </Text>
-                      <Text style={styles.infoBoxText}>{item.level}</Text>
-                    </View>
-                    <View style={styles.infoBox3}>
-                      <Text style={styles.infoBoxTitle}>Mô tả khóa học:</Text>
-                      <Text style={styles.infoBoxText}>{item.descript}</Text>
-                    </View>
-                    <View style={styles.infoBox2}>
-                      <Text style={styles.infoBoxTitle}>Tên chi nhánh:</Text>
-                      <Text style={styles.infoBoxText}>{item.storeName}</Text>
-                    </View>
-                    <View style={styles.infoBox2}>
-                      <Text style={styles.infoBoxTitle}>Địa chỉ quán:</Text>
-                      <Text style={styles.infoBoxText}>{item.address}</Text>
-                    </View>
-                    <View style={styles.infoBox3}>
-                      <Text style={styles.infoBoxTitle}>
-                        Ngày bắt đầu - kết thúc:
-                      </Text>
-                      <Text style={styles.infoBoxText}>
-                        {item.startDate} đến {item.endDate}
-                      </Text>
-                    </View>
-                    <View style={styles.infoBox2}>
-                      <Text style={styles.infoBoxTitle}>Thời gian học:</Text>
-                      <Text style={styles.infoBoxText}>
-                        {item.startTime} - {item.endTime}
-                      </Text>
-                    </View>
-                    <View style={styles.infoBox3}>
-                      <Text style={styles.infoBoxTitle}>Các buổi học:</Text>
-                      <Text style={styles.infoBoxText}>
-                        {convertScheduleToVietnamese(item.schedule)}
-                      </Text>
-                    </View>
-                    <View style={styles.infoBox2}>
-                      <Text style={styles.infoBoxTitle}>Giá khóa học:</Text>
-                      <Text style={styles.infoBoxText}>
-                        {item.price.toLocaleString("en-US")}
-                      </Text>
-                    </View>
-                    <View style={styles.infoBox2}>
-                      <Text style={styles.infoBoxTitle}>
-                        Số lượng người tham gia:
-                      </Text>
-                      <Text style={styles.infoBoxText}>{item.quantity}</Text>
-                    </View>
+          {courseData.length === 0 ? (
+            <Text style={styles.title2}>Không tìm thấy khóa học.</Text>
+          ) : (
+            courseData.map((item) => (
+              <View key={item.id} style={styles.dataBox}>
+                <View style={styles.innerBox}>
+                  <View style={styles.imageBox}>
+                    <Image
+                      style={styles.image}
+                      source={
+                        item.accountAvatar
+                          ? { uri: item.accountAvatar }
+                          : require("../../assets/images/eda492de2906a8827a6266e32bcd3ffb.webp")
+                      }
+                    />
                   </View>
-                  <IconButton
-                    iconName={"addCircleIcon"}
-                    textStyles={{ fontSize: 13, color: "white" }}
-                    buttonStyles={styles.submitButton}
-                    title={"ĐẶT KHÓA HỌC"}
-                    onPress={() => {
-                      registerCourse(item.id);
-                    }}
-                  />
+                  <View style={styles.infoBox3}>
+                    <Text style={styles.infoBoxTitle}>Tên khóa học:</Text>
+                    <Text style={styles.infoBoxText}>{item.title}</Text>
+                  </View>
+                  <View style={styles.infoBox2}>
+                    <Text style={styles.infoBoxTitle}>Tên giáo viên:</Text>
+                    <Text style={styles.infoBoxText}>{item.accountName}</Text>
+                  </View>
+                  <View style={styles.infoBox2}>
+                    <Text style={styles.infoBoxTitle}>Đánh giá khóa học:</Text>
+                    <Text style={styles.infoBoxText}>{item.level}</Text>
+                  </View>
+                  <View style={styles.infoBox3}>
+                    <Text style={styles.infoBoxTitle}>Mô tả khóa học:</Text>
+                    <Text style={styles.infoBoxText}>{item.descript}</Text>
+                  </View>
+                  <View style={styles.infoBox2}>
+                    <Text style={styles.infoBoxTitle}>Tên chi nhánh:</Text>
+                    <Text style={styles.infoBoxText}>{item.storeName}</Text>
+                  </View>
+                  <View style={styles.infoBox2}>
+                    <Text style={styles.infoBoxTitle}>Địa chỉ quán:</Text>
+                    <Text style={styles.infoBoxText}>{item.address}</Text>
+                  </View>
+                  <View style={styles.infoBox3}>
+                    <Text style={styles.infoBoxTitle}>
+                      Ngày bắt đầu - kết thúc:
+                    </Text>
+                    <Text style={styles.infoBoxText}>
+                      {item.startDate} đến {item.endDate}
+                    </Text>
+                  </View>
+                  <View style={styles.infoBox2}>
+                    <Text style={styles.infoBoxTitle}>Thời gian học:</Text>
+                    <Text style={styles.infoBoxText}>
+                      {item.startTime} - {item.endTime}
+                    </Text>
+                  </View>
+                  <View style={styles.infoBox3}>
+                    <Text style={styles.infoBoxTitle}>Các buổi học:</Text>
+                    <Text style={styles.infoBoxText}>
+                      {convertScheduleToVietnamese(item.schedule)}
+                    </Text>
+                  </View>
+                  <View style={styles.infoBox2}>
+                    <Text style={styles.infoBoxTitle}>Giá khóa học:</Text>
+                    <Text style={styles.infoBoxText}>
+                      {item.price.toLocaleString("en-US")}
+                    </Text>
+                  </View>
+                  <View style={styles.infoBox2}>
+                    <Text style={styles.infoBoxTitle}>
+                      Số lượng người tham gia:
+                    </Text>
+                    <Text style={styles.infoBoxText}>{item.quantity}</Text>
+                  </View>
                 </View>
-              ))
-            )}
-          </View>
+                <IconButton
+                  iconName={"addCircleIcon"}
+                  textStyles={{ fontSize: 13, color: "white" }}
+                  buttonStyles={styles.submitButton}
+                  title={"ĐẶT KHÓA HỌC"}
+                  onPress={() => {
+                    registerCourse(item.id);
+                  }}
+                />
+              </View>
+            ))
+          )}
           <View style={styles.customDivider}></View>
         </View>
       </ScrollView>
@@ -373,7 +368,7 @@ const styles = StyleSheet.create({
   dataBox: {
     backgroundColor: theme.colors.background,
     marginVertical: 5,
-    marginHorizontal: 5,
+    marginHorizontal: 10,
     padding: 10,
     shadowColor: "black",
     shadowOffset: {

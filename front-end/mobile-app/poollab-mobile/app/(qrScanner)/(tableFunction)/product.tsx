@@ -55,7 +55,7 @@ const product = () => {
         Status: "Còn Hàng",
       };
       const response = await get_all_product(getProductData);
-      console.log("response: ", response.data);
+      console.log("response: ", response);
       if (response.status === 200) {
         setProduct(response.data.data.items);
         setIsLoading(false);

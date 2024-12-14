@@ -3,10 +3,17 @@ import { getStoredTableInfo } from "./tokenDecode";
 
 export const get_all_product = async (data) => {
   const tableData = await getStoredTableInfo();
+  storeId = tableData.bidaTable.storeId;
   console.log("tableData: ", tableData);
+  console.log("data: ", data);
+  console.log("store id: ", tableData.bidaTable.storeId);
+  const status = "Còn Hàng";
   try {
+    console.log("data: ", data);
+    console.log("storeId: ", storeId);
+    console.log("status: ", status);
     const response = await ApiManager.get(
-      `/Product/GetAllProducts?ProductTypeId=${data.ProductTypeId}&ProductGroupId=${data.ProductGroupId}&Status=${data.Status}?StoreId=${tableData.storeId}`
+      `/Product/GetAllProducts?ProductTypeId=${data.ProductTypeId}&ProductGroupId=${data.ProductGroupId}&Status=${data.Status}&StoreId=${storeId}`
     );
     return response;
   } catch (error) {

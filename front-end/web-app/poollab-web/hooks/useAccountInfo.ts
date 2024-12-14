@@ -6,9 +6,24 @@ import { ManagerData } from '@/utils/types/manager.types';
 
 export const useAccountInfo = () => {
   const [managerData, setManagerData] = useState<ManagerData | null>(null);
+  const [roleName, setRoleName] = useState<string>('');
   const [loading, setLoading] = useState(true);
+  const [isUploading, setIsUploading] = useState(false);
   const toast = useToast();
 
+  const fetchRoleName = async (roleId: string) => {
+    try {
+      const response = await accountApi.getAllRoles();
+      if (response.status === 200) {
+        const role = response.data.find((role: any) => role.id === roleId);
+        if (role) {
+          setRoleName(role.name);
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching role:', err);
+    }
+  };
   const fetchManagerData = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -20,6 +35,9 @@ export const useAccountInfo = () => {
       const response = await accountApi.getAccountById(accountId);
       if (response.status === 200) {
         setManagerData(response.data);
+        if (response.data.roleId) {
+          await fetchRoleName(response.data.roleId);
+        }
       }
     } catch (err) {
       toast({
@@ -104,14 +122,77 @@ export const useAccountInfo = () => {
     }
   };
 
+  const uploadAvatar = async (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Lỗi",
+        description: "Vui lòng chọn file hình ảnh",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+      return null;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "Lỗi",
+        description: "Kích thước file không được vượt quá 5MB",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+      return null;
+    }
+
+    setIsUploading(true);
+    try {
+      const response = await accountApi.uploadAvatar(file);
+      
+      if (response.status === 200) {
+        toast({
+          title: "Thành công",
+          description: "Cập nhật ảnh đại diện thành công",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+        });
+        
+        if (managerData) {
+          await updateInfo({
+            ...managerData,
+            avatarUrl: response.data
+          });
+        }
+        return response.data;
+      } else {
+        throw new Error(response.message || 'Upload failed');
+      }
+    } catch (error) {
+      toast({
+        title: "Lỗi",
+        description: "Không thể tải lên ảnh đại diện",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+      return null;
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   useEffect(() => {
     fetchManagerData();
   }, []);
 
   return {
     managerData,
+    roleName,
     loading,
+    isUploading,
     updateInfo,
     updatePassword,
+    uploadAvatar,
   };
 };

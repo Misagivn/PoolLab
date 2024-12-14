@@ -144,14 +144,16 @@ const index = () => {
     }
   };
   const loadStore = async () => {
+    const data = {
+      status: "Hoạt Động",
+    };
     try {
-      const storedStore = await get_all_Store();
+      const storedStore = await get_all_Store(data);
       if (storedStore) {
-        //setStoreData(storedStore.data.data);
-        const rawdata = storedStore.data.data;
+        const rawdata = storedStore.data.data.items;
         const transformData = rawdata.map(
           (item: { name: any; id: any; address: any }) => ({
-            label: "Tên quán: " + item.name,
+            label: "Tên chi nhánh: " + item.name,
             value: item.id,
             address: "Địa chỉ: " + item.address,
           })

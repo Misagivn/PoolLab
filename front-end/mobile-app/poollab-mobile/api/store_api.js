@@ -1,8 +1,10 @@
 import ApiManager from "./ApiManager";
 
-export const get_all_Store = async () => {
+export const get_all_Store = async (data) => {
   try {
-    const response = await ApiManager.get("/Store/GetAllStore");
+    const response = await ApiManager.get(
+      `/store/getallstore?Status=${data.status}`
+    );
     return response;
   } catch (error) {
     if (error.response) {

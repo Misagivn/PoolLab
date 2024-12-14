@@ -26,8 +26,8 @@ const index = () => {
         const bookingDateData = rawData.map((item: any) => item.courseDate);
         const title = rawData.map((item: any) => item.title);
         const mentorName = rawData.map((item: any) => item.mentorName);
-        const timeStart = rawData.map((item: any) => item.timeStart);
-        const timeEnd = rawData.map((item: any) => item.timeEnd);
+        const timeStart = rawData.map((item: any) => item.startTime);
+        const timeEnd = rawData.map((item: any) => item.endTime);
         const address = rawData.map((item: any) => item.address);
         const storeName = rawData.map((item: any) => item.storeName);
         const price = rawData.map((item: any) => item.price);

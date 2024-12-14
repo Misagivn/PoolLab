@@ -164,13 +164,16 @@ const index = () => {
     }
   };
   const loadStore = async () => {
+    const data = {
+      status: "Hoạt Động",
+    };
     try {
-      const storedStore = await get_all_Store();
+      const storedStore = await get_all_Store(data);
       if (storedStore) {
-        const rawdata = storedStore.data.data;
+        const rawdata = storedStore.data.data.items;
         const transformData = rawdata.map(
           (item: { name: any; id: any; address: any }) => ({
-            label: "Tên quán: " + item.name,
+            label: "Tên chi nhánh: " + item.name,
             value: item.id,
             address: "Địa chỉ: " + item.address,
           })
@@ -544,63 +547,61 @@ const index = () => {
               />
             </View>
           </View>
-          <View style={styles.detailsBox}>
-            <Text style={styles.title}>Thông tin bàn.</Text>
-            {tableData.length === 0 ? (
-              <Text style={styles.title2}>Không tìm thấy bàn.</Text>
-            ) : (
-              tableData.map((item) => (
-                <View key={item.id} style={styles.dataBox}>
-                  <View style={styles.innerBox}>
-                    <View style={styles.imageBox}>
-                      <Image
-                        style={styles.image}
-                        source={{ uri: item.image.toString() }}
-                      />
-                    </View>
-                    <View style={styles.infoBox2}>
-                      <Text style={styles.infoBoxTitle}>Tên quán:</Text>
-                      <Text style={styles.infoBoxText}>{item.storeName}</Text>
-                    </View>
-                    <View style={styles.infoBox2}>
-                      <Text style={styles.infoBoxTitle}>Địa chỉ:</Text>
-                      <Text style={styles.infoBoxText}>{item.address}</Text>
-                    </View>
-                    <View style={styles.infoBox2}>
-                      <Text style={styles.infoBoxTitle}>Tên bàn:</Text>
-                      <Text style={styles.infoBoxText}>{item.name}</Text>
-                    </View>
-                    <View style={styles.infoBox2}>
-                      <Text style={styles.infoBoxTitle}>Loại bàn:</Text>
-                      <Text style={styles.infoBoxText}>
-                        {item.billiardTypeName}
-                      </Text>
-                    </View>
-                    <View style={styles.infoBox2}>
-                      <Text style={styles.infoBoxTitle}>Khu vực:</Text>
-                      <Text style={styles.infoBoxText}>{item.areaName}</Text>
-                    </View>
-                    <View style={styles.infoBox2}>
-                      <Text style={styles.infoBoxTitle}>Giá bàn:</Text>
-                      <Text style={styles.infoBoxText}>
-                        {/* {item.bidaPrice.toLocaleString("en-US")} */}
-                        {item.bidaPrice}
-                      </Text>
-                    </View>
+          <Text style={styles.title}>Thông tin bàn.</Text>
+          {tableData.length === 0 ? (
+            <Text style={styles.title2}>Không tìm thấy bàn.</Text>
+          ) : (
+            tableData.map((item) => (
+              <View key={item.id} style={styles.dataBox}>
+                <View style={styles.innerBox}>
+                  <View style={styles.imageBox}>
+                    <Image
+                      style={styles.image}
+                      source={{ uri: item.image.toString() }}
+                    />
                   </View>
-                  <IconButton
-                    iconName={"addCircleIcon"}
-                    textStyles={{ fontSize: 13, color: "white" }}
-                    buttonStyles={styles.submitButton}
-                    title={"ĐẶT BÀN"}
-                    onPress={() => {
-                      submitTable(item.id);
-                    }}
-                  />
+                  <View style={styles.infoBox2}>
+                    <Text style={styles.infoBoxTitle}>Tên quán:</Text>
+                    <Text style={styles.infoBoxText}>{item.storeName}</Text>
+                  </View>
+                  <View style={styles.infoBox2}>
+                    <Text style={styles.infoBoxTitle}>Địa chỉ:</Text>
+                    <Text style={styles.infoBoxText}>{item.address}</Text>
+                  </View>
+                  <View style={styles.infoBox2}>
+                    <Text style={styles.infoBoxTitle}>Tên bàn:</Text>
+                    <Text style={styles.infoBoxText}>{item.name}</Text>
+                  </View>
+                  <View style={styles.infoBox2}>
+                    <Text style={styles.infoBoxTitle}>Loại bàn:</Text>
+                    <Text style={styles.infoBoxText}>
+                      {item.billiardTypeName}
+                    </Text>
+                  </View>
+                  <View style={styles.infoBox2}>
+                    <Text style={styles.infoBoxTitle}>Khu vực:</Text>
+                    <Text style={styles.infoBoxText}>{item.areaName}</Text>
+                  </View>
+                  <View style={styles.infoBox2}>
+                    <Text style={styles.infoBoxTitle}>Giá bàn:</Text>
+                    <Text style={styles.infoBoxText}>
+                      {/* {item.bidaPrice.toLocaleString("en-US")} */}
+                      {item.bidaPrice}
+                    </Text>
+                  </View>
                 </View>
-              ))
-            )}
-          </View>
+                <IconButton
+                  iconName={"addCircleIcon"}
+                  textStyles={{ fontSize: 13, color: "white" }}
+                  buttonStyles={styles.submitButton}
+                  title={"ĐẶT BÀN"}
+                  onPress={() => {
+                    submitTable(item.id);
+                  }}
+                />
+              </View>
+            ))
+          )}
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -634,7 +635,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
   },
   title: {
-    fontSize: 25,
+    fontSize: 30,
     fontWeight: "bold",
     color: theme.colors.primary,
   },
@@ -699,7 +700,7 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background,
     marginVertical: 5,
     marginHorizontal: 5,
-    padding: 10,
+    padding: 15,
     shadowColor: "black",
     shadowOffset: {
       width: 5,

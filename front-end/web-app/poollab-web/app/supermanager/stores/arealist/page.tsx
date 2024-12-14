@@ -48,7 +48,7 @@ import { Store } from '@/utils/types/store';
 
 export default function StorePage() {
   const { 
-    data: stores, // Thay đổi stores thành data: stores
+    data: stores, 
     loading, 
     fetchStores, 
     createStore,

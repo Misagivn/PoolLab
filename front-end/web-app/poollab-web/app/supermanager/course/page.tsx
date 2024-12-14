@@ -223,7 +223,7 @@ export default function CoursePage() {
             />
           </InputGroup>
 
-          <Select
+          {/* <Select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
             maxW={{ base: "full", md: "200px" }}
@@ -231,7 +231,7 @@ export default function CoursePage() {
             <option value="1">Mới nhất</option>
             <option value="2">Giá tăng dần</option>
             <option value="3">Giá giảm dần</option>
-          </Select>
+          </Select> */}
 
           <IconButton
             aria-label="Refresh"

@@ -1,4 +1,12 @@
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  Alert,
+} from "react-native";
 import React, { useEffect, useState } from "react";
 import CustomHeader from "@/components/customHeader";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -12,10 +20,11 @@ import Button from "@/components/roundButton";
 import { get_all_billard_type } from "@/api/billard_type";
 import { getStoredUser } from "@/api/tokenDecode";
 import { get_all_billard_type_area } from "@/api/area_api";
-import { create_booking } from "@/api/booking_api";
+import { create_booking, search_for_billiard_table } from "@/api/booking_api";
 import CustomAlert from "@/components/alertCustom";
 import { router } from "expo-router";
 import ExpoDatePicker from "@/components/expoDatePicker";
+import IconButton from "@/components/iconButton";
 const ReserveScreen = () => {
   const [customerId, setCustomerId] = useState("");
   const [storeData, setStoreData] = useState([]);
@@ -34,6 +43,7 @@ const ReserveScreen = () => {
   const [areaError, setAreaError] = useState("");
   const [errorResponse, setErrorResponse] = useState("");
   const [successResponse, setSuccessResponse] = useState("");
+  const [tableData, setTabelData] = useState([]);
   const handleStartTimeSelect = (time) => {
     setSelectedStartTime(time);
     console.log("Selected start time:", time);
@@ -64,15 +74,13 @@ const ReserveScreen = () => {
       console.error("Error loading stored user:", error);
     }
   };
-  const bookingData = {
-    customerId: customerId,
+  const searchData = {
     billiardTypeId: billardtypeId,
     storeId: storeId,
     areaId: areaId,
-    message: userMessage,
     bookingDate: bookingDate,
-    timeStart: selectedStartTime,
-    timeEnd: selectedEndTime,
+    startTime: selectedStartTime,
+    endTime: selectedEndTime,
   };
   const alertPopup = (
     title: string | undefined,
@@ -155,10 +163,13 @@ const ReserveScreen = () => {
     }
   };
   const loadStore = async () => {
+    const data = {
+      status: "Hoạt Động",
+    };
     try {
-      const storedStore = await get_all_Store();
+      const storedStore = await get_all_Store(data);
       if (storedStore) {
-        const rawdata = storedStore.data.data;
+        const rawdata = storedStore.data.data.items;
         const transformData = rawdata.map(
           (item: { name: any; id: any; address: any }) => ({
             label: "Tên chi nhánh: " + item.name,
@@ -272,17 +283,11 @@ const ReserveScreen = () => {
   };
 
   const onSubmit = () => {
-    console.log(bookingData);
+    console.log("data send search: ", searchData);
     if (checkTimeRange(selectedStartTime, selectedEndTime)) {
-      console.log("Time range is valid!");
-      console.log("++++++++++++++++++++++++");
-      console.log(bookingData);
       const result = calculateRoundedTime(selectedStartTime, selectedEndTime);
-      console.log("Play time:", result);
-      // Proceed with other logic
     } else {
       console.log("Time range is invalid.");
-      // Handle the error or take appropriate action
     }
     if (
       areaId === "" ||
@@ -297,12 +302,10 @@ const ReserveScreen = () => {
     } else {
       setIsLoading(true);
       try {
-        create_booking(bookingData).then((response) => {
+        search_for_billiard_table(searchData).then((response) => {
+          console.log("response: ", response);
           if (response?.data.status === 200) {
-            console.log("Booking created successfully!");
-            console.log("Data sau khi dat ", response.data.data);
-            setAlertVisible(true);
-            setSuccessResponse("Đã tạo bàn thành công!");
+            setTabelData(response.data.data);
             setIsLoading(false);
           } else {
             setIsLoading(false);
@@ -316,6 +319,36 @@ const ReserveScreen = () => {
       }
     }
   };
+  const bookTable = async (tableId) => {
+    const bookingData = {
+      customerId: customerId,
+      billiardTableId: tableId,
+      message: userMessage,
+      bookingDate: bookingDate,
+      timeStart: selectedStartTime,
+      timeEnd: selectedEndTime,
+    };
+    setIsLoading(true);
+    try {
+      console.log("booking data: ", bookingData);
+      create_booking(bookingData).then((response) => {
+        console.log("response: ", response);
+        if (response.status === 200) {
+          console.log("Booking created successfully!");
+          console.log("Data sau khi dat ", response.data.data);
+          setAlertVisible(true);
+          setSuccessResponse("Đã tạo bàn thành công!");
+          setIsLoading(false);
+        } else {
+          Alert.alert("Lỗi", response.data.message);
+          setIsLoading(false);
+        }
+      });
+    } catch (error) {
+      console.log("Error: ", error);
+    }
+  };
+
   if (alertVisible) {
     if (areaError) {
       return alertPopup(
@@ -485,7 +518,7 @@ const ReserveScreen = () => {
                 value={userMessage}
               />
               <Button
-                title="TÌM KIẾM & ĐẶT BÀN"
+                title="TÌM KIẾM"
                 buttonStyles={styles.updateButton}
                 textStyles={styles.updateButtonText}
                 onPress={() => {
@@ -531,17 +564,64 @@ const ReserveScreen = () => {
               </Pressable>
             </View>
           </View>
-          {/* <View style={styles.resetButtonBox}>
-            <IconButton
-              title="Cài đặt lại"
-              buttonStyles={styles.resetButton}
-              textStyles={styles.resetButtonText}
-              iconName={"refreshIcon"}
-              onPress={() => {
-                resetInfo();
-              }}
-            />
-          </View> */}
+          <Text style={styles.title1}>Thông tin bàn.</Text>
+          {tableData.length === 0 ? (
+            <Text style={styles.title2}>Không tìm thấy bàn.</Text>
+          ) : (
+            tableData.map((item) => (
+              <View key={item.id} style={styles.dataBox}>
+                <View style={styles.innerBox}>
+                  <View style={styles.imageBox}>
+                    <Image
+                      style={styles.image}
+                      source={
+                        item.image
+                          ? { uri: item.image }
+                          : require("../../assets/images/eda492de2906a8827a6266e32bcd3ffb.webp")
+                      }
+                    />
+                  </View>
+                  <View style={styles.infoBox2}>
+                    <Text style={styles.infoBoxTitle}>Tên bàn:</Text>
+                    <Text style={styles.infoBoxText}>{item.name}</Text>
+                  </View>
+                  <View style={styles.infoBox2}>
+                    <Text style={styles.infoBoxTitle}>Loại lỗ:</Text>
+                    <Text style={styles.infoBoxText}>
+                      {item.billiardTypeName}
+                    </Text>
+                  </View>
+                  <View style={styles.infoBox2}>
+                    <Text style={styles.infoBoxTitle}>Tên quán:</Text>
+                    <Text style={styles.infoBoxText}>{item.storeName}</Text>
+                  </View>
+                  <View style={styles.infoBox2}>
+                    <Text style={styles.infoBoxTitle}>Địa chỉ:</Text>
+                    <Text style={styles.infoBoxText}>{item.address}</Text>
+                  </View>
+                  <View style={styles.infoBox2}>
+                    <Text style={styles.infoBoxTitle}>Khu vực chơi:</Text>
+                    <Text style={styles.infoBoxText}>{item.areaName}</Text>
+                  </View>
+                  <View style={styles.infoBox3}>
+                    <Text style={styles.infoBoxTitle}>Giá bàn:</Text>
+                    <Text style={styles.infoBoxText}>
+                      {Number(item.bidaPrice).toLocaleString("en-US") + "/h"}
+                    </Text>
+                  </View>
+                </View>
+                <IconButton
+                  iconName={"addCircleIcon"}
+                  textStyles={{ fontSize: 13, color: "white" }}
+                  buttonStyles={styles.submitButton}
+                  title={"ĐẶT BÀN"}
+                  onPress={() => {
+                    bookTable(item.id);
+                  }}
+                />
+              </View>
+            ))
+          )}
           <View style={styles.customDivider}></View>
         </View>
       </ScrollView>
@@ -630,5 +710,70 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     justifyContent: "center",
     alignItems: "center",
+  },
+  dataBox: {
+    backgroundColor: theme.colors.background,
+    marginVertical: 5,
+    marginHorizontal: 10,
+    padding: 10,
+    shadowColor: "black",
+    shadowOffset: {
+      width: 5,
+      height: 10,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 6,
+    borderRadius: 20,
+    borderCurve: "continuous",
+  },
+  innerBox: {
+    backgroundColor: theme.colors.background,
+    padding: 15,
+    borderRadius: 10,
+    borderCurve: "continuous",
+  },
+  imageBox: {
+    justifyContent: "center",
+    alignItems: "center",
+    position: "relative",
+    paddingBottom: 10,
+  },
+  image: {
+    width: 250,
+    height: 250,
+    borderRadius: 20,
+    borderWidth: 2,
+  },
+  infoBox2: {
+    flexDirection: "row",
+    gap: 10,
+  },
+  infoBox3: {
+    gap: 5,
+  },
+  infoBoxText: {
+    fontSize: 15,
+  },
+  infoBoxTitle: {
+    fontSize: 15,
+    fontWeight: "bold",
+  },
+  submitButton: {
+    gap: 5,
+    height: 40,
+    paddingHorizontal: 10,
+    backgroundColor: theme.colors.primary,
+    borderRadius: 10,
+  },
+  title2: {
+    fontSize: 25,
+    fontWeight: "bold",
+    color: "black",
+  },
+  title1: {
+    fontSize: 30,
+    fontWeight: "bold",
+    color: theme.colors.primary,
   },
 });

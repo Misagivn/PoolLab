@@ -71,10 +71,13 @@ const CourseScreen = () => {
     return vietnameseDays.join(", ");
   };
   const loadStore = async () => {
+    const data = {
+      status: "Hoạt Động",
+    };
     try {
-      const storedStore = await get_all_Store();
+      const storedStore = await get_all_Store(data);
       if (storedStore) {
-        const rawdata = storedStore.data.data;
+        const rawdata = storedStore.data.data.items;
         const transformData = rawdata.map(
           (item: { name: any; id: any; address: any }) => ({
             label: "Tên chi nhánh: " + item.name,
@@ -421,5 +424,10 @@ const styles = StyleSheet.create({
     height: 250,
     borderRadius: 20,
     borderWidth: 2,
+  },
+  title2: {
+    fontSize: 25,
+    fontWeight: "bold",
+    color: "black",
   },
 });

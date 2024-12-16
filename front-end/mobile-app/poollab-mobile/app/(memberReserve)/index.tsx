@@ -17,11 +17,15 @@ import { getAccountId, getUserName } from "@/data/userData";
 import { activate_table } from "@/api/billard_table";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import CustomAlert from "@/components/alertCustom";
+import CustomDropdown from "@/components/customDropdown";
+import { get_all_voucher } from "@/api/vouceher_api";
 const index = () => {
   const [tableData, setTableData] = useState([]);
   const [userId, setUserId] = useState("");
   const [alertVisible, setAlertVisible] = useState(false);
   const [errorResponse, setErrorResponse] = useState("");
+  const [voucherData, setVoucherData] = useState([]);
+  const [voucherId, setVoucherId] = useState("");
   const alertPopup = (title, message, confirmText, cancelText) => {
     return (
       <CustomAlert
@@ -53,6 +57,22 @@ const index = () => {
         const accountId = await getAccountId();
         if (accountId) {
           setUserId(accountId);
+          try {
+            const voucherData = await get_all_voucher(accountId);
+            const rawData = voucherData.data.data;
+            const transformData = rawData.map(
+              (item: { voucherName: any; id: any; discount: any }) => ({
+                label: "Tên Voucher: " + item.voucherName,
+                value: item.id,
+                address: "Giảm giá: " + item.discount + "%",
+              })
+            );
+            if (voucherData) {
+              setVoucherData(transformData);
+            }
+          } catch (error) {
+            console.error("Error loading voucher data:", error);
+          }
         }
       } catch (error) {
         console.error("Error loading stored user:", error);
@@ -67,6 +87,7 @@ const index = () => {
     billiardTableID: tableData.id,
     customerID: userId,
     customerTime: "",
+    accountVoucherID: voucherId,
   };
   const handleStartTable = async () => {
     try {
@@ -131,6 +152,27 @@ const index = () => {
           </View>
           <View style={styles.imageBox}>
             <Image style={styles.image} source={{ uri: tableData.image }} />
+          </View>
+          <View>
+            <Text style={styles.inputTitle}>Chọn Voucher:</Text>
+            <CustomDropdown
+              icon={
+                <Icon
+                  name="voucherIcon"
+                  size={25}
+                  strokeWidth={1.5}
+                  color="black"
+                />
+              }
+              placeholder="Chọn voucher"
+              data={voucherData}
+              onSelect={async (item) => {
+                setVoucherId(item.value);
+              }}
+              onClear={() => {
+                setVoucherId("");
+              }}
+            />
           </View>
           <View style={styles.buttonBox}>
             <Button
@@ -248,5 +290,10 @@ const styles = StyleSheet.create({
   },
   timeInput: {
     marginTop: 10,
+  },
+  inputTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "black",
   },
 });

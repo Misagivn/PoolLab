@@ -1,4 +1,11 @@
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 import React, { useState, useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Image } from "react-native";
@@ -15,6 +22,7 @@ const ProfileScreen = () => {
   const [image, setImage] = useState(
     require("../../assets/images/eda492de2906a8827a6266e32bcd3ffb.webp")
   );
+  const [userPoints, setUserPoints] = useState("");
   useEffect(() => {
     const loadStat = async () => {
       try {
@@ -25,9 +33,11 @@ const ProfileScreen = () => {
               const userFullName = response.data.data.fullName;
               const userEmail = response.data.data.email;
               const userImage = response.data.data.avatarUrl;
+              const point = response.data.data.point;
               setUserFullName(userFullName);
               setUserEmail(userEmail);
               setImage(userImage);
+              setUserPoints(point);
             }
           });
         }
@@ -48,7 +58,21 @@ const ProfileScreen = () => {
           />
           <View style={styles.basicInfo}>
             <Text style={styles.infoName}>{userFullName}</Text>
-            <Text style={styles.infoEmail}>{userEmail}</Text>
+            {/* <Text style={styles.infoEmail}>{userEmail}</Text> */}
+            <View style={styles.pointCount}>
+              <TextInput
+                style={{
+                  color: "black",
+                  fontSize: 15,
+                  fontWeight: "normal",
+                  textAlign: "center",
+                }}
+                editable={false}
+                placeholder="0"
+                value={userPoints.toString()}
+              />
+              <Text>điểm</Text>
+            </View>
           </View>
         </View>
         <View style={styles.quickFunction}>
@@ -103,10 +127,13 @@ const ProfileScreen = () => {
             <Text style={styles.functionName}>Lịch học</Text>
             <Icon name="arrowRight" size={20} strokeWidth={3} color="black" />
           </Pressable>
-          <View style={styles.functionBox}>
-            <Text style={styles.functionName}>Ví voucher</Text>
+          <Pressable
+            style={styles.functionBox}
+            onPress={() => router.push("../(voucher)")}
+          >
+            <Text style={styles.functionName}>Ví Voucher</Text>
             <Icon name="arrowRight" size={20} strokeWidth={3} color="black" />
-          </View>
+          </Pressable>
         </View>
         <View style={styles.customDivider}></View>
       </ScrollView>
@@ -136,14 +163,18 @@ const styles = StyleSheet.create({
     borderCurve: "continuous",
   },
   headerImage: {
+    justifyContent: "center",
+    alignItems: "center",
+    alignSelf: "center",
     marginLeft: 10,
-    width: 80,
-    height: 80,
+    width: 90,
+    height: 90,
     borderRadius: 100,
     borderWidth: 5,
     borderColor: theme.colors.primary,
   },
   basicInfo: {
+    paddingLeft: 5,
     justifyContent: "center",
     alignItems: "flex-start",
     gap: 0,
@@ -186,5 +217,19 @@ const styles = StyleSheet.create({
   },
   customDivider: {
     padding: 50,
+  },
+  pointCount: {
+    marginTop: 5,
+    backgroundColor: theme.colors.background,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    gap: 3,
+    borderCurve: "continuous",
+    borderColor: theme.colors.primary,
+    borderWidth: 1.5,
   },
 });

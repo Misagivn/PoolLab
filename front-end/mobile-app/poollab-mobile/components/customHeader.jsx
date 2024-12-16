@@ -133,7 +133,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 5,
     gap: 3,
-    borderColor: theme.colors.primary,
     borderCurve: "continuous",
     borderColor: theme.colors.primary,
     borderWidth: 1.5,

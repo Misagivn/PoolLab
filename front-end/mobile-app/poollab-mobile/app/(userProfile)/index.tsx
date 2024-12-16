@@ -252,6 +252,7 @@ const index = () => {
                   color="black"
                 />
               }
+              editable={false}
               value={userEmail}
               onEndEditing={validateEmail}
               onChangeText={(text) => {

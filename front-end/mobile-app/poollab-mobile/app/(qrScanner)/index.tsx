@@ -7,16 +7,15 @@ import {
   View,
 } from "react-native";
 import React, { useEffect, useState } from "react";
-import { getStoredTableData } from "@/api/tokenDecode";
+import { getStoredTableData, getStoredTimeCus } from "@/api/tokenDecode";
 import { theme } from "@/constants/theme";
 import { StatusBar } from "expo-status-bar";
 import Button from "@/components/roundButton";
 import DemoCustomTimeInput from "@/components/customTimeInput";
 import { router } from "expo-router";
-import { getAccountId, getUserName } from "@/data/userData";
+import { getAccountId } from "@/data/userData";
 import { activate_table } from "@/api/billard_table";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { store } from "expo-router/build/global-state/router-store";
 import CustomAlert from "@/components/alertCustom";
 import CustomDropdown from "@/components/customDropdown";
 import Icon from "@/assets/icons/icons";
@@ -24,12 +23,13 @@ import { get_all_voucher } from "@/api/vouceher_api";
 const index = () => {
   const [tableData, setTableData] = useState([]);
   const [timeCanPlay, setTimeCanPlay] = useState([]);
-  const [playTime, setPlayTime] = useState("01:00");
+  const [playTime, setPlayTime] = useState("00:30");
   const [userId, setUserId] = useState("");
   const [alertVisible, setAlertVisible] = useState(false);
   const [errorResponse, setErrorResponse] = useState("");
   const [voucherData, setVoucherData] = useState([]);
   const [voucherId, setVoucherId] = useState("");
+  const [maxTime, setMaxTime] = useState("");
   const alertPopup = (title, message, confirmText, cancelText) => {
     return (
       <CustomAlert
@@ -46,6 +46,7 @@ const index = () => {
       />
     );
   };
+
   useEffect(() => {
     const loadStat = async () => {
       try {
@@ -80,6 +81,17 @@ const index = () => {
         }
       } catch (error) {
         console.error("Error loading stored user:", error);
+      }
+      try {
+        const storedTimeCus = await getStoredTimeCus();
+        console.log("storedTimeCus ", storedTimeCus);
+        if (storedTimeCus === null) {
+          setMaxTime("14:00");
+        } else {
+          setMaxTime(storedTimeCus);
+        }
+      } catch (error) {
+        console.error("Error loading stored time cus:", error);
       }
     };
     loadStat();
@@ -192,10 +204,10 @@ const index = () => {
                 color: "#333",
               }}
               is24Hour={true}
-              initialHour={1}
-              initialMinute={0}
+              initialHour={0}
+              initialMinute={30}
               minTime="00:30"
-              maxTime="14:00"
+              maxTime={maxTime}
             />
           </View>
           <View>

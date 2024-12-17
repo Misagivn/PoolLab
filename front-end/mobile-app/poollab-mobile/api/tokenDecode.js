@@ -80,6 +80,15 @@ export const getStoredTableInfo = async () => {
     return null;
   }
 };
+export const getStoredTimeCus = async () => {
+  try {
+    const timeCus = await AsyncStorage.getItem("timeCus");
+    return timeCus ? JSON.parse(timeCus) : null;
+  } catch (error) {
+    console.error("Error getting stored table timeCus:", error);
+    return null;
+  }
+};
 export const getStoredTableDataReserve = async () => {
   try {
     const tableData = await AsyncStorage.getItem("tableDataReserve");

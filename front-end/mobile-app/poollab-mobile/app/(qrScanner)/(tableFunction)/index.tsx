@@ -168,6 +168,7 @@ const index = () => {
         console.log("end table data: ", endTableData);
         const response = await deactive_table(endTableData);
         if (response.status === 200) {
+          AsyncStorage.removeItem("timeCus");
           setIsLoading(false);
           router.replace("./review");
         } else {

@@ -18,6 +18,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import CountdownTimer from "@/components/countDownTimer";
 import product from "./product";
 import { get_user_order_product } from "@/api/product_api";
+import Icon from "@/assets/icons/icons";
 const index = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [tableData, setTableData] = useState([]);
@@ -30,10 +31,15 @@ const index = () => {
   const [tableId, setTableId] = useState("");
   const [productOrder, setProductOrder] = useState([]);
   const getProductData = async () => {
+    const data = {
+      id: tableId,
+    };
+    console.log("data: ", data);
     try {
-      const userProducts = get_user_order_product(tableId);
-      if (userProducts) {
-        setProductOrder(await userProducts);
+      const response = await get_user_order_product(data);
+      if (response) {
+        console.log("userProducts: ", response.data.data);
+        setProductOrder(response.data.data);
       }
     } catch (error) {
       console.error("Error loading stored user:", error);
@@ -44,7 +50,7 @@ const index = () => {
       try {
         const storedTableData = await getStoredTableDataReserve();
         if (storedTableData) {
-          setTableId(storedTableData.data.bidaTable.id);
+          setTableId(storedTableData.data.id);
           setTableData(storedTableData.data);
           setTimeCanPlay(storedTableData.data.timeCus);
         }
@@ -168,7 +174,7 @@ const index = () => {
           console.log("Table ended successfully!");
           setIsLoading(false);
           console.log("Data sau khi dat ", response.data);
-          router.replace("../../(home)");
+          router.replace("/review");
         } else {
           console.error("Error ending table:", response);
           setIsLoading(false);
@@ -287,6 +293,15 @@ const index = () => {
                 <Text style={styles.infoBoxText}>Giỏ hàng rỗng.</Text>
               )}
             </View>
+            <Button
+              title="ĐẶT SẢN PHẨM"
+              buttonStyles={styles.productButton}
+              textStyles={styles.ButtonText}
+              onPress={() => {
+                router.push("./product");
+              }}
+              loading={isLoading}
+            />
           </View>
         </View>
       </ScrollView>

@@ -51,6 +51,11 @@ export const ConfigPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (Object.values(formData).some(val => val < 0)) {
+      alert("Có giá trị là số âm vui lòng nhập lại");
+      return;
+    }
     await updateConfig(formData);
   };
 
@@ -61,6 +66,7 @@ export const ConfigPage: React.FC = () => {
       </Flex>
     );
   }
+
 
   return (
     <Box p={6}>
@@ -143,11 +149,17 @@ export const ConfigPage: React.FC = () => {
                   <FormLabel>Giới hạn tháng</FormLabel>
                   <Input
                     type="number"
+                    min={0}
+                    max={12}
                     value={formData.monthLimit}
-                    onChange={(e) => setFormData(prev => ({
-                      ...prev,
-                      monthLimit: Number(e.target.value)
-                    }))}
+                    // onChange={(e) => setFormData(prev => ({
+                    //   ...prev,
+                    //   monthLimit: Number(e.target.value)
+                    // }))}
+                    onChange={(e) => {
+                      const value = Math.max(0, Math.min(12, Number(e.target.value)));
+                      setFormData(prev => ({...prev, monthLimit : value}));
+                    }}
                   />
                 </FormControl>
 
@@ -155,11 +167,17 @@ export const ConfigPage: React.FC = () => {
                   <FormLabel>Giới hạn ngày</FormLabel>
                   <Input
                     type="number"
+                    min={0}
+                    max={30}
                     value={formData.dayLimit}
-                    onChange={(e) => setFormData(prev => ({
-                      ...prev,
-                      dayLimit: Number(e.target.value)
-                    }))}
+                    // onChange={(e) => setFormData(prev => ({
+                    //   ...prev,
+                    //   dayLimit: Number(e.target.value)
+                    // }))}
+                    onChange={(e) => {
+                      const value = Math.max(0, Math.min(30, Number(e.target.value)));
+                      setFormData(prev => ({...prev, dayLimit: value}));
+                    }}
                   />
                 </FormControl>
               </SimpleGrid>

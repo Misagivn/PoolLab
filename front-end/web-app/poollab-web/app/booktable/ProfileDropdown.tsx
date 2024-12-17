@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { User, Settings, HelpCircle, Moon, MessageSquare, LogOut } from 'lucide-react';
+import { User, Settings, HelpCircle, Moon, MessageSquare, LogOut, Airplay } from 'lucide-react';
 import styles from './layout.module.css';
 
 const ProfileDropdown = () => {
@@ -39,7 +39,7 @@ const ProfileDropdown = () => {
           </button>
           
           <button className={styles.dropdown_item}>
-            <Settings size={20} />
+            <Airplay size={20} />
             <span>Thông tin đặt bàn</span>
           </button>
           

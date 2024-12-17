@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useToast } from '@chakra-ui/react';
 import { jwtDecode } from 'jwt-decode';
 import { accountApi } from '@/apis/account.api';
-import { ManagerData } from '@/utils/types/manager.types';
+import { ManagerData } from '@/utils/types/info.types';
 
 export const useAccountInfo = () => {
   const [managerData, setManagerData] = useState<ManagerData | null>(null);

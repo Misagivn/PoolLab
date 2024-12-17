@@ -22,7 +22,7 @@ import {
   Icon,
   useDisclosure,
   Badge,
-  Avatar,
+  Image,
   AlertDialog,
   AlertDialogOverlay,
   AlertDialogContent,
@@ -37,38 +37,38 @@ import {
   FiEdit2,
   FiInfo,
   FiPlus,
-  FiMapPin,
-  FiStar,
+  FiCalendar,
   FiTrash2,
+  FiClock,
 } from 'react-icons/fi';
-import { useStores } from '@/hooks/useStores';
-import { StoreDetailModal } from '@/components/store/StoreDetailModal';
-import { StoreFormModal } from '@/components/store/StoreFormModal';
-import { Store } from '@/utils/types/store';
+import { useEvents } from '@/hooks/useEvent';
+// import { EventDetailModal } from '@/components/event/EventDetailModal';
+import { EventFormModal } from '@/components/event/EventFormModal';
+import { Event } from '@/utils/types/event.types';
 import { ProductPagination } from '@/components/common/paginations';
 
-export default function StorePage() {
+export default function EventPage() {
   const { 
-    data: stores, 
+    data: events, 
     loading,
     pagination,
-    fetchStores, 
-    createStore,
-    updateStore,
-    deleteStore,
-  } = useStores();
+    fetchEvents, 
+    createEvent,
+    updateEvent,
+    deleteEvent,
+  } = useEvents();
   
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedStore, setSelectedStore] = useState<Store | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const cancelRef = useRef(null);
-  const [storeToDelete, setStoreToDelete] = useState<Store | null>(null);
+  const [eventToDelete, setEventToDelete] = useState<Event | null>(null);
+
   const { 
     isOpen: isDeleteOpen, 
     onOpen: onDeleteOpen, 
     onClose: onDeleteClose 
   } = useDisclosure();
 
-  // Modals state
   const { 
     isOpen: isDetailOpen, 
     onOpen: onDetailOpen, 
@@ -82,56 +82,53 @@ export default function StorePage() {
   } = useDisclosure();
 
   useEffect(() => {
-    fetchStores(1);
-  }, [fetchStores]);
+    fetchEvents(1);
+  }, [fetchEvents]);
 
   const handlePageChange = (page: number) => {
-    fetchStores(page);
+    fetchEvents(page);
   };
 
-  const handleAddStore = async (data: Partial<Store>) => {
+  
+
+  const handleAddEvent = async (data: Partial<Event>) => {
     try {
-      await createStore(data as Omit<Store, 'id' | 'rated' | 'createdDate' | 'updatedDate' | 'status' | 'companyId'>);
+      await createEvent(data as any);
       onFormClose();
     } catch (error) {
-      console.error('Error adding store:', error);
+      console.error('Error adding event:', error);
     }
   };
 
-  const handleUpdateStore = async (data: Partial<Store>) => {
-    if (!selectedStore) return;
+  const handleUpdateEvent = async (data: Partial<Event>) => {
+    if (!selectedEvent) return;
     try {
-      await updateStore(selectedStore.id, data as Omit<Store, 'id' | 'rated' | 'createdDate' | 'updatedDate' | 'status' | 'companyId'>);
+      await updateEvent(selectedEvent.id, data as any);
       onFormClose();
-      setSelectedStore(null);
+      setSelectedEvent(null);
     } catch (error) {
-      console.error('Error updating store:', error);
+      console.error('Error updating event:', error);
     }
   };
 
-  const handleDeleteStore = async () => {
-    if (!storeToDelete) return;
+  
+
+  const handleDeleteEvent = async () => {
+    if (!eventToDelete) return;
     try {
-      await deleteStore(storeToDelete.id);
+      await deleteEvent(eventToDelete.id);
       onDeleteClose();
-      setStoreToDelete(null);
+      setEventToDelete(null);
     } catch (error) {
-      console.error('Error deleting store:', error);
+      console.error('Error deleting event:', error);
     }
   };
 
-  const filteredStores = (stores || []).filter(store => 
-    store.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    store.address.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    store.phoneNumber.includes(searchQuery)
+  const filteredEvents = (events || []).filter(event => 
+    event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    event.descript.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    event.username.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
-  const getRatingColor = (rating: number) => {
-    if (rating >= 4.5) return 'green';
-    if (rating >= 4.0) return 'blue';
-    if (rating >= 3.0) return 'yellow';
-    return 'gray';
-  };
 
   if (loading) {
     return (
@@ -146,14 +143,14 @@ export default function StorePage() {
       <Stack spacing={6}>
         {/* Header */}
         <Flex direction={{ base: 'column', sm: 'row' }} justify="space-between" align={{ base: 'stretch', sm: 'center' }} gap={4}>
-          <Heading size={{ base: "md", md: "lg" }}>Quản lý cửa hàng</Heading>
+          <Heading size={{ base: "md", md: "lg" }}>Quản lý sự kiện</Heading>
           <Button
             leftIcon={<Icon as={FiPlus} />}
             colorScheme="blue"
             onClick={onFormOpen}
             w={{ base: "full", sm: "auto" }}
           >
-            Thêm cửa hàng
+            Thêm sự kiện
           </Button>
         </Flex>
 
@@ -164,7 +161,7 @@ export default function StorePage() {
               <Icon as={FiSearch} color="gray.400" />
             </InputLeftElement>
             <Input
-              placeholder="Tìm kiếm cửa hàng..."
+              placeholder="Tìm kiếm sự kiện..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -175,60 +172,74 @@ export default function StorePage() {
             icon={<Icon as={FiRefreshCcw} />}
             onClick={() => {
               setSearchQuery('');
-              fetchStores(1);
+              fetchEvents(1);
             }}
           />
         </HStack>
 
-        {/* Stores Table */}
+        {/* Events Table */}
         <Table variant="simple" bg="white" boxShadow="sm" rounded="lg">
           <Thead bg="gray.50">
             <Tr>
-              <Th>CỬA HÀNG</Th>
-              <Th>LIÊN HỆ</Th>
-              <Th>ĐÁNH GIÁ</Th>
+              <Th>SỰ KIỆN</Th>
+              <Th>NGƯỜI TẠO</Th>
+              <Th>THỜI GIAN</Th>
               <Th>TRẠNG THÁI</Th>
               <Th width="100px" textAlign="right">THAO TÁC</Th>
             </Tr>
           </Thead>
           <Tbody>
-            {filteredStores.map((store) => (
-              <Tr key={store.id}>
+            {filteredEvents.map((event) => (
+              <Tr key={event.id}>
                 <Td>
                   <HStack spacing={3}>
-                    <Avatar 
-                      size="md" 
-                      name={store.name} 
-                      src={store.storeImg} 
+                    <Image 
+                      borderRadius="md"
+                      boxSize="50px"
+                      objectFit="cover"
+                      src={event.thumbnail || 'https://via.placeholder.com/50'}
+                      alt={event.title}
+                      fallbackSrc="https://via.placeholder.com/50"
                     />
                     <Box>
-                      <Text fontWeight="medium">{store.name}</Text>
-                      <HStack color="gray.600" fontSize="sm">
-                        <Icon as={FiMapPin} />
-                        <Text>{store.address}</Text>
-                      </HStack>
+                      <Text fontWeight="medium">{event.title}</Text>
+                      <Text color="gray.600" fontSize="sm" noOfLines={2}>
+                        {event.descript}
+                      </Text>
                     </Box>
                   </HStack>
                 </Td>
                 <Td>
-                  <Text>{store.phoneNumber}</Text>
-                  <Text fontSize="sm" color="gray.600">
-                    {store.timeStart && store.timeEnd ? 
-                      `${store.timeStart} - ${store.timeEnd}` : 
-                      'Chưa cập nhật giờ mở cửa'}
-                  </Text>
+                  <Text>{event.fullName}</Text>
+                  <Text fontSize="sm" color="gray.600">{event.username}</Text>
                 </Td>
                 <Td>
-                  <HStack>
-                    <Icon as={FiStar} color={`${getRatingColor(store.rated)}.400`} />
-                    <Text fontWeight="medium">{store.rated.toFixed(1)}</Text>
+                  <HStack color="gray.600" fontSize="sm">
+                    <Icon as={FiCalendar} />
+                    <Text>
+                      {new Date(event.timeStart).toLocaleDateString('vi-VN')}
+                    </Text>
+                  </HStack>
+                  <HStack color="gray.600" fontSize="sm">
+                    <Icon as={FiClock} />
+                    <Text>
+                      {new Date(event.timeStart).toLocaleTimeString('vi-VN', { 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                      })}
+                      {' - '}
+                      {new Date(event.timeEnd).toLocaleTimeString('vi-VN', { 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                      })}
+                    </Text>
                   </HStack>
                 </Td>
                 <Td>
                   <Badge 
-                    colorScheme={store.status === 'Hoạt Động' ? 'green' : 'red'}
+                    colorScheme={event.status === 'Đã Tạo' ? 'green' : 'yellow'}
                   >
-                    {store.status}
+                    {event.status}
                   </Badge>
                 </Td>
                 <Td>
@@ -239,28 +250,28 @@ export default function StorePage() {
                       size="sm"
                       variant="ghost"
                       onClick={() => {
-                        setSelectedStore(store);
+                        setSelectedEvent(event);
                         onDetailOpen();
                       }}
                     />
                     <IconButton
-                      aria-label="Edit store"
+                      aria-label="Edit event"
                       icon={<Icon as={FiEdit2} />}
                       size="sm"
                       variant="ghost"
                       onClick={() => {
-                        setSelectedStore(store);
+                        setSelectedEvent(event);
                         onFormOpen();
                       }}
                     />
                     <IconButton
-                      aria-label="Delete store"
+                      aria-label="Delete event"
                       icon={<Icon as={FiTrash2} />}
                       size="sm"
                       variant="ghost"
                       colorScheme="red"
                       onClick={() => {
-                        setStoreToDelete(store);
+                        setEventToDelete(event);
                         onDeleteOpen();
                       }}
                     />
@@ -272,7 +283,7 @@ export default function StorePage() {
         </Table>
 
         {/* Pagination */}
-        {!searchQuery && filteredStores.length > 0 && (
+        {!searchQuery && filteredEvents.length > 0 && (
           <ProductPagination
             currentPage={pagination.currentPage}
             totalPages={pagination.totalPages}
@@ -282,7 +293,7 @@ export default function StorePage() {
         )}
 
         {/* Empty State */}
-        {filteredStores.length === 0 && (
+        {filteredEvents.length === 0 && (
           <Flex 
             direction="column" 
             align="center" 
@@ -291,9 +302,9 @@ export default function StorePage() {
             bg="gray.50"
             borderRadius="lg"
           >
-            <Icon as={FiMapPin} fontSize="3xl" color="gray.400" mb={2} />
+            <Icon as={FiCalendar} fontSize="3xl" color="gray.400" mb={2} />
             <Text color="gray.500">
-              Không tìm thấy cửa hàng nào
+              Không tìm thấy sự kiện nào
             </Text>
             <Button
               mt={4}
@@ -301,7 +312,7 @@ export default function StorePage() {
               leftIcon={<Icon as={FiRefreshCcw} />}
               onClick={() => {
                 setSearchQuery('');
-                fetchStores(1);
+                fetchEvents(1);
               }}
             >
               Đặt lại bộ lọc
@@ -318,11 +329,11 @@ export default function StorePage() {
           <AlertDialogOverlay>
             <AlertDialogContent>
               <AlertDialogHeader fontSize="lg" fontWeight="bold">
-                Xóa cửa hàng
+                Xóa sự kiện
               </AlertDialogHeader>
 
               <AlertDialogBody>
-                Bạn có chắc chắn muốn xóa cửa hàng "{storeToDelete?.name}"? 
+                Bạn có chắc chắn muốn xóa sự kiện "{eventToDelete?.title}"? 
                 Hành động này không thể hoàn tác.
               </AlertDialogBody>
 
@@ -330,7 +341,7 @@ export default function StorePage() {
                 <Button ref={cancelRef} onClick={onDeleteClose}>
                   Hủy
                 </Button>
-                <Button colorScheme="red" onClick={handleDeleteStore} ml={3}>
+                <Button colorScheme="red" onClick={handleDeleteEvent} ml={3}>
                   Xóa
                 </Button>
               </AlertDialogFooter>
@@ -338,23 +349,23 @@ export default function StorePage() {
           </AlertDialogOverlay>
         </AlertDialog>
 
-        {/* Store Detail Modal */}
-        <StoreDetailModal
+        {/* Event Detail Modal */}
+        {/* <EventDetailModal
           isOpen={isDetailOpen}
           onClose={onDetailClose}
-          store={selectedStore}
-        />
+          event={selectedEvent}
+        /> */}
 
-        {/* Store Form Modal */}
-        <StoreFormModal
+        {/* Event Form Modal */}
+        <EventFormModal
           isOpen={isFormOpen}
           onClose={() => {
             onFormClose();
-            setSelectedStore(null);
+            setSelectedEvent(null);
           }}
-          onSubmit={selectedStore ? handleUpdateStore : handleAddStore}
-          initialData={selectedStore}
-          title={selectedStore ? 'Chỉnh sửa cửa hàng' : 'Thêm cửa hàng mới'}
+          onSubmit={selectedEvent ? handleUpdateEvent : handleAddEvent}
+          initialData={selectedEvent}
+          title={selectedEvent ? 'Chỉnh sửa sự kiện' : 'Thêm sự kiện mới'}
         />
       </Stack>
     </Box>

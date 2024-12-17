@@ -1,11 +1,10 @@
-
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { useToast } from '@chakra-ui/react';
-import { Store } from '@/utils/types/store';
-import { storeApi } from '@/apis/store.api';
+import { Event } from '@/utils/types/event.types';
+import { eventApi } from '@/apis/event.api';
 
-export const useStores = () => {
-  const [stores, setStores] = useState<Store[]>([]);
+export const useEvents = () => {
+  const [events, setEvents] = useState<Event[]>([]);
   const [pagination, setPagination] = useState({
     totalItems: 0,
     pageSize: 10,
@@ -15,13 +14,13 @@ export const useStores = () => {
   const [loading, setLoading] = useState(true);
   const toast = useToast();
 
-  const fetchStores = useCallback(async (page: number = 1) => {
+  const fetchEvents = useCallback(async (page: number = 1) => {
     try {
       setLoading(true);
-      const response = await storeApi.getAllStores(page);
+      const response = await eventApi.getAllEvents(page);
       
       if (response.status === 200) {
-        setStores(response.data.items);
+        setEvents(response.data.items);
         setPagination({
           totalItems: response.data.totalItem,
           pageSize: response.data.pageSize,
@@ -32,35 +31,35 @@ export const useStores = () => {
     } catch (err) {
       toast({
         title: 'Lỗi',
-        description: 'Không thể tải danh sách cửa hàng',
+        description: 'Không thể tải danh sách sự kiện',
         status: 'error',
         duration: 3000,
         isClosable: true,
       });
-      setStores([]);
+      setEvents([]);
     } finally {
       setLoading(false);
     }
   }, [toast]);
 
-  const createStore = async (data: Omit<Store, 'id' | 'rated' | 'createdDate' | 'updatedDate' | 'status' | 'companyId'>) => {
+  const createEvent = async (data: Omit<Event, 'id' | 'username' | 'fullName' | 'storeName' | 'address' | 'createdDate' | 'updatedDate' | 'status'>) => {
     try {
-      const response = await storeApi.createStore(data);
+      const response = await eventApi.createEvent(data);
       if (response.status === 200) {
         toast({
           title: 'Thành công',
-          description: 'Thêm cửa hàng mới thành công',
+          description: 'Thêm sự kiện mới thành công',
           status: 'success',
           duration: 3000,
           isClosable: true,
         });
-        await fetchStores();
+        await fetchEvents();
         return response.data;
       }
     } catch (err) {
       toast({
         title: 'Lỗi',
-        description: 'Không thể thêm cửa hàng mới',
+        description: 'Không thể thêm sự kiện mới',
         status: 'error',
         duration: 3000,
         isClosable: true,
@@ -69,49 +68,24 @@ export const useStores = () => {
     }
   };
 
-  const updateStore = async (storeId: string, data: Omit<Store, 'id' | 'rated' | 'createdDate' | 'updatedDate' | 'status' | 'companyId'>) => {
+  const updateEvent = async (eventId: string, data: Omit<Event, 'id' | 'username' | 'fullName' | 'storeName' | 'address' | 'createdDate' | 'updatedDate' | 'status'>) => {
     try {
-      const response = await storeApi.updateStore(storeId, data);
+      const response = await eventApi.updateEvent(eventId, data);
       if (response.status === 200) {
         toast({
-          title: 'Thành công',
-          description: 'Cập nhật cửa hàng thành công',
+          title: 'Thành công', 
+          description: 'Cập nhật sự kiện thành công',
           status: 'success',
           duration: 3000,
           isClosable: true,
         });
-        await fetchStores();
+        await fetchEvents();
         return response.data;
       }
     } catch (err) {
       toast({
         title: 'Lỗi',
-        description: 'Không thể cập nhật cửa hàng',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-      throw err;
-    }
-  };
-  
-  const deleteStore = async (storeId: string) => {
-    try {
-      const response = await storeApi.deleteStore(storeId);
-      if (response.status === 200) {
-        toast({
-          title: 'Thành công',
-          description: 'Xóa cửa hàng thành công',
-          status: 'success',
-          duration: 3000,
-          isClosable: true,
-        });
-        await fetchStores();
-      }
-    } catch (err) {
-      toast({
-        title: 'Lỗi',
-        description: 'Không thể xóa cửa hàng',
+        description: 'Không thể cập nhật sự kiện',
         status: 'error',
         duration: 3000,
         isClosable: true,
@@ -120,17 +94,38 @@ export const useStores = () => {
     }
   };
 
-  useEffect(() => {
-    fetchStores();
-  }, [fetchStores]);
+  const deleteEvent = async (eventId: string) => {
+    try {
+      const response = await eventApi.deleteEvent(eventId);
+      if (response.status === 200) {
+        toast({
+          title: 'Thành công',
+          description: 'Xóa sự kiện thành công',
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        });
+        await fetchEvents();
+      }
+    } catch (err) {
+      toast({
+        title: 'Lỗi',
+        description: 'Không thể xóa sự kiện',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+      throw err;
+    }
+  };
 
   return {
-    data: stores,
+    data: events,
     loading,
     pagination,
-    fetchStores,
-    createStore,
-    updateStore,
-    deleteStore
+    fetchEvents,
+    createEvent,
+    updateEvent,
+    deleteEvent
   };
 };

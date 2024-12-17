@@ -62,17 +62,25 @@
 .table_filter {
   display: flex;
   flex-direction: row;
-  flex-wrap: wrap;
-  justify-content: space-around;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 40px;
   margin-top: 20px;
+  padding: 0 15px;
 }
 
+
+.table_filter > div {
+  position: relative;
+  width: 24%; 
+}
+
+
 .table_filter select {
-  width: 14rem;
-  height: 3rem;
-  padding-left: 9px;
-  font-size: 16px;
+  width: 100%;
+  height: 40px; 
+  padding: 0 30px 0 10px; 
+  font-size: 14px;
   border: 1.9px solid lightgray;
   border-radius: 5px;
   color: #39325a;
@@ -82,68 +90,70 @@
   background: #fff;
 }
 
-.table_filter span {
-  position: relative;
-  color: #908d92;
-}
-
-.table_filter i {
-  position: relative;
-  font-size: 12px;
-  color: #908d92;
-  left: -33px;
-  pointer-events: none;
-  padding: 19px 9px 15px 9px;
-}
-
-.filter_bidaType::before {
-  position: absolute;
-  content: "Loại bàn";
-  top: -24px;
-  left: -215px;
-  background: #fff;
-  width: 66px;
-  height: 22px;
-  text-align: center;
-  font-size: 15px;
-}
-
-.filter_area::before {
-  position: absolute;
-  content: "Khu vực";
-  top: -24px;
-  left: -215px;
-  background: #fff;
-  width: 66px;
-  height: 22px;
-  text-align: center;
-  font-size: 15px;
-}
-
-.filter_status::before {
-  position: absolute;
-  content: "Trạng thái";
-  top: -24px;
-  left: -215px;
-  background: #fff;
-  width: 73px;
-  height: 22px;
-  text-align: center;
-  font-size: 15px;
-}
 
 .filter_btn {
-  padding: 5px 10px;
-  border-radius: 10px;
-  font-size: 15px;
+  width: 24%;
+  height: 40px; 
+  border-radius: 5px;
+  font-size: 14px;
   cursor: pointer;
   background-color: #017d49;
   color: #fff;
   font-weight: 700;
+  border: none;
+  padding: 0 15px;
 }
 
+
+.table_filter i {
+  position: absolute;
+  right: 10px; 
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 12px;
+  color: #908d92;
+  pointer-events: none;
+}
+
+
+.filter_bidaType::before,
+.filter_area::before,
+.filter_status::before {
+  position: absolute;
+  content: "Loại bàn";
+  top: -24px;
+  left: 10px;
+  background: #fff;
+  padding: 0 5px;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.filter_area::before {
+  content: "Khu vực";
+}
+
+.filter_status::before {
+  content: "Trạng thái";
+}
+
+
 .filter_btn:hover {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  background-color: #015d35;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+
+@media (max-width: 768px) {
+  .table_filter {
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .table_filter > div,
+  .filter_btn {
+    width: 48%;
+  }
 }
 
 .card_container {

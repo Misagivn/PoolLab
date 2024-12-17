@@ -110,7 +110,7 @@ function RightTab({ selectedTable, menus, orderItems, onUpdateOrderItems }: Righ
   const [currentOrderedItems, setCurrentOrderedItems] = useState<OrderedItem[]>([]);
   const [customerPaid, setCustomerPaid] = useState<number>(0);
   const [change, setChange] = useState<number>(0);
-  const [stop, setStop] = useState<boolean>(false);
+  const [stop, setStop] = useState<boolean>(true);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
   const formatCurrency = (amount: number): string => {
@@ -118,7 +118,7 @@ function RightTab({ selectedTable, menus, orderItems, onUpdateOrderItems }: Righ
   };
 
   useEffect(() => {
-    setStop(false);
+    // setStop(true);
     setCustomerPaid(0);
     setChange(0);
     setOrder(null);
@@ -231,7 +231,7 @@ function RightTab({ selectedTable, menus, orderItems, onUpdateOrderItems }: Righ
         setShowSuccessMessage(true);
         setTimeout(() => {
           setShowSuccessMessage(false);
-        }, 3000);
+        }, 30000);
         onUpdateOrderItems([]);
         fetchCurrentOrderedItems();
       } else {
@@ -348,6 +348,7 @@ function RightTab({ selectedTable, menus, orderItems, onUpdateOrderItems }: Righ
           description: data.message,
           status: "success",
         });
+        setStop(false);
       }
     } catch (error) {
       console.error(error);
@@ -621,11 +622,11 @@ function RightTab({ selectedTable, menus, orderItems, onUpdateOrderItems }: Righ
         </div>
       )} */}
 
-      {showSuccessMessage && (
+      {/* {showSuccessMessage && (
         <div className={styles.success_message}>
           Đặt món thành công
         </div>
-      )}
+      )} */}
     </div>
   );
 }

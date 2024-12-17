@@ -52,7 +52,7 @@ export const StoreDetailModal = ({ isOpen, onClose, store }: StoreDetailModalPro
                   {store.name}
                 </Text>
                 <HStack spacing={2} mt={1}>
-                  <Badge colorScheme={store.status === 'Đang hoạt động' ? 'green' : 'red'}>
+                <Badge colorScheme={store.status === 'Hoạt Động' ? 'green' : 'red'}>
                     {store.status}
                   </Badge>
                   <HStack spacing={1}>

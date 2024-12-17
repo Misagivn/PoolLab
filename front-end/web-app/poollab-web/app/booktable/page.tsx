@@ -212,8 +212,9 @@ export default function StaffPage() {
 
   const fetchFoods = async () => {
     try {
+      const status = "Thực đơn";
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_LOCAL_URL}/Product/GetAllProducts?StoreId=${storeId}`,
+        `${process.env.NEXT_PUBLIC_LOCAL_URL}/Product/GetAllProducts?StoreId=${storeId}&ProductTypeName=${status}`,
         {
           method: "GET",
           headers: { "Content-Type": "application/json" },

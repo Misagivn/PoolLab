@@ -119,6 +119,7 @@ const LoginScreen = () => {
       setIsLoading(true);
       try {
         user_login(loginData).then((response) => {
+          console.log(response);
           if (response.data.status === 200) {
             const token = response?.data.data;
             const decodedToken = jwtDecode(token);
@@ -129,6 +130,10 @@ const LoginScreen = () => {
             ]);
             setIsLoading(false);
             router.replace("(home)");
+          } else if (response.status === 500) {
+            setAlertVisible(true);
+            setErrorResponse("Tài khoản chưa được xác thực hoặc bí khóa.");
+            setIsLoading(false);
           } else {
             setAlertVisible(true);
             setErrorResponse(response.data.message);

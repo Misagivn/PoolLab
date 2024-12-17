@@ -13,6 +13,7 @@ import {
   get_all_product,
   get_all_product_group,
   add_product_to_order,
+  get_all_product_reserve,
 } from "@/api/product_api";
 import BackButton from "@/components/backButton";
 import { theme } from "@/constants/theme";
@@ -21,7 +22,10 @@ import Icon from "@/assets/icons/icons";
 import Button from "@/components/roundButton";
 import QuantitySelector from "@/components/quantityCount";
 import CustomHeader from "@/components/customHeader";
-import { getStoredTableData } from "@/api/tokenDecode";
+import {
+  getStoredTableData,
+  getStoredTableDataReserve,
+} from "@/api/tokenDecode";
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 const product = () => {
@@ -36,9 +40,9 @@ const product = () => {
   const [tableId, setTableId] = useState("");
   const getTableId = async () => {
     try {
-      const response = await getStoredTableData();
+      const response = await getStoredTableDataReserve();
       if (response) {
-        const tableId = response.data.bidaTable.id;
+        const tableId = response.data.id;
         setTableId(tableId);
       }
     } catch (error) {
@@ -53,7 +57,7 @@ const product = () => {
         ProductGroupId: "",
         Status: "Còn Hàng",
       };
-      const response = await get_all_product(getProductData);
+      const response = await get_all_product_reserve(getProductData);
       if (response.data.status === 200) {
         setProduct(response.data.data.items);
         setIsLoading(false);
@@ -112,7 +116,7 @@ const product = () => {
       Status: "Còn Hàng",
     };
     try {
-      const response = await get_all_product(getProductData);
+      const response = await get_all_product_reserve(getProductData);
       if (response.data.status === 200) {
         setProduct(response.data.data.items);
         setIsLoading(false);
@@ -299,6 +303,12 @@ const product = () => {
                 ]}
               >
                 <View style={styles.innerBox}>
+                  <View style={styles.imageBox}>
+                    <Image
+                      style={styles.image}
+                      source={{ uri: item.productImg.toString() }}
+                    />
+                  </View>
                   <View style={styles.infoBox2}>
                     <Text style={styles.infoBoxTitle}>Tên mặt hàng:</Text>
                     <Text style={styles.infoBoxText}>{item.name}</Text>
@@ -470,11 +480,10 @@ const styles = StyleSheet.create({
     position: "relative",
   },
   image: {
-    width: 50,
-    height: 50,
+    width: 250,
+    height: 250,
     borderRadius: 20,
-    borderWidth: 2,
-    borderColor: theme.colors.primary,
+    borderWidth: 1,
   },
   QuantitySelectorContainer: {
     alignSelf: "flex-end",

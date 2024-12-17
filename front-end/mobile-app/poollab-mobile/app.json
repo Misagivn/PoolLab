@@ -1,14 +1,14 @@
 {
   "expo": {
-    "name": "poollab",
+    "name": "PoolLab",
     "slug": "poollab",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/logo_icon.png",
+    "icon": "./assets/logo_icon.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/images/logo_long.png",
+      "image": "./assets/logo_long.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -17,7 +17,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./assets/logo_icon.png",
         "backgroundColor": "#ffffff"
       },
       "permissions": [

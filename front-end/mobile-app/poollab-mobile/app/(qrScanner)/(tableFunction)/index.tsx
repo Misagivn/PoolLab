@@ -93,6 +93,9 @@ const index = () => {
   };
   const calculateHavePlayTime = (playTime, remainingTime) => {
     try {
+      if (playTime === remainingTime) {
+        return playTime.toString();
+      }
       // Validate inputs
       if (!playTime || !remainingTime) {
         console.log("Invalid inputs:", { playTime, remainingTime });
@@ -150,6 +153,7 @@ const index = () => {
     setIsLoading(true);
     if (timerRef.current) {
       const remainingTime = timerRef.current.getRemainingTime();
+      console.log("remainingTime: ", remainingTime);
       // Call your handleEndTable logic here
       timerRef.current.stopTimer();
       setTimeRemaining(remainingTime);
@@ -164,7 +168,7 @@ const index = () => {
         console.log("end table data: ", endTableData);
         const response = await deactive_table(endTableData);
         if (response.status === 200) {
-          AsyncStorage.removeItem("userProducts");
+          AsyncStorage.removeItem("timeCus");
           setIsLoading(false);
           router.replace("./review");
         } else {

@@ -26,6 +26,8 @@ import Coins01Icon from "./moneyIcon";
 import RefreshIcon from "./refreshIcon";
 import ArrowUpIcon from "./arrowUp";
 import ArrowDownIcon from "./arrowDown";
+import CouponIcon from "./voucherIcon";
+import LogoutIcon from "./logOutIco";
 const icons = {
   fbIcon: FacebookIcon,
   ggIcon: GoogleIcon,
@@ -52,6 +54,8 @@ const icons = {
   refreshIcon: RefreshIcon,
   arrowUpIcon: ArrowUpIcon,
   arrowDownIcon: ArrowDownIcon,
+  voucherIcon: CouponIcon,
+  logOutIcon: LogoutIcon,
 };
 
 const Icon = ({ name, ...props }) => {

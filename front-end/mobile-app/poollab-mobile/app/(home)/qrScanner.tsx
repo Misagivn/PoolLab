@@ -19,6 +19,7 @@ const qrScanner = () => {
   const [customerId, setCustomerId] = useState("");
   const [alertVisible, setAlertVisible] = useState(false);
   const [errorResponse, setErrorResponse] = useState("");
+  const [exceptionResponse, setExceptionResponse] = useState("");
   const alertPopup = (
     title,
     message,
@@ -34,13 +35,18 @@ const qrScanner = () => {
         confirmText={confirmText}
         cancelText={cancelText}
         onConfirm={() => {
-          setAlertVisible(false);
-          setErrorResponse("");
-          setScanningEnable(true);
+          if (errorResponse) {
+            setAlertVisible(false);
+            setErrorResponse("");
+            setScanningEnable(true);
+          } else if (exceptionResponse) {
+            setAlertVisible(false);
+            setExceptionResponse("");
+            setScanningEnable(true);
+            router.replace("../(qrScanner)");
+          }
         }}
-        onCancel={() => {
-          setAlertVisible(false);
-        }}
+        onCancel={() => {}}
       />
     );
   };
@@ -85,6 +91,7 @@ const qrScanner = () => {
           customerId: customerId,
         };
         const response = await get_tables_by_QR(openTableData);
+        console.log("QR scanner: ", response.data);
         if (response.data.status === 200) {
           AsyncStorage.multiSet([
             ["tableData", JSON.stringify(response.data)],
@@ -98,6 +105,15 @@ const qrScanner = () => {
             ["tableInfoReserve", JSON.stringify(response.data.data)],
           ]);
           router.replace("../(memberReserve)");
+        } else if (response.data.status === 202) {
+          AsyncStorage.multiSet([
+            ["tableData", JSON.stringify(response.data)],
+            ["tableInfo", JSON.stringify(response.data.data)],
+            ["timeCus", JSON.stringify(response.data.data.timeCus)],
+          ]);
+          setAlertVisible(true);
+          setExceptionResponse(response.data.message);
+          setScanningEnable(false);
         } else {
           console.log(response.data);
           setAlertVisible(true);
@@ -118,6 +134,8 @@ const qrScanner = () => {
   if (alertVisible) {
     if (errorResponse) {
       return alertPopup("Thông báo", errorResponse, "OK", "Huy");
+    } else if (exceptionResponse) {
+      return alertPopup("Thông báo", exceptionResponse, "OK", "Huy");
     }
   }
   return (

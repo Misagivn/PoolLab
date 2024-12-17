@@ -1,38 +1,12 @@
-import { 
-  CreateCourseRequest, 
-  UpdateCourseRequest,
-  CourseResponse, 
-  PaginatedCourseResponse,
-  CourseFilters,
-  UploadAvatarResponse 
- } from '@/utils/types/course.types';
- 
- const BASE_URL = 'https://poollabwebapi20241008201316.azurewebsites.net/api';
- 
- export const courseApi = {
-  getAllCourses: async (params: CourseFilters): Promise<PaginatedCourseResponse> => {
-    const token = localStorage.getItem('token');
-    const url = new URL(`${BASE_URL}/course/getallcourses`);
-    
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined) {
-        url.searchParams.append(key, value.toString());
-      }
-    });
- 
-    const response = await fetch(url.toString(), {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
-    });
-    return response.json();
-  },
- 
-  getCourseById: async (id: string): Promise<CourseResponse> => {
+import { CourseApiResponse } from "@/utils/types/course.types";
+
+const BASE_URL = 'https://poollabwebapi20241008201316.azurewebsites.net/api';
+
+export const courseApi = {
+  getAllCourses: async (page: number = 1): Promise<CourseApiResponse> => {
     const token = localStorage.getItem('token');
     const response = await fetch(
-      `${BASE_URL}/course/getcoursebyid/${id}`,
+      `${BASE_URL}/course/getallcourses?SortBy=createdDate&SortAscending=false&PageNumber=${page}&PageSize=10`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -42,8 +16,34 @@ import {
     );
     return response.json();
   },
- 
-  createCourse: async (data: CreateCourseRequest): Promise<CourseResponse> => {
+
+  getCourseById: async (courseId: string): Promise<CourseApiResponse> => {
+    const token = localStorage.getItem('token');
+    const response = await fetch(
+      `${BASE_URL}/course/getcoursebyid/${courseId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    return response.json();
+  },
+
+  createCourse: async (data: {
+    title: string;
+    descript: string;
+    price: number;
+    schedule: string[];
+    courseMonth: string;
+    startTime: string;
+    endTime: string;
+    level: string;
+    quantity: number;
+    storeId: string;
+    accountId: string;
+  }): Promise<CourseApiResponse> => {
     const token = localStorage.getItem('token');
     const response = await fetch(
       `${BASE_URL}/course/createcourse`,
@@ -53,16 +53,24 @@ import {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          ...data,
-          schedule: data.schedule.join(',')
-        })
+        body: JSON.stringify(data)
       }
     );
     return response.json();
   },
- 
-  updateCourse: async (courseId: string, data: UpdateCourseRequest): Promise<CourseResponse> => {
+
+  updateCourse: async (courseId: string, data: {
+    title: string;
+    descript: string;
+    price: number;
+    schedule: string;
+    startDate: string;
+    level: string;
+    quantity: number;
+    storeId: string;
+    accountId: string;
+    status: string;
+  }): Promise<CourseApiResponse> => {
     const token = localStorage.getItem('token');
     const response = await fetch(
       `${BASE_URL}/course/updatecourse/${courseId}`,
@@ -77,8 +85,23 @@ import {
     );
     return response.json();
   },
- 
-  deleteCourse: async (courseId: string): Promise<CourseResponse> => {
+
+  cancelCourse: async (courseId: string): Promise<CourseApiResponse> => {
+    const token = localStorage.getItem('token');
+    const response = await fetch(
+      `${BASE_URL}/course/cancelcourse/${courseId}`,
+      {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    return response.json();
+  },
+
+  deleteCourse: async (courseId: string): Promise<CourseApiResponse> => {
     const token = localStorage.getItem('token');
     const response = await fetch(
       `${BASE_URL}/course/deletecourse?id=${courseId}`,
@@ -92,22 +115,18 @@ import {
     );
     return response.json();
   },
- 
-  uploadMentorAvatar: async (file: File): Promise<UploadAvatarResponse> => {
+
+  getMembers: async (): Promise<CourseApiResponse> => {
     const token = localStorage.getItem('token');
-    const formData = new FormData();
-    formData.append('file', file);
-    
     const response = await fetch(
-      `${BASE_URL}/account/uploadfileavatar`,
+      `${BASE_URL}/account/getallaccount?RoleName=Member`,
       {
-        method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
-        },
-        body: formData
+          'Content-Type': 'application/json'
+        }
       }
     );
     return response.json();
   }
- };
+};

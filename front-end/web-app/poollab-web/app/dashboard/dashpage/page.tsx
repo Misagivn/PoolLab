@@ -20,138 +20,149 @@ import {
   Tr,
   Th,
   Td,
+  Select,
+  HStack,
+  Spinner,
+  Icon,
   Switch,
   FormControl,
   FormLabel,
-  Select,
-  HStack,
 } from '@chakra-ui/react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
-  LineChart,
-  Line,
   BarChart,
   Bar,
-  AreaChart,
-  Area,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
 } from 'recharts';
+import { FiShoppingBag, FiCalendar, FiDollarSign, FiUsers } from 'react-icons/fi';
+import { useToast } from '@chakra-ui/react';
+import { dashboardApi } from '@/apis/dashboardAdmin.api';
 
-// Interface cho dữ liệu cửa hàng
-interface StoreData {
-  id: number;
-  name: string;
-  revenue: number;
-  lastRevenue: number;
-  percentChange: number;
-  color: string;
-  orders: number;
-  lastOrders: number;
-  averageOrderValue: number;
+interface StoreRevenue {
+  branchId: string;
+  branchName: string;
+  revenueByMonth: {
+    month: number;
+    orderRevenue: number;
+    depositRevenue: number;
+    totalRevenue: number;
+  }[];
 }
 
-// Dữ liệu mẫu cho các cửa hàng
-const stores: StoreData[] = [
-  {
-    id: 1,
-    name: 'Chi nhánh Quận 1',
-    revenue: 125000000,
-    lastRevenue: 115000000,
-    percentChange: 8.7,
-    color: '#FF6B6B',
-    orders: 150,
-    lastOrders: 130,
-    averageOrderValue: 833333
-  },
-  {
-    id: 2,
-    name: 'Chi nhánh Quận 2',
-    revenue: 98000000,
-    lastRevenue: 102000000,
-    percentChange: -3.9,
-    color: '#4ECDC4',
-    orders: 120,
-    lastOrders: 110,
-    averageOrderValue: 816666
-  },
-  {
-    id: 3,
-    name: 'Chi nhánh Quận 3',
-    revenue: 145000000,
-    lastRevenue: 128000000,
-    percentChange: 13.3,
-    color: '#45B7D1',
-    orders: 163,
-    lastOrders: 140,
-    averageOrderValue: 889571
-  },
-  {
-    id: 4,
-    name: 'Chi nhánh Tân Bình',
-    revenue: 88000000,
-    lastRevenue: 85000000,
-    percentChange: 3.5,
-    color: '#96CEB4',
-    orders: 100,
-    lastOrders: 90,
-    averageOrderValue: 880000
-  }
-];
+const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4'];
 
-// Tạo dữ liệu cho biểu đồ
-const generateChartData = () => {
-  const dates = Array.from({ length: 30 }, (_, i) => {
-    const date = new Date();
-    date.setDate(date.getDate() - (29 - i));
-    return date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
-  });
+export default function DashboardPage() {
+  const toast = useToast();
+  const [loading, setLoading] = useState(true);
+  const [totalIncome, setTotalIncome] = useState("0");
+  const [totalOrders, setTotalOrders] = useState("0");
+  const [totalBookings, setTotalBookings] = useState("0");
+  const [totalStaff, setTotalStaff] = useState("0");
+  const [selectedYear, setSelectedYear] = useState(2024);
+  const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
+  const [showTotal, setShowTotal] = useState(true);
+  const [chartData, setChartData] = useState<any[]>([]);
+  const [storeRevenues, setStoreRevenues] = useState<StoreRevenue[]>([]);
 
-  return dates.map(date => {
-    const data: any = { date };
-    stores.forEach(store => {
-      const baseRevenue = store.revenue / 30;
-      const random = 0.8 + Math.random() * 0.4; // Random factor between 0.8 and 1.2
-      data[store.name] = Math.round(baseRevenue * random);
-    });
-    data['Tổng'] = Object.values(data)
-      .filter(value => typeof value === 'number')
-      .reduce((a: any, b: any) => a + b, 0);
-    return data;
-  });
-};
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      const [
+        incomeRes,
+        ordersRes,
+        bookingsRes,
+        staffRes,
+        storeRevenuesRes
+      ] = await Promise.all([
+        dashboardApi.getTotalIncome(),
+        dashboardApi.getTotalOrders(),
+        dashboardApi.getTotalBookings(),
+        dashboardApi.getTotalStaff(),
+        dashboardApi.getStoreRevenuesByYear(selectedYear)
+      ]);
 
-export default function DashPage() {
-  const [showAllStores, setShowAllStores] = useState(true);
-  const [timeRange, setTimeRange] = useState('30days');
-  const [chartType, setChartType] = useState<'line' | 'bar' | 'area'>('line');
+      if (incomeRes.status === 200) setTotalIncome(incomeRes.data);
+      if (ordersRes.status === 200) setTotalOrders(ordersRes.data);
+      if (bookingsRes.status === 200) setTotalBookings(bookingsRes.data);
+      if (staffRes.status === 200) setTotalStaff(staffRes.data);
 
-  // Format tiền VND
-  const formatCurrency = (amount: number) => {
+      if (storeRevenuesRes.status === 200) {
+        setStoreRevenues(storeRevenuesRes.data);
+        await updateChartData(storeRevenuesRes.data);
+      }
+    } catch (error) {
+      toast({
+        title: 'Lỗi',
+        description: 'Không thể tải dữ liệu dashboard',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateChartData = async (stores: StoreRevenue[]) => {
+    try {
+      if (selectedMonth !== null) {
+        const promises = stores.map(store => 
+          dashboardApi.getStoreIncomeByFilter(store.branchId, selectedYear, selectedMonth)
+        );
+        const monthlyData = await Promise.all(promises);
+
+        // Transform data cho hiển thị theo ngày
+        const transformedData = monthlyData[0].data.map((day: any) => {
+          const dataPoint: any = {
+            date: day.date,
+            total: 0,
+          };
+
+          monthlyData.forEach((storeData, index) => {
+            const storeName = stores[index].branchName;
+            const dayData = storeData.data.find((d: any) => d.date === day.date);
+            dataPoint[storeName] = dayData?.totalIncome || 0;
+            dataPoint.total += dayData?.totalIncome || 0;
+          });
+
+          return dataPoint;
+        });
+
+        setChartData(transformedData);
+      } else {
+        // Transform data cho hiển thị cả năm
+        const yearlyData = [{
+          branchName: 'Doanh thu',
+          total: stores.reduce((sum, store) => 
+            sum + (store.revenueByMonth[0]?.totalRevenue || 0), 0
+          ),
+          ...stores.reduce((acc, store) => ({
+            ...acc,
+            [store.branchName]: store.revenueByMonth[0]?.totalRevenue || 0
+          }), {})
+        }];
+        setChartData(yearlyData);
+      }
+    } catch (error) {
+      console.error('Error updating chart data:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, [selectedYear, selectedMonth]);
+
+  const formatCurrency = (value: string | number) => {
     return new Intl.NumberFormat('vi-VN', {
       style: 'currency',
       currency: 'VND'
-    }).format(amount);
+    }).format(Number(value));
   };
 
-  // Tính toán các tổng
-  const totalRevenue = stores.reduce((sum, store) => sum + store.revenue, 0);
-  const totalLastRevenue = stores.reduce((sum, store) => sum + store.lastRevenue, 0);
-  const totalPercentChange = ((totalRevenue - totalLastRevenue) / totalLastRevenue) * 100;
-  const totalOrders = stores.reduce((sum, store) => sum + store.orders, 0);
-  const totalLastOrders = stores.reduce((sum, store) => sum + store.lastOrders, 0);
-  const ordersPercentChange = ((totalOrders - totalLastOrders) / totalLastOrders) * 100;
-  const averageOrderValue = totalRevenue / totalOrders;
-  const lastAverageOrderValue = totalLastRevenue / totalLastOrders;
-  const averageOrderPercentChange = ((averageOrderValue - lastAverageOrderValue) / lastAverageOrderValue) * 100;
-
-  const chartData = generateChartData();
-
-  // Custom tooltip cho biểu đồ
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
@@ -170,240 +181,231 @@ export default function DashPage() {
     return null;
   };
 
-  // Render biểu đồ theo loại
-  const renderChart = () => {
-    const commonProps = {
-      data: chartData,
-      children: [
-        <CartesianGrid strokeDasharray="3 3" key="grid" />,
-        <XAxis 
-          dataKey="date"
-          tick={{ fontSize: 12 }}
-          key="xAxis"
-        />,
-        <YAxis
-          tickFormatter={(value) => 
-            new Intl.NumberFormat('vi-VN', {
-              notation: 'compact',
-              compactDisplay: 'short',
-              maximumFractionDigits: 1
-            }).format(value)
-          }
-          tick={{ fontSize: 12 }}
-          key="yAxis"
-        />,
-        <Tooltip content={<CustomTooltip />} key="tooltip" />,
-        <Legend 
-          verticalAlign="top"
-          height={36}
-          formatter={(value) => <span style={{ fontSize: '12px' }}>{value}</span>}
-          key="legend"
-        />
-      ]
-    };
-
-    switch (chartType) {
-      case 'line':
-        return (
-          <LineChart {...commonProps}>
-            {commonProps.children}
-            {showAllStores && (
-              <Line
-                type="monotone"
-                dataKey="Tổng"
-                stroke="#2D3748"
-                strokeWidth={2}
-                dot={false}
-              />
-            )}
-            {stores.map(store => (
-              <Line
-                key={store.id}
-                type="monotone"
-                dataKey={store.name}
-                stroke={store.color}
-                strokeWidth={2}
-                dot={false}
-              />
-            ))}
-          </LineChart>
-        );
-      case 'bar':
-        return (
-          <BarChart {...commonProps}>
-            {commonProps.children}
-            {showAllStores && (
-              <Bar dataKey="Tổng" fill="#2D3748" />
-            )}
-            {stores.map(store => (
-              <Bar key={store.id} dataKey={store.name} fill={store.color} />
-            ))}
-          </BarChart>
-        );
-      case 'area':
-        return (
-          <AreaChart {...commonProps}>
-            {commonProps.children}
-            {showAllStores && (
-              <Area
-                type="monotone"
-                dataKey="Tổng"
-                fill="#2D3748"
-                stroke="#2D3748"
-                fillOpacity={0.3}
-              />
-            )}
-            {stores.map(store => (
-              <Area
-                key={store.id}
-                type="monotone"
-                dataKey={store.name}
-                fill={store.color}
-                stroke={store.color}
-                fillOpacity={0.3}
-              />
-            ))}
-          </AreaChart>
-        );
-    }
-  };
+  if (loading) {
+    return (
+      <Flex h="100vh" align="center" justify="center">
+        <Spinner size="xl" color="blue.500" />
+      </Flex>
+    );
+  }
 
   return (
-    <Stack spacing={6}>
-      {/* Thống kê tổng quan */}
-      <Grid templateColumns="repeat(3, 1fr)" gap={6}>
-        <Card>
+    <Stack spacing={6} p={6}>
+      {/* Stats Cards */}
+      <Grid templateColumns="repeat(4, 1fr)" gap={6}>
+        <Card bg="white" shadow="sm">
           <CardBody>
             <Stat>
-              <StatLabel fontSize="lg">Tổng doanh thu</StatLabel>
-              <StatNumber fontSize="2xl" color="green.500">
-                {formatCurrency(totalRevenue)}
-              </StatNumber>
-              <StatHelpText>
-                <StatArrow type={totalPercentChange >= 0 ? 'increase' : 'decrease'} />
-                {Math.abs(totalPercentChange).toFixed(1)}% so với kỳ trước
-              </StatHelpText>
+              <Flex align="center">
+                <Box p={3} bg="green.50" borderRadius="full" mr={4}>
+                  <Icon as={FiDollarSign} boxSize={6} color="green.500" />
+                </Box>
+                <Box flex="1">
+                  <StatLabel color="gray.500">Tổng doanh thu</StatLabel>
+                  <StatNumber fontSize="2xl" color="green.500">
+                    {formatCurrency(totalIncome)}
+                  </StatNumber>
+                  <StatHelpText mb={0}>
+                    <StatArrow type="increase" />
+                    6.0% so với kỳ trước
+                  </StatHelpText>
+                </Box>
+              </Flex>
             </Stat>
           </CardBody>
         </Card>
 
-        <Card>
+        <Card bg="white" shadow="sm">
           <CardBody>
             <Stat>
-              <StatLabel fontSize="lg">Tổng đơn hàng</StatLabel>
-              <StatNumber fontSize="2xl" color="blue.500">
-                {totalOrders.toLocaleString()}
-              </StatNumber>
-              <StatHelpText>
-                <StatArrow type={ordersPercentChange >= 0 ? 'increase' : 'decrease'} />
-                {Math.abs(ordersPercentChange).toFixed(1)}% so với kỳ trước
-              </StatHelpText>
+              <Flex align="center">
+                <Box p={3} bg="blue.50" borderRadius="full" mr={4}>
+                  <Icon as={FiShoppingBag} boxSize={6} color="blue.500" />
+                </Box>
+                <Box flex="1">
+                  <StatLabel color="gray.500">Tổng đơn hàng</StatLabel>
+                  <StatNumber fontSize="2xl" color="blue.500">
+                    {totalOrders}
+                  </StatNumber>
+                  <StatHelpText mb={0}>
+                    <StatArrow type="increase" />
+                    13.4% so với kỳ trước
+                  </StatHelpText>
+                </Box>
+              </Flex>
             </Stat>
           </CardBody>
         </Card>
 
-        <Card>
+        <Card bg="white" shadow="sm">
           <CardBody>
             <Stat>
-              <StatLabel fontSize="lg">Giá trị đơn trung bình</StatLabel>
-              <StatNumber fontSize="2xl" color="purple.500">
-                {formatCurrency(averageOrderValue)}
-              </StatNumber>
-              <StatHelpText>
-                <StatArrow type={averageOrderPercentChange >= 0 ? 'increase' : 'decrease'} />
-                {Math.abs(averageOrderPercentChange).toFixed(1)}% so với kỳ trước
-              </StatHelpText>
+              <Flex align="center">
+                <Box p={3} bg="purple.50" borderRadius="full" mr={4}>
+                  <Icon as={FiCalendar} boxSize={6} color="purple.500" />
+                </Box>
+                <Box flex="1">
+                  <StatLabel color="gray.500">Tổng booking</StatLabel>
+                  <StatNumber fontSize="2xl" color="purple.500">
+                    {totalBookings}
+                  </StatNumber>
+                  <StatHelpText mb={0}>
+                    <StatArrow type="decrease" />
+                    6.5% so với kỳ trước
+                  </StatHelpText>
+                </Box>
+              </Flex>
+            </Stat>
+          </CardBody>
+        </Card>
+
+        <Card bg="white" shadow="sm">
+          <CardBody>
+            <Stat>
+              <Flex align="center">
+                <Box p={3} bg="orange.50" borderRadius="full" mr={4}>
+                  <Icon as={FiUsers} boxSize={6} color="orange.500" />
+                </Box>
+                <Box flex="1">
+                  <StatLabel color="gray.500">Tổng nhân viên</StatLabel>
+                  <StatNumber fontSize="2xl" color="orange.500">
+                    {totalStaff}
+                  </StatNumber>
+                  <StatHelpText mb={0}>
+                    <StatArrow type="increase" />
+                    8.2% so với kỳ trước
+                  </StatHelpText>
+                </Box>
+              </Flex>
             </Stat>
           </CardBody>
         </Card>
       </Grid>
 
-      {/* Biểu đồ doanh thu */}
+      {/* Revenue Chart */}
       <Card>
         <CardBody>
-          <Flex justifyContent="space-between" alignItems="center" mb={4}>
+          <Flex justify="space-between" align="center" mb={6}>
             <Heading size="md">Biểu đồ doanh thu</Heading>
             <HStack spacing={4}>
               <Select 
-                size="sm"
-                width="150px"
-                value={timeRange}
-                onChange={(e) => setTimeRange(e.target.value)}
+                placeholder="Chọn tháng"
+                value={selectedMonth || ''}
+                onChange={(e) => setSelectedMonth(e.target.value ? Number(e.target.value) : null)}
+                w="150px"
               >
-                <option value="7days">7 ngày qua</option>
-                <option value="30days">30 ngày qua</option>
-                <option value="90days">90 ngày qua</option>
+                {Array.from({length: 12}, (_, i) => (
+                  <option key={i + 1} value={i + 1}>Tháng {i + 1}</option>
+                ))}
               </Select>
 
               <Select
-                size="sm"
-                width="150px"
-                value={chartType}
-                onChange={(e) => setChartType(e.target.value as 'line' | 'bar' | 'area')}
+                w="120px"
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(Number(e.target.value))}
               >
-                <option value="line">Đường</option>
-                <option value="bar">Cột</option>
-                <option value="area">Vùng</option>
+                <option value={2024}>2024</option>
+                <option value={2023}>2023</option>
               </Select>
 
-              <FormControl display="flex" alignItems="center">
-                <FormLabel mb="0" mr={2}>
-                  Hiển thị tất cả
+              <FormControl display='flex' alignItems='center'>
+                <FormLabel htmlFor='show-total' mb='0'>
+                  Hiển thị tổng
                 </FormLabel>
-                <Switch
-                  isChecked={showAllStores}
-                  onChange={(e) => setShowAllStores(e.target.checked)}
-                  colorScheme="blue"
+                <Switch 
+                  id='show-total' 
+                  isChecked={showTotal}
+                  onChange={(e) => setShowTotal(e.target.checked)}
                 />
               </FormControl>
             </HStack>
           </Flex>
 
-          <Box height="400px">
+          <Box h="400px">
             <ResponsiveContainer width="100%" height="100%">
-              {renderChart()}
+              <BarChart 
+                data={chartData}
+                maxBarSize={60}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis 
+                  dataKey={selectedMonth ? "date" : "branchName"}
+                  interval={0}
+                />
+                <YAxis 
+                  tickFormatter={(value) => 
+                    new Intl.NumberFormat('vi-VN', {
+                      notation: 'compact',
+                      maximumFractionDigits: 1
+                    }).format(value)
+                  }
+                />
+                <Tooltip content={<CustomTooltip />} />
+                {showTotal && (
+                  <Bar dataKey="total" fill="#2D3748" name="Tổng" radius={[4, 4, 0, 0]} />
+                )}
+                {storeRevenues.map((store, index) => (
+                  <Bar
+                    key={store.branchId}
+                    dataKey={store.branchName}
+                    fill={colors[index % colors.length]}
+                    name={store.branchName}
+                    radius={[4, 4, 0, 0]}
+                  />
+                ))}
+              </BarChart>
             </ResponsiveContainer>
           </Box>
         </CardBody>
       </Card>
 
-      {/* Bảng chi tiết doanh thu */}
+      {/* Revenue Details Table */}
       <Card>
         <CardBody>
           <Heading size="md" mb={4}>Chi tiết doanh thu theo cửa hàng</Heading>
           <Table>
-            <Thead>
+            <Thead bg="gray.50">
               <Tr>
-                <Th>Cửa hàng</Th>
-                <Th isNumeric>Doanh thu</Th>
-                <Th isNumeric>Số đơn</Th>
-                <Th isNumeric>TB/Đơn</Th>
-                <Th isNumeric>% Thay đổi DT</Th>
+                <Th>CỬA HÀNG</Th>
+                <Th isNumeric>DOANH THU</Th>
+                <Th isNumeric>DOANH THU ĐƠN HÀNG</Th>
+                <Th isNumeric>DOANH THU ĐẶT CỌC</Th>
               </Tr>
             </Thead>
             <Tbody>
-              {stores.map((store) => (
-                <Tr key={store.id}>
-                  <Td fontWeight="medium">{store.name}</Td>
-                  <Td isNumeric>{formatCurrency(store.revenue)}</Td>
-                  <Td isNumeric>{store.orders.toLocaleString()}</Td>
-                  <Td isNumeric>{formatCurrency(store.averageOrderValue)}</Td>
-                  <Td isNumeric>
-                    <Text color={store.percentChange >= 0 ? 'green.500' : 'red.500'}>
-                      {store.percentChange >= 0 ? '+' : ''}{store.percentChange.toFixed(1)}%
-                    </Text>
-                  </Td>
+              {storeRevenues.map((store) => (
+                <Tr key={store.branchId}>
+                  <Td fontWeight="medium">{store.branchName}</Td>
+                  <Td isNumeric>{formatCurrency(store.revenueByMonth[0]?.totalRevenue || 0)}</Td>
+                  <Td isNumeric>{formatCurrency(store.revenueByMonth[0]?.orderRevenue || 0)}</Td>
+                  <Td isNumeric>{formatCurrency(store.revenueByMonth[0]?.depositRevenue || 0)}</Td>
                 </Tr>
               ))}
               <Tr fontWeight="bold" bg="gray.50">
                 <Td>Tổng cộng</Td>
-                <Td isNumeric>{formatCurrency(totalRevenue)}</Td>
-                <Td isNumeric>{totalOrders.toLocaleString()}</Td>
-                <Td isNumeric>{formatCurrency(averageOrderValue)}</Td>
                 <Td isNumeric>
-                  <Text color={totalPercentChange >= 0 ? 'green.500' : 'red.500'}>
-                    {totalPercentChange >= 0 ? '+' : ''}{totalPercentChange.toFixed(1)}%
-                  </Text>
+                  {formatCurrency(
+                    storeRevenues.reduce(
+                      (sum, store) => sum + (store.revenueByMonth[0]?.totalRevenue || 0),
+                      0
+                    )
+                  )}
+                </Td>
+                <Td isNumeric>
+                  {formatCurrency(
+                    storeRevenues.reduce(
+                      (sum, store) => sum + (store.revenueByMonth[0]?.orderRevenue || 0),
+                      0
+                    )
+                  )}
+                </Td>
+                <Td isNumeric>
+                  {formatCurrency(
+                    storeRevenues.reduce(
+                      (sum, store) => sum + (store.revenueByMonth[0]?.depositRevenue || 0),
+                      0
+                    )
+                  )}
                 </Td>
               </Tr>
             </Tbody>

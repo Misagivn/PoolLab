@@ -45,8 +45,12 @@ export default function OrdersPage() {
   } = useOrder();
 
   useEffect(() => {
-    fetchOrders(1);
-  }, [fetchOrders]);
+    const timeoutId = setTimeout(() => {
+      fetchOrders(1, searchQuery);
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery, fetchOrders]);
 
   const handleViewDetail = async (orderId: string) => {
     await fetchOrderDetail(orderId);
@@ -65,16 +69,6 @@ export default function OrdersPage() {
   const formatCurrency = (amount: number) => {
     return amount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
   };
-
-  // Sort orders by date in descending order (newest first)
-  const sortedOrders = [...orders].sort((a, b) => 
-    new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime()
-  );
-
-  const filteredOrders = sortedOrders.filter(order =>
-    order.orderCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    order.username.toLowerCase().includes(searchQuery.toLowerCase())
-  );
 
   if (loading && orders.length === 0) {
     return (
@@ -123,7 +117,7 @@ export default function OrdersPage() {
                 </Tr>
               </Thead>
               <Tbody>
-                {filteredOrders.map((order) => (
+                {orders.map((order) => (
                   <Tr key={order.id}>
                     <Td>{order.orderCode}</Td>
                     <Td>{order.username}</Td>
@@ -150,7 +144,7 @@ export default function OrdersPage() {
               </Tbody>
             </Table>
 
-            {filteredOrders.length === 0 && (
+            {orders.length === 0 && (
               <Flex
                 direction="column"
                 align="center"
@@ -172,7 +166,7 @@ export default function OrdersPage() {
           </CardBody>
         </Card>
 
-        {filteredOrders.length > 0 && (
+        {orders.length > 0 && (
           <ProductPagination
             currentPage={pagination.currentPage}
             totalPages={pagination.totalPages}

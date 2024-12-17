@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "poollab",
+    "name": "PoolLab",
     "slug": "poollab",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -17,7 +17,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./assets/images/logo_icon.png",
         "backgroundColor": "#ffffff"
       },
       "permissions": [

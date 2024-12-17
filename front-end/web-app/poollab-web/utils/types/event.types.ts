@@ -1,6 +1,6 @@
 export interface Event {
   id: string;
-  title: string;
+  title: string; 
   descript: string;
   thumbnail: string;
   managerId: string;
@@ -11,12 +11,12 @@ export interface Event {
   address: string | null;
   timeStart: string;
   timeEnd: string;
-  createdDate:string;
+  createdDate: string;
   updatedDate: string | null;
   status: string;
 }
 
-export interface PaginatedEvents {
+export interface PaginatedResponse {
   items: Event[];
   totalItem: number;
   pageSize: number;
@@ -27,6 +27,5 @@ export interface PaginatedEvents {
 export interface EventResponse {
   status: number;
   message: string | null;
-  data: PaginatedEvents;
-
+  data: PaginatedResponse;
 }

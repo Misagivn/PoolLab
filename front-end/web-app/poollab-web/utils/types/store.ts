@@ -14,8 +14,28 @@ export interface Store {
   status: string;
 }
 
+interface StoreApiResponse {
+  status: number;
+  message: string | null;
+  data: {
+    items: Store[];
+    totalItem: number;
+    pageSize: number;
+    totalPages: number;
+    pageNumber: number;
+  };
+}
+
+export interface PaginatedResponse {
+  items: Store[];
+  totalItem: number;
+  pageSize: number;
+  totalPages: number;
+  pageNumber: number;
+}
+
 export interface StoreResponse {
   status: number;
   message: string | null;
-  data: Store[] | Store;
+  data: PaginatedResponse;
 }

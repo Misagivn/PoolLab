@@ -9,16 +9,31 @@ export const staffApi = {
     pageSize?: number;
     roleId?: string;
     storeId?: string;
+    UserName?: string;
+    SortBy?: string;
+    SortAscending?: boolean;
   }): Promise<PaginatedStaffResponse> => {
-    const { pageNumber = 1, pageSize = 10, roleId = ROLE_ID, storeId } = params;
+    const { 
+      pageNumber = 1, 
+      pageSize = 10, 
+      roleId = ROLE_ID, 
+      storeId, 
+      UserName,
+      SortBy = 'joinDate',
+      SortAscending = false 
+    } = params;
+    
     const token = localStorage.getItem('token');
     
     const url = new URL(`${BASE_URL}/Account/GetAllAccount`);
     url.searchParams.append('PageNumber', pageNumber.toString());
     url.searchParams.append('PageSize', pageSize.toString());
+    url.searchParams.append('SortBy', SortBy);
+    url.searchParams.append('SortAscending', SortAscending.toString());
     if (roleId) url.searchParams.append('RoleId', roleId);
     if (storeId) url.searchParams.append('StoreId', storeId);
-
+    if (UserName) url.searchParams.append('UserName', UserName);
+  
     const response = await fetch(url.toString(), {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -27,7 +42,7 @@ export const staffApi = {
     });
     return response.json();
   },
-
+  
   getStaffById: async (staffId: string): Promise<StaffResponse> => {
     const token = localStorage.getItem('token');
     const response = await fetch(
@@ -90,5 +105,20 @@ export const staffApi = {
       }
     );
     return response.json();
-  }
+  },
+  updateAccountStatus: async (accountId: string, status: string): Promise<StaffResponse> => {
+    const token = localStorage.getItem('token');
+    const response = await fetch(
+      `${BASE_URL}/account/updateaccstatus/${accountId}`,
+      {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status })
+      }
+    );
+    return response.json();
+  },
 };

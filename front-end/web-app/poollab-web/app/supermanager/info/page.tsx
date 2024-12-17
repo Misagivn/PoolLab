@@ -28,9 +28,9 @@ import {
   FiKey
 } from 'react-icons/fi';
 import { useAccountInfo } from '@/hooks/useAccountInfo';
-import { EditInfoModal } from '@/components/manager/EditInfoModal';
-import { ChangePasswordModal } from '@/components/manager/ChangePasswordModal';
-import { AvatarUpload } from '@/components/manager/AvatarUpload';
+import { EditInfoModal } from '@/components/info/EditInfoModal';
+import { ChangePasswordModal } from '@/components/info/ChangePasswordModal';
+import { AvatarUpload } from '@/components/info/AvatarUpload';
 
 export default function InfoPage() {
   const { managerData, roleName, loading, updateInfo, updatePassword } = useAccountInfo();
@@ -88,7 +88,7 @@ export default function InfoPage() {
                 {roleName}
                 </Badge>
                 <Badge 
-                  colorScheme={managerData.status === 'Kích hoạt' ? 'green' : 'red'}
+                  colorScheme={managerData.status === 'Kích Hoạt' ? 'green' : 'red'}
                   px={2}
                   py={1}
                 >
@@ -183,7 +183,7 @@ export default function InfoPage() {
                     Trạng thái tài khoản
                   </Text>
                   <Badge 
-                    colorScheme={managerData.status === 'Kích hoạt' ? 'green' : 'red'}
+                    colorScheme={managerData.status === 'Kích Hoạt' ? 'green' : 'red'}
                     px={2}
                     py={1}
                   >

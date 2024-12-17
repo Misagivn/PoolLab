@@ -45,11 +45,13 @@ import { useStores } from '@/hooks/useStores';
 import { StoreDetailModal } from '@/components/store/StoreDetailModal';
 import { StoreFormModal } from '@/components/store/StoreFormModal';
 import { Store } from '@/utils/types/store';
+import { ProductPagination } from '@/components/common/paginations';
 
 export default function StorePage() {
   const { 
     data: stores, 
-    loading, 
+    loading,
+    pagination,
     fetchStores, 
     createStore,
     updateStore,
@@ -80,8 +82,12 @@ export default function StorePage() {
   } = useDisclosure();
 
   useEffect(() => {
-    fetchStores();
+    fetchStores(1);
   }, [fetchStores]);
+
+  const handlePageChange = (page: number) => {
+    fetchStores(page);
+  };
 
   const handleAddStore = async (data: Partial<Store>) => {
     try {
@@ -114,7 +120,7 @@ export default function StorePage() {
     }
   };
 
-  const filteredStores = (stores || []).filter(store => // Thêm null check với stores
+  const filteredStores = (stores || []).filter(store => 
     store.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     store.address.toLowerCase().includes(searchQuery.toLowerCase()) ||
     store.phoneNumber.includes(searchQuery)
@@ -169,7 +175,7 @@ export default function StorePage() {
             icon={<Icon as={FiRefreshCcw} />}
             onClick={() => {
               setSearchQuery('');
-              fetchStores();
+              fetchStores(1);
             }}
           />
         </HStack>
@@ -220,7 +226,7 @@ export default function StorePage() {
                 </Td>
                 <Td>
                   <Badge 
-                    colorScheme={store.status === 'Đang hoạt động' ? 'green' : 'red'}
+                    colorScheme={store.status === 'Hoạt Động' ? 'green' : 'red'}
                   >
                     {store.status}
                   </Badge>
@@ -247,24 +253,33 @@ export default function StorePage() {
                         onFormOpen();
                       }}
                     />
-
                     <IconButton
-                            aria-label="Delete store"
-                            icon={<Icon as={FiTrash2} />}
-                            size="sm"
-                            variant="ghost"
-                            colorScheme="red"
-                            onClick={() => {
-                              setStoreToDelete(store);
-                              onDeleteOpen();
-                            }}
-                          />
+                      aria-label="Delete store"
+                      icon={<Icon as={FiTrash2} />}
+                      size="sm"
+                      variant="ghost"
+                      colorScheme="red"
+                      onClick={() => {
+                        setStoreToDelete(store);
+                        onDeleteOpen();
+                      }}
+                    />
                   </HStack>
                 </Td>
               </Tr>
             ))}
           </Tbody>
         </Table>
+
+        {/* Pagination */}
+        {!searchQuery && filteredStores.length > 0 && (
+          <ProductPagination
+            currentPage={pagination.currentPage}
+            totalPages={pagination.totalPages}
+            onPageChange={handlePageChange}
+            loading={loading}
+          />
+        )}
 
         {/* Empty State */}
         {filteredStores.length === 0 && (
@@ -284,14 +299,18 @@ export default function StorePage() {
               mt={4}
               size="sm"
               leftIcon={<Icon as={FiRefreshCcw} />}
-              onClick={() => setSearchQuery('')}
+              onClick={() => {
+                setSearchQuery('');
+                fetchStores(1);
+              }}
             >
               Đặt lại bộ lọc
             </Button>
           </Flex>
         )}
 
-      <AlertDialog
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog
           isOpen={isDeleteOpen}
           leastDestructiveRef={cancelRef}
           onClose={onDeleteClose}
@@ -318,7 +337,6 @@ export default function StorePage() {
             </AlertDialogContent>
           </AlertDialogOverlay>
         </AlertDialog>
-
 
         {/* Store Detail Modal */}
         <StoreDetailModal

@@ -15,6 +15,7 @@ import { router } from "expo-router";
 import { get_user_details } from "@/api/user_api";
 import CustomHeader from "@/components/customHeader";
 import { getAccountId } from "@/data/userData";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 const ProfileScreen = () => {
   //Get userId from AsyncStorage
   const [userFullName, setUserFullName] = useState("");
@@ -22,6 +23,10 @@ const ProfileScreen = () => {
   const [image, setImage] = useState(
     require("../../assets/images/eda492de2906a8827a6266e32bcd3ffb.webp")
   );
+  const logOut = () => {
+    router.replace("../loginScreen");
+    AsyncStorage.clear();
+  };
   const [userPoints, setUserPoints] = useState("");
   useEffect(() => {
     const loadStat = async () => {
@@ -135,6 +140,13 @@ const ProfileScreen = () => {
             <Icon name="arrowRight" size={20} strokeWidth={3} color="black" />
           </Pressable>
         </View>
+        <View style={styles.customDivider2}></View>
+        <View style={styles.logOutBox}>
+          <Pressable style={styles.logOutInnerBox} onPress={() => logOut()}>
+            <Icon name="logOutIcon" size={20} strokeWidth={3} color="red" />
+            <Text style={{ color: "red", fontSize: 20 }}>Đăng xuất</Text>
+          </Pressable>
+        </View>
         <View style={styles.customDivider}></View>
       </ScrollView>
     </SafeAreaView>
@@ -204,6 +216,23 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderCurve: "continuous",
   },
+  logOutBox: {
+    backgroundColor: theme.colors.background,
+    justifyContent: "center",
+    marginHorizontal: 10,
+    marginVertical: 5,
+    padding: 15,
+    shadowColor: "black",
+    shadowOffset: {
+      width: 5,
+      height: 10,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 6,
+    borderRadius: 20,
+    borderCurve: "continuous",
+  },
   functionBox: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -212,11 +241,23 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#eee",
   },
+  logOutInnerBox: {
+    alignSelf: "center",
+    alignItems: "center",
+    alignContent: "center",
+    justifyContent: "flex-end",
+    flexDirection: "row",
+    paddingHorizontal: 15,
+    gap: 10,
+  },
   functionName: {
     fontSize: 20,
   },
   customDivider: {
     padding: 50,
+  },
+  customDivider2: {
+    padding: 20,
   },
   pointCount: {
     marginTop: 5,

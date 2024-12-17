@@ -87,6 +87,9 @@ const index = () => {
   };
   const calculateHavePlayTime = (playTime, remainingTime) => {
     try {
+      if (playTime === remainingTime) {
+        return playTime.toString();
+      }
       // Validate inputs
       if (!playTime || !remainingTime) {
         console.log("Invalid inputs:", { playTime, remainingTime });

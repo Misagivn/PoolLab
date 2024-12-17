@@ -24,7 +24,6 @@ import CustomHeader from "@/components/customHeader";
 import { getStoredTableData } from "@/api/tokenDecode";
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 const product = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [productType, setProductType] = useState([]);
@@ -171,7 +170,6 @@ const product = () => {
       const response = await add_product_to_order(tableId, productOrder);
       if (response.status === 200) {
         console.log("success add product to order: ", productOrder);
-        AsyncStorage.setItem("userProducts", JSON.stringify(productOrder));
         router.back();
       } else {
         console.log("error add product to order: ", response.data);

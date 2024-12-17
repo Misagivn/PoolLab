@@ -1,4 +1,4 @@
-export interface FeedbackData {
+export interface Review {
   id: string;
   message: string;
   storeId: string;
@@ -10,11 +10,11 @@ export interface FeedbackData {
   createdDate: string;
 }
 
-export interface FeedbackResponse {
+export interface ReviewResponse {
   status: number;
   message: string | null;
   data: {
-    items: FeedbackData[];
+    items: Review[];
     totalItem: number;
     pageSize: number;
     totalPages: number;

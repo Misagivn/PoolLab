@@ -161,7 +161,7 @@ export default function EventPage() {
               <Icon as={FiSearch} color="gray.400" />
             </InputLeftElement>
             <Input
-              placeholder="Tìm kiếm sự kiện..."
+              placeholder="Tìm kiếm"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />

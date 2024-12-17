@@ -1,126 +1,168 @@
 'use client';
 
 import {
-  Container,
   Box,
-  Heading,
-  VStack,
-  HStack,
+  Flex,
   Text,
-  Card,
-  CardHeader,
-  CardBody,
-  Badge,
-  Skeleton,
+  Heading,
+  Spinner,
   Input,
-  Select,
   InputGroup,
   InputLeftElement,
+  Stack,
+  Select,
+  HStack,
   Icon,
-  IconButton,
-  Alert,
-  AlertIcon,
+  Card,
+  CardBody,
 } from '@chakra-ui/react';
-import { StarIcon } from '@chakra-ui/icons';
-import { FiSearch, FiArrowUp, FiArrowDown } from 'react-icons/fi';
-import { useFeedback } from '@/hooks/useFeedback';
+import { useState, useEffect } from 'react';
+import { FiSearch, FiStar, FiUser, FiMapPin } from 'react-icons/fi';
+import { useReviews } from '@/hooks/useFeedback';
+import { useStores } from '@/hooks/useStores';
+import { ProductPagination } from '@/components/common/paginations';
 
 export default function FeedbackPage() {
+  const { 
+    data: reviews, 
+    loading: reviewsLoading,
+    pagination,
+    fetchReviews 
+  } = useReviews();
+
   const {
-    feedbacks,
-    stores,
-    loading,
-    selectedStore,
-    searchTerm,
-    sortAscending,
-    handleSearchChange,
-    handleStoreChange,
-    toggleSortDirection,
-  } = useFeedback();
+    data: stores,
+    loading: storesLoading,
+    fetchStores
+  } = useStores();
+  
+  const [username, setUsername] = useState('');
+  const [selectedStore, setSelectedStore] = useState<string>('');
+
+  useEffect(() => {
+    fetchStores(1);
+  }, [fetchStores]);
+
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      fetchReviews(1, {
+        username,
+        storeName: selectedStore
+      });
+    }, 300);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [username, selectedStore, fetchReviews]);
+
+  const handlePageChange = (page: number) => {
+    fetchReviews(page, {
+      username,
+      storeName: selectedStore
+    });
+  };
+
+  if (reviewsLoading || storesLoading) {
+    return (
+      <Flex h="100%" align="center" justify="center" p={6}>
+        <Spinner size="xl" color="blue.500" />
+      </Flex>
+    );
+  }
 
   return (
-    <Container maxW="container.xl" py={6}>
-      <Box mb={6}>
-        <Heading size="lg" mb={4}>Đánh giá từ khách hàng</Heading>
+    <Box p={{ base: 4, md: 6 }}>
+      <Stack spacing={6}>
+        {/* Header */}
+        <Heading size={{ base: "md", md: "lg" }}>Quản lý đánh giá</Heading>
 
-        <HStack spacing={4} mb={6}>
+        {/* Filters */}
+        <HStack spacing={4}>
           <InputGroup maxW="320px">
             <InputLeftElement>
               <Icon as={FiSearch} color="gray.400" />
             </InputLeftElement>
             <Input
-              placeholder="Tìm kiếm theo tên khách hàng..."
-              value={searchTerm}
-              onChange={(e) => handleSearchChange(e.target.value)}
+              placeholder="Tìm kiếm"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
             />
           </InputGroup>
 
           <Select
+            placeholder="Chọn cửa hàng"
             value={selectedStore}
-            onChange={(e) => handleStoreChange(e.target.value)}
-            maxW="250px"
-            isRequired
+            onChange={(e) => setSelectedStore(e.target.value)}
+            maxW="320px"
           >
-            {stores.map((store) => (
-              <option key={store.id} value={store.id}>
+            {/* <option value="">Tất cả cửa hàng</option> */}
+            {stores.map(store => (
+              <option key={store.id} value={store.name}>
                 {store.name}
               </option>
             ))}
           </Select>
-
-          <IconButton
-            aria-label="Sort direction"
-            icon={sortAscending ? <FiArrowUp /> : <FiArrowDown />}
-            onClick={toggleSortDirection}
-          />
         </HStack>
 
-        {loading ? (
-          <VStack spacing={4}>
-            {Array.from({ length: 3 }).map((_, idx) => (
-              <Skeleton key={idx} height="200px" width="100%" />
-            ))}
-          </VStack>
-        ) : feedbacks.length === 0 ? (
-          <Alert status="info" borderRadius="md">
-            <AlertIcon />
-            {searchTerm ? 
-              'Không tìm thấy đánh giá nào phù hợp' : 
-              'Chưa có đánh giá nào cho cửa hàng này'}
-          </Alert>
-        ) : (
-          <VStack spacing={4} align="stretch">
-            {feedbacks.map((feedback) => (
-              <Card key={feedback.id}>
-                <CardHeader>
-                  <HStack justify="space-between">
-                    <VStack align="start" spacing={1}>
-                      <Text fontWeight="bold">{feedback.cusName}</Text>
-                      <Text fontSize="sm" color="gray.500">
-                        {new Date(feedback.createdDate).toLocaleDateString('vi-VN')}
-                      </Text>
-                    </VStack>
+        {/* Reviews List */}
+        <Stack spacing={4}>
+          {reviews.map((review) => (
+            <Card key={review.id}>
+              <CardBody>
+                <Stack spacing={3}>
+                  <Flex justify="space-between" align="center">
                     <HStack>
-                      {Array.from({ length: 5 }).map((_, idx) => (
-                        <StarIcon
-                          key={idx}
-                          color={idx < feedback.rated ? "yellow.400" : "gray.300"}
-                        />
-                      ))}
-                      <Badge colorScheme="blue" ml={2}>
-                        {feedback.rated}/5
-                      </Badge>
+                      <Icon as={FiUser} color="blue.500" />
+                      <Text fontWeight="bold">{review.cusName}</Text>
                     </HStack>
+                    <HStack>
+                      <Icon as={FiStar} color="yellow.400" />
+                      <Text fontWeight="bold">{review.rated}/5</Text>
+                    </HStack>
+                  </Flex>
+
+                  <Text>{review.message}</Text>
+
+                  <HStack color="gray.600" fontSize="sm">
+                    <Icon as={FiMapPin} />
+                    <Text>{review.storeName} - {review.address}</Text>
                   </HStack>
-                </CardHeader>
-                <CardBody pt={0}>
-                  <Text>{feedback.message || "Không có bình luận"}</Text>
-                </CardBody>
-              </Card>
-            ))}
-          </VStack>
+
+                  <Text fontSize="sm" color="gray.500">
+                    Ngày đánh giá: {new Date(review.createdDate).toLocaleDateString('vi-VN')}
+                  </Text>
+                </Stack>
+              </CardBody>
+            </Card>
+          ))}
+        </Stack>
+
+        {/* Empty State */}
+        {reviews.length === 0 && (
+          <Flex 
+            direction="column" 
+            align="center" 
+            justify="center" 
+            py={10}
+            bg="gray.50"
+            borderRadius="lg"
+          >
+            <Icon as={FiStar} fontSize="3xl" color="gray.400" mb={2} />
+            <Text color="gray.500">
+              Không tìm thấy đánh giá nào
+            </Text>
+          </Flex>
         )}
-      </Box>
-    </Container>
+
+        {/* Pagination */}
+        {reviews.length > 0 && (
+          <ProductPagination
+            currentPage={pagination.currentPage}
+            totalPages={pagination.totalPages}
+            onPageChange={handlePageChange}
+            loading={reviewsLoading}
+          />
+        )}
+      </Stack>
+    </Box>
   );
 }

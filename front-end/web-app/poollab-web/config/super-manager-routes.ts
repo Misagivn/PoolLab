@@ -60,10 +60,6 @@ export const superManagerRoutes: RouteConfig[] = [
         label: 'Loại Bàn',
       },
       {
-        path: '/supermanager/finance/productPrice',
-        label: 'Tiền Hàng',
-      },
-      {
         path: '/supermanager/finance/productType',
         label: 'Loại Hàng',
       },
@@ -72,7 +68,7 @@ export const superManagerRoutes: RouteConfig[] = [
         label: 'Đơn vị',
       },
       {
-        path: '/supermanager/finance/group',
+        path: '/supermanager/finance/groupProduct',
         label: 'Nhóm Hàng',
       },
     ],

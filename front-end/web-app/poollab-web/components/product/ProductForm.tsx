@@ -25,7 +25,7 @@ import {
   Box,
   useToast,
 } from '@chakra-ui/react';
-import { Product } from '@/types/product.types';
+import { Product } from '@/utils/types/product';
 
 interface ProductFormProps {
   isOpen: boolean;

@@ -134,11 +134,15 @@ function RightTab({ selectedTable, menus, orderItems, onUpdateOrderItems }: Righ
     if (!selectedTable) return;
     
     try {
+      const token = localStorage.getItem('token');
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_LOCAL_URL}/orderdetail/getallorderdetailbytableid/${selectedTable.id}`,
         {
           method: "GET",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
         }
       );
 
@@ -170,11 +174,16 @@ function RightTab({ selectedTable, menus, orderItems, onUpdateOrderItems }: Righ
     if (!selectedTable) return;
     
     try {
+      const token = localStorage.getItem('token');
       const response = await fetch(
+        
         `${process.env.NEXT_PUBLIC_LOCAL_URL}/orderdetail/getallorderdetailbytableid/${selectedTable.id}`,
         {
           method: "GET",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
         }
       );
 
@@ -216,11 +225,15 @@ function RightTab({ selectedTable, menus, orderItems, onUpdateOrderItems }: Righ
     }));
 
     try {
+      const token = localStorage.getItem('token');
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_LOCAL_URL}/orderdetail/addnewproducttoorder/${selectedTable.id}`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
           body: JSON.stringify(itemsToOrder)
         }
       );
@@ -253,11 +266,15 @@ function RightTab({ selectedTable, menus, orderItems, onUpdateOrderItems }: Righ
 
   const handlePaymentOrder = async () => {
     try {
+      const token = localStorage.getItem('token');
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_LOCAL_URL}/order/updatecuspayorder/${order?.id}`,
         {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
           body: JSON.stringify({
             discount: order?.discount,
             totalPrice: order?.totalPrice,
@@ -293,11 +310,15 @@ function RightTab({ selectedTable, menus, orderItems, onUpdateOrderItems }: Righ
   const handleOrder = async () => {
     if (selectedTable && stop) {
       try {
+        const token = localStorage.getItem('token');
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_LOCAL_URL}/order/getorderbyid/${selectedTable.id}`,
           {
             method: "GET",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
           }
         );
 
@@ -327,11 +348,15 @@ function RightTab({ selectedTable, menus, orderItems, onUpdateOrderItems }: Righ
     if (!selectedTable) return;
     
     try {
+      const token = localStorage.getItem('token');
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_LOCAL_URL}/billiardtable/activatetableforguest/${selectedTable.id}`,
         {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
           body: JSON.stringify({ storeId: storeId, staffName: username }),
         }
       );
@@ -359,11 +384,15 @@ function RightTab({ selectedTable, menus, orderItems, onUpdateOrderItems }: Righ
     if (!selectedTable) return;
 
     try {
+      const token = localStorage.getItem('token');
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_LOCAL_URL}/playtime/stopplaytime`,
         {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
           body: JSON.stringify({
             billiardTableID: selectedTable.id,
             customerID: null,

@@ -1,4 +1,3 @@
-// pages/billiard-type/page.tsx
 'use client';
 
 import {
@@ -24,18 +23,19 @@ import {
   useToast,
   Stack,
   Text,
+  Badge,
 } from '@chakra-ui/react';
 import { useEffect, useState, useRef } from 'react';
 import { FiPlus, FiEdit2, FiTrash2, FiRefreshCcw } from 'react-icons/fi';
-import { BilliardType } from '@/utils/types/table.types';
-import { billiardTypeApi } from '@/apis/billiard-type.api';
-import { BilliardTypeFormModal } from '@/components/billiardTable/BilliardTypeFormModal';
+import { BilliardPrice } from '@/utils/types/table.types';
+import { billiardPriceApi } from '@/apis/billiard-price.api';
+import { BilliardPriceFormModal } from '@/components/billiardTable/BilliardPriceFormModal';
 
-export default function BilliardTypePage() {
-  const [types, setTypes] = useState<BilliardType[]>([]);
-  const [selectedType, setSelectedType] = useState<BilliardType | null>(null);
+export default function BilliardPricePage() {
+  const [prices, setPrices] = useState<BilliardPrice[]>([]);
+  const [selectedPrice, setSelectedPrice] = useState<BilliardPrice | null>(null);
   const [loading, setLoading] = useState(true);
-  const [typeToDelete, setTypeToDelete] = useState<BilliardType | null>(null);
+  const [priceToDelete, setPriceToDelete] = useState<BilliardPrice | null>(null);
 
   const { 
     isOpen: isFormOpen, 
@@ -52,17 +52,17 @@ export default function BilliardTypePage() {
   const cancelRef = useRef(null);
   const toast = useToast();
 
-  const fetchTypes = async () => {
+  const fetchPrices = async () => {
     try {
       setLoading(true);
-      const response = await billiardTypeApi.getAllTypes();
+      const response = await billiardPriceApi.getAllPrices();
       if (response.status === 200) {
-        setTypes(response.data);
+        setPrices(response.data);
       }
     } catch (error) {
       toast({
         title: 'Lỗi',
-        description: 'Không thể tải danh sách loại bàn',
+        description: 'Không thể tải danh sách giá',
         status: 'error',
         duration: 3000,
         isClosable: true,
@@ -73,26 +73,26 @@ export default function BilliardTypePage() {
   };
 
   useEffect(() => {
-    fetchTypes();
+    fetchPrices();
   }, []);
 
-  const handleAddType = async (data: Omit<BilliardType, 'id'>) => {
+  const handleAddPrice = async (data: Omit<BilliardPrice, 'id' | 'status'>) => {
     try {
-      const response = await billiardTypeApi.createType(data);
+      const response = await billiardPriceApi.createPrice(data);
       if (response.status === 200) {
         toast({
           title: 'Thành công',
-          description: 'Thêm loại bàn mới thành công',
+          description: 'Thêm giá mới thành công',
           status: 'success',
           duration: 3000,
           isClosable: true,
         });
-        fetchTypes();
+        fetchPrices();
       }
     } catch (error) {
       toast({
         title: 'Lỗi',
-        description: 'Không thể thêm loại bàn mới',
+        description: 'Không thể thêm giá mới',
         status: 'error',
         duration: 3000,
         isClosable: true,
@@ -100,24 +100,24 @@ export default function BilliardTypePage() {
     }
   };
 
-  const handleUpdateType = async (data: Omit<BilliardType, 'id'>) => {
-    if (!selectedType) return;
+  const handleUpdatePrice = async (data: Omit<BilliardPrice, 'id' | 'status'>) => {
+    if (!selectedPrice) return;
     try {
-      const response = await billiardTypeApi.updateType(selectedType.id, data);
+      const response = await billiardPriceApi.updatePrice(selectedPrice.id, data);
       if (response.status === 200) {
         toast({
           title: 'Thành công',
-          description: 'Cập nhật loại bàn thành công',
+          description: 'Cập nhật giá thành công',
           status: 'success',
           duration: 3000,
           isClosable: true,
         });
-        fetchTypes();
+        fetchPrices();
       }
     } catch (error) {
       toast({
         title: 'Lỗi',
-        description: 'Không thể cập nhật loại bàn',
+        description: 'Không thể cập nhật giá',
         status: 'error',
         duration: 3000,
         isClosable: true,
@@ -125,30 +125,41 @@ export default function BilliardTypePage() {
     }
   };
 
-  const handleDeleteType = async () => {
-    if (!typeToDelete) return;
+  const handleDeletePrice = async () => {
+    if (!priceToDelete) return;
     try {
-      const response = await billiardTypeApi.deleteType(typeToDelete.id);
+      const response = await billiardPriceApi.deletePrice(priceToDelete.id);
       if (response.status === 200) {
         toast({
           title: 'Thành công',
-          description: 'Xóa loại bàn thành công',
+          description: 'Xóa giá thành công',
           status: 'success',
           duration: 3000,
           isClosable: true,
         });
-        fetchTypes();
+        fetchPrices();
         onDeleteClose();
       }
     } catch (error) {
       toast({
         title: 'Lỗi',
-        description: 'Không thể xóa loại bàn',
+        description: 'Không thể xóa giá',
         status: 'error',
         duration: 3000,
         isClosable: true,
       });
     }
+  };
+
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND'
+    }).format(price);
+  };
+
+  const formatDateTime = (dateString: string) => {
+    return new Date(dateString).toLocaleString('vi-VN');
   };
 
   return (
@@ -156,33 +167,49 @@ export default function BilliardTypePage() {
       <Stack spacing={6}>
         {/* Header */}
         <Flex justify="space-between" align="center">
-          <Heading size="lg">Quản lý loại bàn</Heading>
+          <Heading size="lg">Quản lý giá</Heading>
           <Button
             leftIcon={<Icon as={FiPlus} />}
             colorScheme="blue"
             onClick={() => {
-              setSelectedType(null);
+              setSelectedPrice(null);
               onFormOpen();
             }}
           >
-            Thêm loại bàn
+            Thêm giá mới
           </Button>
         </Flex>
 
-        {/* Types Table */}
+        {/* Prices Table */}
         <Table variant="simple" bg="white" boxShadow="sm" rounded="lg">
           <Thead bg="gray.50">
             <Tr>
-              <Th>TÊN LOẠI BÀN</Th>
+              <Th>TÊN</Th>
               <Th>MÔ TẢ</Th>
+              <Th>Giá TIỀN</Th>
+              <Th>GIÁ CHỌN</Th>
+              <Th>THỜI GIAN BẮT ĐẦU</Th>
+              <Th>THỜI GIAN KẾT THÚC</Th>
+              <Th>TRẠNG THÁI</Th>
               <Th width="100px" textAlign="right">THAO TÁC</Th>
             </Tr>
           </Thead>
           <Tbody>
-            {types.map((type) => (
-              <Tr key={type.id}>
-                <Td fontWeight="medium">{type.name}</Td>
-                <Td>{type.descript || '-'}</Td>
+            {prices.map((price) => (
+              <Tr key={price.id}>
+                <Td fontWeight="medium">{price.name}</Td>
+                <Td>{price.descript || '-'}</Td>
+                <Td>{formatPrice(price.oldPrice)}</Td>
+                <Td>{price.newPrice ? formatPrice(price.newPrice) : '-'}</Td>
+                <Td>{formatDateTime(price.timeStart)}</Td>
+                <Td>{formatDateTime(price.timeEnd)}</Td>
+                <Td>
+                  <Badge
+                    colorScheme={price.status === 'Kích hoạt' ? 'green' : 'gray'}
+                  >
+                    {price.status}
+                  </Badge>
+                </Td>
                 <Td>
                   <Flex justify="flex-end" gap={2}>
                     <IconButton
@@ -191,7 +218,7 @@ export default function BilliardTypePage() {
                       size="sm"
                       variant="ghost"
                       onClick={() => {
-                        setSelectedType(type);
+                        setSelectedPrice(price);
                         onFormOpen();
                       }}
                     />
@@ -202,7 +229,7 @@ export default function BilliardTypePage() {
                       variant="ghost"
                       colorScheme="red"
                       onClick={() => {
-                        setTypeToDelete(type);
+                        setPriceToDelete(price);
                         onDeleteOpen();
                       }}
                     />
@@ -211,9 +238,9 @@ export default function BilliardTypePage() {
               </Tr>
             ))}
 
-            {types.length === 0 && (
+            {prices.length === 0 && !loading && (
               <Tr>
-                <Td colSpan={3}>
+                <Td colSpan={8}>
                   <Flex 
                     direction="column" 
                     align="center" 
@@ -221,11 +248,11 @@ export default function BilliardTypePage() {
                     py={10}
                   >
                     <Text color="gray.500" mb={4}>
-                      Chưa có loại bàn nào
+                      Chưa có giá nào
                     </Text>
                     <Button
                       leftIcon={<Icon as={FiRefreshCcw} />}
-                      onClick={fetchTypes}
+                      onClick={fetchPrices}
                     >
                       Tải lại
                     </Button>
@@ -246,11 +273,11 @@ export default function BilliardTypePage() {
         <AlertDialogOverlay>
           <AlertDialogContent>
             <AlertDialogHeader fontSize="lg" fontWeight="bold">
-              Xóa loại bàn
+              Xóa giá
             </AlertDialogHeader>
 
             <AlertDialogBody>
-              Bạn có chắc chắn muốn xóa loại bàn "{typeToDelete?.name}"? 
+              Bạn có chắc chắn muốn xóa giá "{priceToDelete?.name}"? 
               Hành động này không thể hoàn tác.
             </AlertDialogBody>
 
@@ -258,7 +285,7 @@ export default function BilliardTypePage() {
               <Button ref={cancelRef} onClick={onDeleteClose}>
                 Hủy
               </Button>
-              <Button colorScheme="red" onClick={handleDeleteType} ml={3}>
+              <Button colorScheme="red" onClick={handleDeletePrice} ml={3}>
                 Xóa
               </Button>
             </AlertDialogFooter>
@@ -267,15 +294,15 @@ export default function BilliardTypePage() {
       </AlertDialog>
 
       {/* Form Modal */}
-      <BilliardTypeFormModal
+      <BilliardPriceFormModal
         isOpen={isFormOpen}
         onClose={() => {
           onFormClose();
-          setSelectedType(null);
+          setSelectedPrice(null);
         }}
-        onSubmit={selectedType ? handleUpdateType : handleAddType}
-        initialData={selectedType}
-        title={selectedType ? 'Chỉnh sửa loại bàn' : 'Thêm loại bàn mới'}
+        onSubmit={selectedPrice ? handleUpdatePrice : handleAddPrice}
+        initialData={selectedPrice}
+        title={selectedPrice ? 'Chỉnh sửa giá' : 'Thêm giá mới'}
       />
     </Box>
   );

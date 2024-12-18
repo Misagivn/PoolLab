@@ -1,14 +1,15 @@
-import { ProductType, ProductTypeResponse } from '@/utils/types/productType.types';
+import { ProductGroup, ProductGroupResponse } from '@/utils/types/productGroup.types';
 
 const BASE_URL = 'https://poollabwebapi20241008201316.azurewebsites.net/api';
-export const typeApi = {
-  getAllTypes: async (): Promise<ProductTypeResponse> => {
+
+export const groupApi = {
+  getAllGroups: async (): Promise<ProductGroupResponse> => {
     try {
       const token = localStorage.getItem('token');
       if (!token) throw new Error('No token found');
 
       const response = await fetch(
-        `${BASE_URL}/producttype/getallproducttypes`,
+        `${BASE_URL}/groupproduct/getallgroupproduct`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -18,17 +19,17 @@ export const typeApi = {
       );
       return response.json();
     } catch (error) {
-      console.error('Error in getAllTypes:', error);
+      console.error('Error in getAllGroups:', error);
       throw error;
     }
   },
 
-  createType: async (data: Omit<ProductType, 'id'>): Promise<{ status: number }> => {
+  createGroup: async (data: Omit<ProductGroup, 'id'>): Promise<{ status: number }> => {
     const token = localStorage.getItem('token');
     if (!token) throw new Error('No token found');
 
     const response = await fetch(
-      `${BASE_URL}/producttype/createproducttype`,
+      `${BASE_URL}/groupproduct/createproducttype`,
       {
         method: 'POST',
         headers: {
@@ -41,12 +42,12 @@ export const typeApi = {
     return response.json();
   },
 
-  updateType: async (id: string, data: Omit<ProductType, 'id'>): Promise<{ status: number }> => {
+  updateGroup: async (id: string, data: Omit<ProductGroup, 'id'>): Promise<{ status: number }> => {
     const token = localStorage.getItem('token');
     if (!token) throw new Error('No token found');
 
     const response = await fetch(
-      `${BASE_URL}/producttype/updateproducttype/${id}`,
+      `${BASE_URL}/groupproduct/updategroupproduct/${id}`,
       {
         method: 'PUT',
         headers: {
@@ -59,12 +60,12 @@ export const typeApi = {
     return response.json();
   },
 
-  deleteType: async (id: string): Promise<{ status: number }> => {
+  deleteGroup: async (id: string): Promise<{ status: number }> => {
     const token = localStorage.getItem('token');
     if (!token) throw new Error('No token found');
 
     const response = await fetch(
-      `${BASE_URL}/producttype/deleteproducttype?id=${id}`,
+      `${BASE_URL}/groupproduct/deletegroupproduct?id=${id}`,
       {
         method: 'DELETE',
         headers: {

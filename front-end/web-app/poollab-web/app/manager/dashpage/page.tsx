@@ -135,7 +135,7 @@ export default function ManagerDashboard() {
                   <Icon as={FiUsers} boxSize={6} color="purple.500" />
                 </Box>
                 <Box>
-                  <StatLabel color="gray.500">Khách hàng mỗi ngày</StatLabel>
+                  <StatLabel color="gray.500">Khách đang chơi</StatLabel>
                   <StatNumber fontSize="2xl" color="purple.500">
                     {members}
                   </StatNumber>

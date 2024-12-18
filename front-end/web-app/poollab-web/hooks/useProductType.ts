@@ -1,24 +1,24 @@
 import { useState, useCallback } from 'react';
 import { useToast } from '@chakra-ui/react';
-import { Unit } from '@/utils/types/unit.types';
-import { unitApi } from '@/apis/unit.api';
+import { ProductType } from '@/utils/types/productType.types';
+import { typeApi } from '@/apis/productType.api';
 
-export const useUnit = () => {
-  const [units, setUnits] = useState<Unit[]>([]);
+export const useType = () => {
+  const [types, setTypes] = useState<ProductType[]>([]);
   const [loading, setLoading] = useState(false);
   const toast = useToast();
 
-  const fetchUnits = useCallback(async () => {
+  const fetchTypes = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await unitApi.getAllUnits();
+      const response = await typeApi.getAllTypes();
       if (response.status === 200) {
-        setUnits(response.data);
+        setTypes(response.data);
       }
     } catch (error) {
       toast({
         title: 'Lỗi',
-        description: 'Không thể tải danh sách đơn vị tính',
+        description: 'Không thể tải danh sách loại sản phẩm',
         status: 'error',
         duration: 3000,
         isClosable: true,
@@ -29,8 +29,8 @@ export const useUnit = () => {
   }, [toast]);
 
   return {
-    units,
+    types,
     loading,
-    fetchUnits
+    fetchTypes
   };
 };

@@ -1,4 +1,3 @@
-// pages/billiard-type/page.tsx
 'use client';
 
 import {
@@ -27,15 +26,16 @@ import {
 } from '@chakra-ui/react';
 import { useEffect, useState, useRef } from 'react';
 import { FiPlus, FiEdit2, FiTrash2, FiRefreshCcw } from 'react-icons/fi';
-import { BilliardType } from '@/utils/types/table.types';
-import { billiardTypeApi } from '@/apis/billiard-type.api';
-import { BilliardTypeFormModal } from '@/components/billiardTable/BilliardTypeFormModal';
+import { ProductType } from '@/utils/types/productType.types';
+import { groupApi } from '@/apis/productGroup';
+import { ProductTypeFormModal } from '@/components/productGTU/ProductTypeForm';
 
-export default function BilliardTypePage() {
-  const [types, setTypes] = useState<BilliardType[]>([]);
-  const [selectedType, setSelectedType] = useState<BilliardType | null>(null);
+
+export default function ProductGroupPage() {
+  const [groups, setGroups] = useState<ProductType[]>([]);
+  const [selectedGroup, setSelectedGroup] = useState<ProductType | null>(null);
   const [loading, setLoading] = useState(true);
-  const [typeToDelete, setTypeToDelete] = useState<BilliardType | null>(null);
+  const [groupToDelete, setGroupToDelete] = useState<ProductType | null>(null);
 
   const { 
     isOpen: isFormOpen, 
@@ -52,17 +52,17 @@ export default function BilliardTypePage() {
   const cancelRef = useRef(null);
   const toast = useToast();
 
-  const fetchTypes = async () => {
+  const fetchGroups = async () => {
     try {
       setLoading(true);
-      const response = await billiardTypeApi.getAllTypes();
+      const response = await groupApi.getAllTypes();
       if (response.status === 200) {
-        setTypes(response.data);
+        setGroups(response.data);
       }
     } catch (error) {
       toast({
         title: 'Lỗi',
-        description: 'Không thể tải danh sách loại bàn',
+        description: 'Không thể tải danh sách nhóm sản phẩm',
         status: 'error',
         duration: 3000,
         isClosable: true,
@@ -73,26 +73,26 @@ export default function BilliardTypePage() {
   };
 
   useEffect(() => {
-    fetchTypes();
+    fetchGroups();
   }, []);
 
-  const handleAddType = async (data: Omit<BilliardType, 'id'>) => {
+  const handleAddGroup = async (data: Omit<ProductType, 'id'>) => {
     try {
-      const response = await billiardTypeApi.createType(data);
+      const response = await groupApi.createGroup(data);
       if (response.status === 200) {
         toast({
           title: 'Thành công',
-          description: 'Thêm loại bàn mới thành công',
+          description: 'Thêm nhóm sản phẩm mới thành công',
           status: 'success',
           duration: 3000,
           isClosable: true,
         });
-        fetchTypes();
+        fetchGroups();
       }
     } catch (error) {
       toast({
         title: 'Lỗi',
-        description: 'Không thể thêm loại bàn mới',
+        description: 'Không thể thêm nhóm sản phẩm mới',
         status: 'error',
         duration: 3000,
         isClosable: true,
@@ -100,24 +100,24 @@ export default function BilliardTypePage() {
     }
   };
 
-  const handleUpdateType = async (data: Omit<BilliardType, 'id'>) => {
-    if (!selectedType) return;
+  const handleUpdateGroup = async (data: Omit<ProductType, 'id'>) => {
+    if (!selectedGroup) return;
     try {
-      const response = await billiardTypeApi.updateType(selectedType.id, data);
+      const response = await groupApi.updateGroup(selectedGroup.id, data);
       if (response.status === 200) {
         toast({
           title: 'Thành công',
-          description: 'Cập nhật loại bàn thành công',
+          description: 'Cập nhật nhóm sản phẩm thành công',
           status: 'success',
           duration: 3000,
           isClosable: true,
         });
-        fetchTypes();
+        fetchGroups();
       }
     } catch (error) {
       toast({
         title: 'Lỗi',
-        description: 'Không thể cập nhật loại bàn',
+        description: 'Không thể cập nhật nhóm sản phẩm',
         status: 'error',
         duration: 3000,
         isClosable: true,
@@ -125,25 +125,25 @@ export default function BilliardTypePage() {
     }
   };
 
-  const handleDeleteType = async () => {
-    if (!typeToDelete) return;
+  const handleDeleteGroup = async () => {
+    if (!groupToDelete) return;
     try {
-      const response = await billiardTypeApi.deleteType(typeToDelete.id);
+      const response = await groupApi.deleteGroup(groupToDelete.id);
       if (response.status === 200) {
         toast({
           title: 'Thành công',
-          description: 'Xóa loại bàn thành công',
+          description: 'Xóa nhóm sản phẩm thành công',
           status: 'success',
           duration: 3000,
           isClosable: true,
         });
-        fetchTypes();
+        fetchGroups();
         onDeleteClose();
       }
     } catch (error) {
       toast({
         title: 'Lỗi',
-        description: 'Không thể xóa loại bàn',
+        description: 'Không thể xóa nhóm sản phẩm',
         status: 'error',
         duration: 3000,
         isClosable: true,
@@ -156,33 +156,33 @@ export default function BilliardTypePage() {
       <Stack spacing={6}>
         {/* Header */}
         <Flex justify="space-between" align="center">
-          <Heading size="lg">Quản lý loại bàn</Heading>
+          <Heading size="lg">Quản lý loại sản phẩm</Heading>
           <Button
             leftIcon={<Icon as={FiPlus} />}
             colorScheme="blue"
             onClick={() => {
-              setSelectedType(null);
+              setSelectedGroup(null);
               onFormOpen();
             }}
           >
-            Thêm loại bàn
+            Thêm loại sản phẩm
           </Button>
         </Flex>
 
-        {/* Types Table */}
+        {/* Groups Table */}
         <Table variant="simple" bg="white" boxShadow="sm" rounded="lg">
           <Thead bg="gray.50">
             <Tr>
-              <Th>TÊN LOẠI BÀN</Th>
+              <Th>TÊN LOẠI</Th>
               <Th>MÔ TẢ</Th>
               <Th width="100px" textAlign="right">THAO TÁC</Th>
             </Tr>
           </Thead>
           <Tbody>
-            {types.map((type) => (
-              <Tr key={type.id}>
-                <Td fontWeight="medium">{type.name}</Td>
-                <Td>{type.descript || '-'}</Td>
+            {groups.map((group) => (
+              <Tr key={group.id}>
+                <Td fontWeight="medium">{group.name}</Td>
+                <Td>{group.descript || '-'}</Td>
                 <Td>
                   <Flex justify="flex-end" gap={2}>
                     <IconButton
@@ -191,7 +191,7 @@ export default function BilliardTypePage() {
                       size="sm"
                       variant="ghost"
                       onClick={() => {
-                        setSelectedType(type);
+                        setSelectedGroup(group);
                         onFormOpen();
                       }}
                     />
@@ -202,7 +202,7 @@ export default function BilliardTypePage() {
                       variant="ghost"
                       colorScheme="red"
                       onClick={() => {
-                        setTypeToDelete(type);
+                        setGroupToDelete(group);
                         onDeleteOpen();
                       }}
                     />
@@ -211,7 +211,7 @@ export default function BilliardTypePage() {
               </Tr>
             ))}
 
-            {types.length === 0 && (
+            {groups.length === 0 && !loading && (
               <Tr>
                 <Td colSpan={3}>
                   <Flex 
@@ -221,11 +221,11 @@ export default function BilliardTypePage() {
                     py={10}
                   >
                     <Text color="gray.500" mb={4}>
-                      Chưa có loại bàn nào
+                      Chưa có nhóm sản phẩm nào
                     </Text>
                     <Button
                       leftIcon={<Icon as={FiRefreshCcw} />}
-                      onClick={fetchTypes}
+                      onClick={fetchGroups}
                     >
                       Tải lại
                     </Button>
@@ -246,11 +246,11 @@ export default function BilliardTypePage() {
         <AlertDialogOverlay>
           <AlertDialogContent>
             <AlertDialogHeader fontSize="lg" fontWeight="bold">
-              Xóa loại bàn
+              Loại nhóm sản phẩm
             </AlertDialogHeader>
 
             <AlertDialogBody>
-              Bạn có chắc chắn muốn xóa loại bàn "{typeToDelete?.name}"? 
+              Bạn có chắc chắn muốn xóa loại sản phẩm "{groupToDelete?.name}"? 
               Hành động này không thể hoàn tác.
             </AlertDialogBody>
 
@@ -258,7 +258,7 @@ export default function BilliardTypePage() {
               <Button ref={cancelRef} onClick={onDeleteClose}>
                 Hủy
               </Button>
-              <Button colorScheme="red" onClick={handleDeleteType} ml={3}>
+              <Button colorScheme="red" onClick={handleDeleteGroup} ml={3}>
                 Xóa
               </Button>
             </AlertDialogFooter>
@@ -267,15 +267,15 @@ export default function BilliardTypePage() {
       </AlertDialog>
 
       {/* Form Modal */}
-      <BilliardTypeFormModal
+      <ProductTypeFormModal
         isOpen={isFormOpen}
         onClose={() => {
           onFormClose();
-          setSelectedType(null);
+          setSelectedGroup(null);
         }}
-        onSubmit={selectedType ? handleUpdateType : handleAddType}
-        initialData={selectedType}
-        title={selectedType ? 'Chỉnh sửa loại bàn' : 'Thêm loại bàn mới'}
+        onSubmit={selectedGroup ? handleUpdateGroup : handleAddGroup}
+        initialData={selectedGroup}
+        title={selectedGroup ? 'Chỉnh sửa nhóm sản phẩm' : 'Thêm nhóm sản phẩm mới'}
       />
     </Box>
   );

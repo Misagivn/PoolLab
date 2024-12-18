@@ -89,11 +89,21 @@ export const ConfigPage: React.FC = () => {
                   <FormLabel>Thời gian cho phép đặt (phút)</FormLabel>
                   <Input
                     type="number"
+                    min={5}
+                    max={60}
                     value={formData.timeAllowBook}
-                    onChange={(e) => setFormData(prev => ({
-                      ...prev,
-                      timeAllowBook: Number(e.target.value)
-                    }))}
+                    // onChange={(e) => setFormData(prev => ({
+                    //   ...prev,
+                    //   timeAllowBook: Number(e.target.value)
+                    // }))}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setFormData((prev) => ({ ...prev, timeAllowBook: value }));
+                    }}
+                    onBlur={(e) => {
+                      const value = Math.max(5, Math.min(60, Number(e.target.value))); 
+                      setFormData((prev) => ({ ...prev, timeAllowBook: value }));
+                    }}
                   />
                 </FormControl>
 
@@ -101,11 +111,17 @@ export const ConfigPage: React.FC = () => {
                   <FormLabel>Thời gian trễ (phút)</FormLabel>
                   <Input
                     type="number"
+                    min={5}
+                    max={30}
                     value={formData.timeDelay}
-                    onChange={(e) => setFormData(prev => ({
-                      ...prev,
-                      timeDelay: Number(e.target.value)
-                    }))}
+                    // onChange={(e) => setFormData(prev => ({
+                    //   ...prev,
+                    //   timeDelay: Number(e.target.value)
+                    // }))}
+                    onChange={(e) => {
+                      const value = Math.max(5, Math.min(30, Number(e.target.value)));
+                      setFormData(prev => ({...prev, timeDelay : value}));
+                    }}
                   />
                 </FormControl>
 
@@ -113,11 +129,17 @@ export const ConfigPage: React.FC = () => {
                   <FormLabel>Thời gian giữ bàn (phút)</FormLabel>
                   <Input
                     type="number"
+                    min={5}
+                    max={30}
                     value={formData.timeHold}
-                    onChange={(e) => setFormData(prev => ({
-                      ...prev,
-                      timeHold: Number(e.target.value)
-                    }))}
+                    // onChange={(e) => setFormData(prev => ({
+                    //   ...prev,
+                    //   timeHold: Number(e.target.value)
+                    // }))}
+                    onChange={(e) => {
+                      const value = Math.max(5, Math.min(30, Number(e.target.value)));
+                      setFormData(prev => ({...prev, timeHold : value}));
+                    }}
                   />
                 </FormControl>
 
@@ -125,23 +147,35 @@ export const ConfigPage: React.FC = () => {
                   <FormLabel>Thời gian hủy đặt (phút)</FormLabel>
                   <Input
                     type="number"
+                    min={5}
+                    max={60}
                     value={formData.timeCancelBook}
-                    onChange={(e) => setFormData(prev => ({
-                      ...prev,
-                      timeCancelBook: Number(e.target.value)
-                    }))}
+                    // onChange={(e) => setFormData(prev => ({
+                    //   ...prev,
+                    //   timeCancelBook: Number(e.target.value)
+                    // }))}
+                    onChange={(e) => {
+                      const value = Math.max(5, Math.min(60, Number(e.target.value)));
+                      setFormData(prev => ({...prev, timeCancelBook : value}));
+                    }}
                   />
                 </FormControl>
 
                 <FormControl>
-                  <FormLabel>Tiền đặt cọc (VNĐ)</FormLabel>
+                  <FormLabel>Tiền đặt cọc (%)</FormLabel>
                   <Input
                     type="number"
+                    min={5}
+                    max={50}
                     value={formData.deposit}
-                    onChange={(e) => setFormData(prev => ({
-                      ...prev,
-                      deposit: Number(e.target.value)
-                    }))}
+                    // onChange={(e) => setFormData(prev => ({
+                    //   ...prev,
+                    //   deposit: Number(e.target.value)
+                    // }))}
+                    onChange={(e) => {
+                      const value = Math.max(5, Math.min(50, Number(e.target.value)));
+                      setFormData(prev => ({...prev, deposit : value}));
+                    }}
                   />
                 </FormControl>
 
@@ -149,7 +183,7 @@ export const ConfigPage: React.FC = () => {
                   <FormLabel>Giới hạn tháng</FormLabel>
                   <Input
                     type="number"
-                    min={0}
+                    min={1}
                     max={12}
                     value={formData.monthLimit}
                     // onChange={(e) => setFormData(prev => ({
@@ -157,8 +191,12 @@ export const ConfigPage: React.FC = () => {
                     //   monthLimit: Number(e.target.value)
                     // }))}
                     onChange={(e) => {
-                      const value = Math.max(0, Math.min(12, Number(e.target.value)));
-                      setFormData(prev => ({...prev, monthLimit : value}));
+                      const value = e.target.value;
+                      setFormData((prev) => ({ ...prev, monthLimit: value }));
+                    }}
+                    onBlur={(e) => {
+                      const value = Math.max(1, Math.min(12, Number(e.target.value))); 
+                      setFormData((prev) => ({ ...prev, monthLimit: value }));
                     }}
                   />
                 </FormControl>
@@ -167,7 +205,7 @@ export const ConfigPage: React.FC = () => {
                   <FormLabel>Giới hạn ngày</FormLabel>
                   <Input
                     type="number"
-                    min={0}
+                    min={7}
                     max={30}
                     value={formData.dayLimit}
                     // onChange={(e) => setFormData(prev => ({
@@ -175,8 +213,12 @@ export const ConfigPage: React.FC = () => {
                     //   dayLimit: Number(e.target.value)
                     // }))}
                     onChange={(e) => {
-                      const value = Math.max(0, Math.min(30, Number(e.target.value)));
-                      setFormData(prev => ({...prev, dayLimit: value}));
+                      const value = e.target.value;
+                      setFormData((prev) => ({ ...prev, dayLimit: value }));
+                    }}
+                    onBlur={(e) => {
+                      const value = Math.max(7, Math.min(30, Number(e.target.value))); 
+                      setFormData((prev) => ({ ...prev, dayLimit: value }));
                     }}
                   />
                 </FormControl>

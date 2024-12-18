@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useToast } from '@chakra-ui/react';
-import { ProductGroup } from '@/utils/types/group.types';
-import { groupApi } from '@/apis/groupProduct.api';
+import { ProductGroup } from '@/utils/types/productGroup.types';
+import { groupApi } from '@/apis/productGroup';
 
 export const useGroup = () => {
   const [groups, setGroups] = useState<ProductGroup[]>([]);

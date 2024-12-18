@@ -4,10 +4,12 @@ const BASE_URL = 'https://poollabwebapi20241008201316.azurewebsites.net/api';
 export const typeApi = {
   getAllTypes: async (): Promise<ProductTypeResponse> => {
     try {
+      
       const token = localStorage.getItem('token');
-      if (!token) throw new Error('No token found');
-
+      // if (!token) throw new Error('No token found');
+      console.log(token)
       const response = await fetch(
+        
         `${BASE_URL}/producttype/getallproducttypes`,
         {
           headers: {

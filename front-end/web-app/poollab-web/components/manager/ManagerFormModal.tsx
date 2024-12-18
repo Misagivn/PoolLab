@@ -26,14 +26,14 @@ import { FiEye, FiEyeOff, FiCamera, FiUpload } from 'react-icons/fi';
 import { ManagerFormData } from '@/utils/types/manager.type';
 import { Store } from '@/utils/types/store';
 import { staffApi } from '@/apis/staff.api';
-import { Manager } from '@/utils/types/staff.types';
+import { Staff } from '@/utils/types/staff.types';
 
 interface ManagerFormModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (data: ManagerFormData) => Promise<void>;
   stores: Store[];
-  initialData?: Manager;
+  initialData?: Staff;
   title?: string;
 }
 
@@ -73,7 +73,7 @@ export const ManagerFormModal = ({
           phoneNumber: initialData.phoneNumber || '',
           storeId: initialData.storeId,
           avatarUrl: initialData.avatarUrl || '',
-          passwordHash: '' // Password không được fill khi update
+          passwordHash: '' 
         });
       } else {
         setFormData(initialFormData);
@@ -104,7 +104,7 @@ export const ManagerFormModal = ({
       newErrors.fullName = 'Họ và tên phải có ít nhất 2 ký tự';
     }
 
-    // Chỉ validate password khi tạo mới
+   
     if (!initialData) {
       if (!formData.passwordHash) {
         newErrors.passwordHash = 'Mật khẩu là bắt buộc';
@@ -117,8 +117,8 @@ export const ManagerFormModal = ({
       newErrors.storeId = 'Vui lòng chọn cửa hàng';
     }
 
-    if (formData.phoneNumber && !/^[0-9]{10,11}$/.test(formData.phoneNumber)) {
-      newErrors.phoneNumber = 'Số điện thoại không hợp lệ (phải có 10-11 số)';
+    if (formData.phoneNumber && !/^[0-9]{9,11}$/.test(formData.phoneNumber)) {
+      newErrors.phoneNumber = 'Số điện thoại không hợp lệ (phải có 9-11 số)';
     }
 
     setErrors(newErrors);

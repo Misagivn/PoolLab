@@ -66,35 +66,35 @@ export const StaffFormModal = ({ isOpen, onClose }: StaffFormModalProps) => {
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
-    // Email validation
+    
     if (!formData.email) {
       newErrors.email = 'Email là bắt buộc';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = 'Email không hợp lệ';
     }
 
-    // Username validation
+   
     if (!formData.userName) {
       newErrors.userName = 'Tên đăng nhập là bắt buộc';
     } else if (formData.userName.length < 3) {
       newErrors.userName = 'Tên đăng nhập phải có ít nhất 3 ký tự';
     }
 
-    // Full name validation
+    
     if (!formData.fullName) {
       newErrors.fullName = 'Họ và tên là bắt buộc';
     } else if (formData.fullName.length < 2) {
       newErrors.fullName = 'Họ và tên phải có ít nhất 2 ký tự';
     }
 
-    // Password validation
+   
     if (!formData.passwordHash) {
       newErrors.passwordHash = 'Mật khẩu là bắt buộc';
     } else if (formData.passwordHash.length < 6) {
       newErrors.passwordHash = 'Mật khẩu phải có ít nhất 6 ký tự';
     }
 
-    // Phone number validation (optional but must be valid if provided)
+    
     if (formData.phoneNumber && !/^[0-9]{10,11}$/.test(formData.phoneNumber)) {
       newErrors.phoneNumber = 'Số điện thoại không hợp lệ (phải có 10-11 số)';
     }
@@ -134,7 +134,7 @@ export const StaffFormModal = ({ isOpen, onClose }: StaffFormModalProps) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
+   
     if (!file.type.startsWith('image/')) {
       toast({
         title: 'Lỗi',
@@ -146,7 +146,7 @@ export const StaffFormModal = ({ isOpen, onClose }: StaffFormModalProps) => {
       return;
     }
 
-    // Validate file size (max 5MB)
+  
     if (file.size > 5 * 1024 * 1024) {
       toast({
         title: 'Lỗi',
@@ -214,7 +214,7 @@ export const StaffFormModal = ({ isOpen, onClose }: StaffFormModalProps) => {
         
         <ModalBody>
           <VStack spacing={4}>
-            {/* Avatar Upload Section */}
+      
             <Box position="relative" alignSelf="center">
               <input
                 type="file"

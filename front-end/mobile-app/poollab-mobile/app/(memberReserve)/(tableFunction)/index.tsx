@@ -218,11 +218,11 @@ const index = () => {
                 {tableData.billiardTypeName}
               </Text>
             </View>
-            <View style={styles.infoBox}>
+            <View style={styles.infoBox3}>
               <Text style={styles.infoBoxTitle}>Khu vực chơi:</Text>
               <Text style={styles.infoBoxText}>{tableData.areaName}</Text>
             </View>
-            <View style={styles.infoBox}>
+            <View style={styles.infoBox3}>
               <Text style={styles.infoBoxTitle}>Địa chỉ:</Text>
               <Text style={styles.infoBoxText}>{tableData.address}</Text>
             </View>
@@ -347,6 +347,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
+  },
+  infoBox3: {
+    gap: 5,
   },
   infoBoxTitle: {
     fontSize: 20,

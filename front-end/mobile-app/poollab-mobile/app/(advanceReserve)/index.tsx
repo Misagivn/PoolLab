@@ -564,7 +564,7 @@ const index = () => {
                     <Text style={styles.infoBoxTitle}>Tên quán:</Text>
                     <Text style={styles.infoBoxText}>{item.storeName}</Text>
                   </View>
-                  <View style={styles.infoBox2}>
+                  <View style={styles.infoBox3}>
                     <Text style={styles.infoBoxTitle}>Địa chỉ:</Text>
                     <Text style={styles.infoBoxText}>{item.address}</Text>
                   </View>
@@ -687,6 +687,9 @@ const styles = StyleSheet.create({
   infoBox2: {
     flexDirection: "row",
     gap: 10,
+  },
+  infoBox3: {
+    gap: 5,
   },
   infoBoxText: {
     fontSize: 15,

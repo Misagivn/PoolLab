@@ -29,6 +29,7 @@ import { FiPlus, FiEdit2, FiTrash2, FiRefreshCcw } from 'react-icons/fi';
 import { ProductType } from '@/utils/types/productType.types';
 import { groupApi } from '@/apis/productGroup';
 import { ProductTypeFormModal } from '@/components/productGTU/ProductTypeForm';
+import { typeApi } from '@/apis/productType.api';
 
 
 export default function ProductGroupPage() {
@@ -55,7 +56,7 @@ export default function ProductGroupPage() {
   const fetchGroups = async () => {
     try {
       setLoading(true);
-      const response = await groupApi.getAllTypes();
+      const response = await typeApi.getAllTypes();
       if (response.status === 200) {
         setGroups(response.data);
       }

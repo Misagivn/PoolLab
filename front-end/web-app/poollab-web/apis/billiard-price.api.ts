@@ -4,6 +4,8 @@ const BASE_URL = 'https://poollabwebapi20241008201316.azurewebsites.net/api';
 export const billiardPriceApi = {
   getAllPrices: async (token: string) => {
     try {
+      const token = localStorage.getItem('token');
+      console.log(token);
       const response = await fetch(
         `${BASE_URL}/BilliardPrice/GetAllBilliardPrice`,
         {
@@ -11,8 +13,10 @@ export const billiardPriceApi = {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
+          
         }
       );
+      
       
       if (!response.ok) throw new Error('Network response was not ok');
       return await response.json();

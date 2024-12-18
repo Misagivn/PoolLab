@@ -27,6 +27,7 @@ const review = () => {
     store_rating(data).then((response) => {
       if (response.data.status === 200) {
         console.log("Review submitted successfully!");
+        router.replace("../../(home)");
         setGaveReview(true);
       } else {
         console.log("Error submitting review:", response.data.message);
@@ -38,7 +39,7 @@ const review = () => {
       try {
         const storedTableData = await getStoredTableDataReserve();
         if (storedTableData) {
-          const strId = storedTableData.data.bidaTable.storeId;
+          const strId = storedTableData.data.storeId;
           setStoreId(strId);
         }
       } catch (error) {

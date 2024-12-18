@@ -17,7 +17,7 @@ export const useOrder = () => {
   });
   const toast = useToast();
 
-  const fetchOrders = useCallback(async (pageNumber: number = 1) => {
+  const fetchOrders = useCallback(async (pageNumber: number = 1, username: string = '') => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');

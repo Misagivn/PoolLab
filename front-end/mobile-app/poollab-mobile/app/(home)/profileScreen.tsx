@@ -1,4 +1,11 @@
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 import React, { useState, useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Image } from "react-native";
@@ -8,6 +15,7 @@ import { router } from "expo-router";
 import { get_user_details } from "@/api/user_api";
 import CustomHeader from "@/components/customHeader";
 import { getAccountId } from "@/data/userData";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 const ProfileScreen = () => {
   //Get userId from AsyncStorage
   const [userFullName, setUserFullName] = useState("");
@@ -15,6 +23,11 @@ const ProfileScreen = () => {
   const [image, setImage] = useState(
     require("../../assets/images/eda492de2906a8827a6266e32bcd3ffb.webp")
   );
+  const logOut = () => {
+    router.replace("../loginScreen");
+    AsyncStorage.clear();
+  };
+  const [userPoints, setUserPoints] = useState("");
   useEffect(() => {
     const loadStat = async () => {
       try {
@@ -25,9 +38,11 @@ const ProfileScreen = () => {
               const userFullName = response.data.data.fullName;
               const userEmail = response.data.data.email;
               const userImage = response.data.data.avatarUrl;
+              const point = response.data.data.point;
               setUserFullName(userFullName);
               setUserEmail(userEmail);
               setImage(userImage);
+              setUserPoints(point);
             }
           });
         }
@@ -48,7 +63,21 @@ const ProfileScreen = () => {
           />
           <View style={styles.basicInfo}>
             <Text style={styles.infoName}>{userFullName}</Text>
-            <Text style={styles.infoEmail}>{userEmail}</Text>
+            {/* <Text style={styles.infoEmail}>{userEmail}</Text> */}
+            <View style={styles.pointCount}>
+              <TextInput
+                style={{
+                  color: "black",
+                  fontSize: 15,
+                  fontWeight: "normal",
+                  textAlign: "center",
+                }}
+                editable={false}
+                placeholder="0"
+                value={userPoints.toString()}
+              />
+              <Text>điểm</Text>
+            </View>
           </View>
         </View>
         <View style={styles.quickFunction}>
@@ -103,10 +132,20 @@ const ProfileScreen = () => {
             <Text style={styles.functionName}>Lịch học</Text>
             <Icon name="arrowRight" size={20} strokeWidth={3} color="black" />
           </Pressable>
-          <View style={styles.functionBox}>
-            <Text style={styles.functionName}>Ví voucher</Text>
+          <Pressable
+            style={styles.functionBox}
+            onPress={() => router.push("../(voucher)")}
+          >
+            <Text style={styles.functionName}>Ví Voucher</Text>
             <Icon name="arrowRight" size={20} strokeWidth={3} color="black" />
-          </View>
+          </Pressable>
+        </View>
+        <View style={styles.customDivider2}></View>
+        <View style={styles.logOutBox}>
+          <Pressable style={styles.logOutInnerBox} onPress={() => logOut()}>
+            <Icon name="logOutIcon" size={20} strokeWidth={3} color="red" />
+            <Text style={{ color: "red", fontSize: 20 }}>Đăng xuất</Text>
+          </Pressable>
         </View>
         <View style={styles.customDivider}></View>
       </ScrollView>
@@ -136,14 +175,18 @@ const styles = StyleSheet.create({
     borderCurve: "continuous",
   },
   headerImage: {
+    justifyContent: "center",
+    alignItems: "center",
+    alignSelf: "center",
     marginLeft: 10,
-    width: 80,
-    height: 80,
+    width: 90,
+    height: 90,
     borderRadius: 100,
     borderWidth: 5,
     borderColor: theme.colors.primary,
   },
   basicInfo: {
+    paddingLeft: 5,
     justifyContent: "center",
     alignItems: "flex-start",
     gap: 0,
@@ -173,6 +216,23 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderCurve: "continuous",
   },
+  logOutBox: {
+    backgroundColor: theme.colors.background,
+    justifyContent: "center",
+    marginHorizontal: 10,
+    marginVertical: 5,
+    padding: 15,
+    shadowColor: "black",
+    shadowOffset: {
+      width: 5,
+      height: 10,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 6,
+    borderRadius: 20,
+    borderCurve: "continuous",
+  },
   functionBox: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -181,10 +241,36 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#eee",
   },
+  logOutInnerBox: {
+    alignSelf: "center",
+    alignItems: "center",
+    alignContent: "center",
+    justifyContent: "flex-end",
+    flexDirection: "row",
+    paddingHorizontal: 15,
+    gap: 10,
+  },
   functionName: {
     fontSize: 20,
   },
   customDivider: {
     padding: 50,
+  },
+  customDivider2: {
+    padding: 20,
+  },
+  pointCount: {
+    marginTop: 5,
+    backgroundColor: theme.colors.background,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    gap: 3,
+    borderCurve: "continuous",
+    borderColor: theme.colors.primary,
+    borderWidth: 1.5,
   },
 });

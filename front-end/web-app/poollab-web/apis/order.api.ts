@@ -7,15 +7,21 @@ export const orderApi = {
     token: string;
     pageNumber?: number;
     pageSize?: number;
+    username?: string;
   }): Promise<OrderResponse> => {
-    const { token, pageNumber = 1, pageSize = 10 } = params;
+    const { token, pageNumber = 1, pageSize = 10, username = '' } = params;
     
     const queryParams = new URLSearchParams({
       PageNumber: pageNumber.toString(),
       PageSize: pageSize.toString(),
-      OrderBy: 'orderDate',
-      OrderByDesc: 'true'
+      SortBy: 'orderDate',
+      SortAscending: 'false'
     });
+
+    if (username) {
+      queryParams.append('Username', username);
+    }
+
 
     const response = await fetch(
       `${BASE_URL}/Order/GetAllOrder?${queryParams.toString()}`, 

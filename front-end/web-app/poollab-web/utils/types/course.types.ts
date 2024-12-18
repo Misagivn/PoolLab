@@ -5,7 +5,7 @@ export interface Course {
   price: number;
   schedule: string;
   startDate: string;
-  endDate: string; 
+  endDate: string;
   startTime: string;
   endTime: string;
   level: string;
@@ -16,54 +16,26 @@ export interface Course {
   address: string;
   accountId: string;
   accountName: string;
-  accountAvatar: string | null;
+  accountAvatar: string;
   mentorId: string | null;
   createdDate: string;
   updatedDate: string | null;
   status: string;
- }
- 
- export interface CreateCourseRequest {
-  title: string;
-  descript: string;
-  price: number;
-  schedule: string[];
-  courseMonth: string;
-  startTime: string; 
-  endTime: string;
-  level: string;
-  quantity: number;
-  storeId: string;
-  accountId: string;
- }
- 
- export interface UpdateCourseRequest {
-  title: string;
-  descript: string;
-  price: number;
-  schedule: string;
-  startDate: string;
-  endDate?: string;  
-  startTime?: string; 
-  endTime?: string;  
-  level: string;
-  quantity: number;
-  storeId: string;
-  accountId: string;
+}
+
+export interface Member {
+  id: string;
+  email: string;
+  avatarUrl: string;
+  userName: string;
+  fullName: string;
+  phoneNumber: string;
+  roleId: string;
+  roleName: string;
   status: string;
 }
- 
- export interface DeleteCourseRequest {
-  id: string;  
- }
- 
- export interface CourseResponse {
-  status: number;
-  message: string | null;
-  data: Course;
- }
- 
- export interface PaginatedCourseResponse {
+
+export interface CourseApiResponse {
   status: number;
   message: string | null;
   data: {
@@ -73,18 +45,4 @@ export interface Course {
     totalPages: number;
     pageNumber: number;
   };
- }
- 
- export interface CourseFilters {
-  pageNumber?: number;
-  pageSize?: number; 
-  title?: string;
-  sortBy?: number;
-  sortAscending?: boolean;
- }
- 
- export interface UploadAvatarResponse {
-  status: number;
-  message: string | null;
-  data: string;
- }
+}

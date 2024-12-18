@@ -131,11 +131,16 @@ export default function StaffPage() {
 
   const fetchBidaType = async () => {
     try {
-      const response = await fetch(
+      const token = localStorage.getItem('token');
+      const response = await fetch(  
         `${process.env.NEXT_PUBLIC_LOCAL_URL}/billiardtype/getallbilliardtype`,
         {
           method: "GET",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+          
         }
       );
 
@@ -155,11 +160,15 @@ export default function StaffPage() {
 
   const fetchArea = async () => {
     try {
+      const token = localStorage.getItem('token');
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_LOCAL_URL}/area/getallarea?StoreId=${storeId}`,
         {
           method: "GET",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
         }
       );
 
@@ -179,13 +188,19 @@ export default function StaffPage() {
 
   const fetchTables = async () => {
     try {
+      const token = localStorage.getItem('token');
+      console.log(token);
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_LOCAL_URL}/billiardtable/getallbilliardtable?StroreID=${storeId}`,
         {
           method: "GET",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
         }
       );
+      console.log(storeId);
 
       const data = await response.json();
       if (data.status === 404) {
@@ -212,11 +227,16 @@ export default function StaffPage() {
 
   const fetchFoods = async () => {
     try {
+      const token = localStorage.getItem('token');
+      const status = "Thực đơn";
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_LOCAL_URL}/Product/GetAllProducts?StoreId=${storeId}`,
+        `${process.env.NEXT_PUBLIC_LOCAL_URL}/Product/GetAllProducts?StoreId=${storeId}&ProductTypeName=${status}`,
         {
           method: "GET",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
         }
       );
 
@@ -236,11 +256,15 @@ export default function StaffPage() {
 
   const handleFilter = async () => {
     try {
+      const token = localStorage.getItem('token');
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_LOCAL_URL}/billiardtable/getallbilliardtable?StroreID=${storeId}&AreaID=${selectedArea}&BilliardTypeId=${selectedBidaType}&Status=${selectedStatus}`,
         {
           method: "GET",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
         }
       );
 

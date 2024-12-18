@@ -3,10 +3,10 @@ import { Store, StoreResponse } from "@/utils/types/store";
 const BASE_URL = 'https://poollabwebapi20241008201316.azurewebsites.net/api';
 
 export const storeApi = {
-  getAllStores: async (): Promise<StoreResponse> => {
+  getAllStores: async (page: number = 1, pageSize: number = 10): Promise<StoreResponse> => {
     const token = localStorage.getItem('token');
     const response = await fetch(
-      `${BASE_URL}/store/getallstore`,
+      `${BASE_URL}/store/getallstore?SortBy=createdDate&SortAscending=false&PageNumber=${page}&PageSize=${pageSize}`,
       {
         headers: {
           Authorization: `Bearer ${token}`,

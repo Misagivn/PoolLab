@@ -47,25 +47,37 @@ export const superManagerRoutes: RouteConfig[] = [
     ],
   },
   {
-    path: '/supermanager/staff',
-    label: 'Quản lý nhân viên',
+    path: '/supermanager/finance',
+    label: 'Quản lý kinh doanh',
     icon: FiUsers,
     subRoutes: [
       {
-        path: '/supermanager/staff/list',
-        label: 'Danh sách nhân viên',
+        path: '/supermanager/finance/billiardPrice',
+        label: 'Tiền Bàn',
       },
       {
-        path: '/supermanager/staff/management',
-        label: 'Quản lý nhân viên',
+        path: '/supermanager/finance/billiardType',
+        label: 'Loại Bàn',
+      },
+      {
+        path: '/supermanager/finance/productType',
+        label: 'Loại Hàng',
+      },
+      {
+        path: '/supermanager/finance/unit',
+        label: 'Đơn vị',
+      },
+      {
+        path: '/supermanager/finance/groupProduct',
+        label: 'Nhóm Hàng',
       },
     ],
   },
-  {
-    path: '/supermanager/reports',
-    label: 'Báo cáo',
-    icon: FiTrendingUp,
-  },
+  // {
+  //   path: '/supermanager/reports',
+  //   label: 'Báo cáo',
+  //   icon: FiTrendingUp,
+  // },
   {
     path: '/supermanager/course',
     label: 'Khóa học',

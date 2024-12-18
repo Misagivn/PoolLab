@@ -66,3 +66,17 @@ export const getUserBalance = async (userId) => {
     console.error("Error getting user balance:", error);
   }
 };
+
+export const getUserNameReact = async (userId) => {
+  try {
+    if (userId) {
+      const response = await get_user_details(userId);
+      if (response.data.status === 200) {
+        const userBalance = response.data.data.userName;
+        return userBalance;
+      }
+    }
+  } catch (error) {
+    console.error("Error getting user balance:", error);
+  }
+};

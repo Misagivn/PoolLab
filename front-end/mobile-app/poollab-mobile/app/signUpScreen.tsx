@@ -9,7 +9,7 @@ import { router } from "expo-router";
 import Icon from "@/assets/icons/icons";
 import { register_user } from "@/api/user_api";
 import CustomAlert from "@/components/alertCustom";
-
+import emailjs, { EmailJSResponseStatus } from "@emailjs/react-native";
 /**
  * SignUpScreen: màn hình đăng ký
  *
@@ -112,6 +112,34 @@ const SignUpScreen = () => {
    * - Nếu thành công, chuyển đến màn hình đăng nhập
    * - Nếu thất bại, hiện thông báo lỗi
    */
+  const sendEmail = async (link) => {
+    console.log(link);
+    console.log(userFullName);
+    console.log(email);
+    try {
+      await emailjs.send(
+        "service_awqnj46",
+        "template_2awaf97",
+        {
+          to_name: userFullName,
+          message: "Kích hoạt: " + link,
+          user_email: email,
+        },
+        {
+          publicKey: "Q8SW6yCmKV3shdCrl",
+        }
+      );
+      console.log("SUCCESS!");
+    } catch (err) {
+      if (err instanceof EmailJSResponseStatus) {
+        console.log("EMAILJS FAILED...", err);
+        return;
+      }
+
+      console.log("ERROR", err);
+    }
+  };
+
   const checkSignUp = async () => {
     if (
       email === "" ||
@@ -132,9 +160,14 @@ const SignUpScreen = () => {
       setIsLoading(true);
       try {
         register_user(signupData).then((response) => {
+          console.log(response);
           if (response?.data.status === 200) {
+            sendEmail(response.data.data);
             setAlertVisible(true);
-            setSuccessResponse("Đăng ký thành công, xin hãy đăng nhập.");
+            setSuccessResponse(
+              "Đăng ký thành công, xin hãy kích hoạt tài khoản. Chúng tối đã gửi cho bạn một email xác nhận."
+            );
+
             setIsLoading(false);
           } else {
             setAlertVisible(true);

@@ -93,6 +93,9 @@ const index = () => {
   };
   const calculateHavePlayTime = (playTime, remainingTime) => {
     try {
+      if (playTime === remainingTime) {
+        return playTime.toString();
+      }
       // Validate inputs
       if (!playTime || !remainingTime) {
         console.log("Invalid inputs:", { playTime, remainingTime });
@@ -150,6 +153,7 @@ const index = () => {
     setIsLoading(true);
     if (timerRef.current) {
       const remainingTime = timerRef.current.getRemainingTime();
+      console.log("remainingTime: ", remainingTime);
       // Call your handleEndTable logic here
       timerRef.current.stopTimer();
       setTimeRemaining(remainingTime);
@@ -164,7 +168,7 @@ const index = () => {
         console.log("end table data: ", endTableData);
         const response = await deactive_table(endTableData);
         if (response.status === 200) {
-          AsyncStorage.removeItem("userProducts");
+          AsyncStorage.removeItem("timeCus");
           setIsLoading(false);
           router.replace("./review");
         } else {
@@ -210,11 +214,11 @@ const index = () => {
                 {tableData.billiardTypeName}
               </Text>
             </View>
-            <View style={styles.infoBox}>
+            <View style={styles.infoBox3}>
               <Text style={styles.infoBoxTitle}>Khu vực chơi:</Text>
               <Text style={styles.infoBoxText}>{tableData.areaName}</Text>
             </View>
-            <View style={styles.infoBox}>
+            <View style={styles.infoBox3}>
               <Text style={styles.infoBoxTitle}>Địa chỉ:</Text>
               <Text style={styles.infoBoxText}>{tableData.address}</Text>
             </View>
@@ -339,6 +343,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
+  },
+  infoBox3: {
+    gap: 5,
   },
   infoBoxTitle: {
     fontSize: 20,

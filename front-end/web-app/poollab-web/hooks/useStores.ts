@@ -6,17 +6,28 @@ import { storeApi } from '@/apis/store.api';
 
 export const useStores = () => {
   const [stores, setStores] = useState<Store[]>([]);
+  const [pagination, setPagination] = useState({
+    totalItems: 0,
+    pageSize: 10,
+    totalPages: 1,
+    currentPage: 1
+  });
   const [loading, setLoading] = useState(true);
   const toast = useToast();
 
-  const fetchStores = useCallback(async () => {
+  const fetchStores = useCallback(async (page: number = 1) => {
     try {
       setLoading(true);
-      const response = await storeApi.getAllStores();
+      const response = await storeApi.getAllStores(page);
       
       if (response.status === 200) {
-        setStores(response.data as Store[]);
-        return response.data;
+        setStores(response.data.items);
+        setPagination({
+          totalItems: response.data.totalItem,
+          pageSize: response.data.pageSize,
+          totalPages: response.data.totalPages,
+          currentPage: response.data.pageNumber
+        });
       }
     } catch (err) {
       toast({
@@ -116,6 +127,7 @@ export const useStores = () => {
   return {
     data: stores,
     loading,
+    pagination,
     fetchStores,
     createStore,
     updateStore,

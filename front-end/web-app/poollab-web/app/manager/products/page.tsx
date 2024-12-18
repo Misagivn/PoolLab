@@ -28,9 +28,9 @@ import { ProductTable } from '@/components/product/ProductTable';
 import { ProductForm } from '@/components/product/ProductForm';
 import { ProductDetail } from '@/components/product/ProductDetail';
 import { useProduct } from '@/hooks/useProduct';
-import { useGroup } from '@/hooks/useGroup';
-import { useType } from '@/hooks/useType';
-import { useUnit } from '@/hooks/useUnit';
+import { useGroup } from '@/hooks/useProductGroup';
+import { useType } from '@/hooks/useProductType';
+import { useUnit } from '@/hooks/useProductUnit';
 import { Product } from '@/utils/types/product';
 
 export default function ProductsClient() {

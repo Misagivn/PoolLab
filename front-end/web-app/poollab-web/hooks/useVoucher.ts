@@ -1,11 +1,10 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useToast } from '@chakra-ui/react';
-import { Course, Member } from '@/utils/types/course.types';
-import { courseApi } from '@/apis/course';
+import { Voucher } from '@/utils/types/voucher.types';
+import { voucherApi } from '@/apis/voucher.api';
 
-export const useCourses = () => {
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [members, setMembers] = useState<Member[]>([]);
+export const useVouchers = () => {
+  const [vouchers, setVouchers] = useState<Voucher[]>([]);
   const [pagination, setPagination] = useState({
     totalItems: 0,
     pageSize: 10,
@@ -15,13 +14,13 @@ export const useCourses = () => {
   const [loading, setLoading] = useState(true);
   const toast = useToast();
 
-  const fetchCourses = useCallback(async (page: number = 1) => {
+  const fetchVouchers = useCallback(async (page: number = 1) => {
     try {
       setLoading(true);
-      const response = await courseApi.getAllCourses(page);
+      const response = await voucherApi.getAllVouchers(page);
       
       if (response.status === 200) {
-        setCourses(response.data.items);
+        setVouchers(response.data.items);
         setPagination({
           totalItems: response.data.totalItem,
           pageSize: response.data.pageSize,
@@ -32,51 +31,35 @@ export const useCourses = () => {
     } catch (err) {
       toast({
         title: 'Lỗi',
-        description: 'Không thể tải danh sách khóa học',
+        description: 'Không thể tải danh sách voucher',
         status: 'error',
         duration: 3000,
         isClosable: true,
       });
-      setCourses([]);
+      setVouchers([]);
     } finally {
       setLoading(false);
     }
   }, [toast]);
 
-  const fetchMembers = useCallback(async () => {
+  const createVoucher = async (data: Pick<Voucher, 'name' | 'description' | 'point' | 'discount'>) => {
     try {
-      const response = await courseApi.getMembers();
-      if (response.status === 200) {
-        setMembers(response.data.items);
-      }
-    } catch (err) {
-      toast({
-        title: 'Lỗi',
-        description: 'Không thể tải danh sách thành viên',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-    }
-  }, [toast]);
-
-  const createCourse = async (data: any) => {
-    try {
-      const response = await courseApi.createCourse(data);
+      const response = await voucherApi.createVoucher(data);
       if (response.status === 200) {
         toast({
           title: 'Thành công',
-          description: 'Tạo khóa học mới thành công',
+          description: 'Thêm voucher mới thành công',
           status: 'success',
           duration: 3000,
           isClosable: true,
         });
-        await fetchCourses();
+        await fetchVouchers();
+        return response.data;
       }
     } catch (err) {
       toast({
         title: 'Lỗi',
-        description: 'Không thể tạo khóa học mới',
+        description: 'Không thể thêm voucher mới',
         status: 'error',
         duration: 3000,
         isClosable: true,
@@ -85,23 +68,24 @@ export const useCourses = () => {
     }
   };
 
-  const updateCourse = async (courseId: string, data: any) => {
+  const updateVoucher = async (voucherId: string, data: Pick<Voucher, 'name' | 'description' | 'point' | 'discount'>) => {
     try {
-      const response = await courseApi.updateCourse(courseId, data);
+      const response = await voucherApi.updateVoucher(voucherId, data);
       if (response.status === 200) {
         toast({
           title: 'Thành công',
-          description: 'Cập nhật khóa học thành công',
+          description: 'Cập nhật voucher thành công',
           status: 'success',
           duration: 3000,
           isClosable: true,
         });
-        await fetchCourses();
+        await fetchVouchers();
+        return response.data;
       }
     } catch (err) {
       toast({
         title: 'Lỗi',
-        description: 'Không thể cập nhật khóa học',
+        description: 'Không thể cập nhật voucher',
         status: 'error',
         duration: 3000,
         isClosable: true,
@@ -110,23 +94,23 @@ export const useCourses = () => {
     }
   };
 
-  const cancelCourse = async (courseId: string) => {
+  const inactiveVoucher = async (voucherId: string) => {
     try {
-      const response = await courseApi.cancelCourse(courseId);
+      const response = await voucherApi.inactiveVoucher(voucherId);
       if (response.status === 200) {
         toast({
           title: 'Thành công',
-          description: 'Hủy khóa học thành công',
+          description: 'Vô hiệu hóa voucher thành công',
           status: 'success',
           duration: 3000,
           isClosable: true,
         });
-        await fetchCourses();
+        await fetchVouchers();
       }
     } catch (err) {
       toast({
         title: 'Lỗi',
-        description: 'Không thể hủy khóa học',
+        description: 'Không thể vô hiệu hóa voucher',
         status: 'error',
         duration: 3000,
         isClosable: true,
@@ -135,23 +119,23 @@ export const useCourses = () => {
     }
   };
 
-  const deleteCourse = async (courseId: string) => {
+  const reactivateVoucher = async (voucherId: string) => {
     try {
-      const response = await courseApi.deleteCourse(courseId);
+      const response = await voucherApi.reactivateVoucher(voucherId);
       if (response.status === 200) {
         toast({
           title: 'Thành công',
-          description: 'Xóa khóa học thành công',
+          description: 'Kích hoạt lại voucher thành công',
           status: 'success',
           duration: 3000,
           isClosable: true,
         });
-        await fetchCourses();
+        await fetchVouchers();
       }
     } catch (err) {
       toast({
         title: 'Lỗi',
-        description: 'Không thể xóa khóa học',
+        description: 'Không thể kích hoạt lại voucher',
         status: 'error',
         duration: 3000,
         isClosable: true,
@@ -159,17 +143,19 @@ export const useCourses = () => {
       throw err;
     }
   };
+
+  useEffect(() => {
+    fetchVouchers();
+  }, [fetchVouchers]);
 
   return {
-    data: courses,
-    members,
+    data: vouchers,
     loading,
     pagination,
-    fetchCourses,
-    fetchMembers,
-    createCourse,
-    updateCourse,
-    cancelCourse,
-    deleteCourse
+    fetchVouchers,
+    createVoucher,
+    updateVoucher,
+    inactiveVoucher,
+    reactivateVoucher
   };
 };

@@ -1,12 +1,12 @@
-import { CourseApiResponse } from "@/utils/types/course.types";
+import { SingleVoucherResponse, Voucher, VoucherResponse } from "@/utils/types/voucher.types";
 
 const BASE_URL = 'https://poollabwebapi20241008201316.azurewebsites.net/api';
 
-export const courseApi = {
-  getAllCourses: async (page: number = 1): Promise<CourseApiResponse> => {
+export const voucherApi = {
+  getAllVouchers: async (page: number = 1, pageSize: number = 10): Promise<VoucherResponse> => {
     const token = localStorage.getItem('token');
     const response = await fetch(
-      `${BASE_URL}/course/getallcourses?SortBy=createdDate&SortAscending=false&PageNumber=${page}&PageSize=10`,
+      `${BASE_URL}/voucher/getallvoucher?SortBy=createdDate&SortAscending=false&PageNumber=${page}&PageSize=${pageSize}`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -17,10 +17,10 @@ export const courseApi = {
     return response.json();
   },
 
-  getCourseById: async (courseId: string): Promise<CourseApiResponse> => {
+  getVoucherById: async (voucherId: string): Promise<SingleVoucherResponse> => {
     const token = localStorage.getItem('token');
     const response = await fetch(
-      `${BASE_URL}/course/getcoursebyid/${courseId}`,
+      `${BASE_URL}/voucher/getvoucherbyid/${voucherId}`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -31,22 +31,10 @@ export const courseApi = {
     return response.json();
   },
 
-  createCourse: async (data: {
-    title: string;
-    descript: string;
-    price: number;
-    schedule: string[];
-    courseMonth: string;
-    startTime: string;
-    endTime: string;
-    level: string;
-    quantity: number;
-    storeId: string;
-    accountId: string;
-  }): Promise<CourseApiResponse> => {
+  createVoucher: async (data: Pick<Voucher, 'name' | 'description' | 'point' | 'discount'>): Promise<SingleVoucherResponse> => {
     const token = localStorage.getItem('token');
     const response = await fetch(
-      `${BASE_URL}/course/createcourse`,
+      `${BASE_URL}/voucher/addnewvoucher`,
       {
         method: 'POST',
         headers: {
@@ -59,21 +47,10 @@ export const courseApi = {
     return response.json();
   },
 
-  updateCourse: async (courseId: string, data: {
-    title: string;
-    descript: string;
-    price: number;
-    schedule: string;
-    startDate: string;
-    level: string;
-    quantity: number;
-    storeId: string;
-    accountId: string;
-    status: string;
-  }): Promise<CourseApiResponse> => {
+  updateVoucher: async (voucherId: string, data: Pick<Voucher, 'name' | 'description' | 'point' | 'discount'>): Promise<SingleVoucherResponse> => {
     const token = localStorage.getItem('token');
     const response = await fetch(
-      `${BASE_URL}/course/updatecourse/${courseId}`,
+      `${BASE_URL}/voucher/updatevoucher/${voucherId}`,
       {
         method: 'PUT',
         headers: {
@@ -85,11 +62,10 @@ export const courseApi = {
     );
     return response.json();
   },
-
-  cancelCourse: async (courseId: string): Promise<CourseApiResponse> => {
+  inactiveVoucher: async (voucherId: string): Promise<SingleVoucherResponse> => {
     const token = localStorage.getItem('token');
     const response = await fetch(
-      `${BASE_URL}/course/cancelcourse/${courseId}`,
+      `${BASE_URL}/voucher/inactivevoucher/${voucherId}`,
       {
         method: 'PUT',
         headers: {
@@ -101,26 +77,12 @@ export const courseApi = {
     return response.json();
   },
 
-  deleteCourse: async (courseId: string): Promise<CourseApiResponse> => {
+  reactivateVoucher: async (voucherId: string): Promise<SingleVoucherResponse> => {
     const token = localStorage.getItem('token');
     const response = await fetch(
-      `${BASE_URL}/course/deletecourse?id=${courseId}`,
+      `${BASE_URL}/voucher/reactivevoucher/${voucherId}`,
       {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      }
-    );
-    return response.json();
-  },
-
-  getMembers: async (): Promise<CourseApiResponse> => {
-    const token = localStorage.getItem('token');
-    const response = await fetch(
-      `${BASE_URL}/account/getallaccount?RoleName=Member`,
-      {
+        method: 'PUT',
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'

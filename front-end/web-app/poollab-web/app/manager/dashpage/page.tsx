@@ -1,177 +1,229 @@
-
 "use client";
 
-import { 
-  Box, 
-  Flex, 
-  Text, 
-  SimpleGrid, 
-  Container, 
-  useColorModeValue,
-  Progress,
-  CircularProgress,
+import {
+  Box,
+  Card,
+  CardBody,
+  Flex,
+  Grid,
+  Heading,
+  Stack,
+  Text,
   Stat,
   StatLabel,
   StatNumber,
-  StatHelpText,
-  StatArrow,
-  Stack,
-  Icon
+  Select,
+  HStack,
+  Spinner,
+  Icon,
 } from '@chakra-ui/react';
-import { 
-  FiDollarSign, 
-  FiShoppingBag, 
-  FiUsers, 
-  FiBarChart 
-} from 'react-icons/fi';
+import { useState, useEffect } from 'react';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts';
+import { FiDollarSign, FiShoppingBag, FiUsers, FiStar } from 'react-icons/fi';
+import { useManagerDashboard } from '@/hooks/useDashBoardMana';
 
-// Các component phụ nên được tách ra file riêng
-interface StatCardProps {
-  title: string;
-  value: string;
-  percentage: number;
-  icon: any;
-  isIncrease: boolean;
-}
+export default function ManagerDashboard() {
+  // Replace with actual store ID
+  const storeId = '8a78e8ab-2e80-4042-bf08-e205672f5464';
+  const [selectedYear, setSelectedYear] = useState(2024);
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
 
-const StatCard = ({ title, value, percentage, icon, isIncrease }: StatCardProps) => {
-  const cardBg = useColorModeValue('white', 'gray.700');
-  
-  return (
-    <Box p="6" bg={cardBg} borderRadius="lg" shadow="sm">
-      <Flex alignItems="center" mb="2">
-        <Icon as={icon} w="6" h="6" color={isIncrease ? "green.500" : "red.500"} />
+  const {
+    loading,
+    income,
+    orders,
+    members,
+    reviews,
+    dailyStats,
+    fetchDashboardData
+  } = useManagerDashboard(storeId);
+
+  useEffect(() => {
+    fetchDashboardData(selectedYear, selectedMonth);
+  }, [selectedYear, selectedMonth, fetchDashboardData]);
+
+  const formatCurrency = (value: string | number) => {
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND'
+    }).format(Number(value));
+  };
+
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <Card>
+          <CardBody p={2}>
+            <Text fontWeight="bold" mb={2}>{label}</Text>
+            {payload.map((entry: any) => (
+              <Text key={entry.name} color={entry.color}>
+                {entry.name}: {
+                  entry.dataKey === 'totalIncome' 
+                    ? formatCurrency(entry.value)
+                    : entry.value
+                }
+              </Text>
+            ))}
+          </CardBody>
+        </Card>
+      );
+    }
+    return null;
+  };
+
+  if (loading) {
+    return (
+      <Flex h="100vh" align="center" justify="center">
+        <Spinner size="xl" color="blue.500" />
       </Flex>
-      <Stat>
-        <StatLabel fontSize="sm" color="gray.500">{title}</StatLabel>
-        <StatNumber fontSize="2xl" fontWeight="bold">{value}</StatNumber>
-        <StatHelpText>
-          <StatArrow type={isIncrease ? "increase" : "decrease"} />
-          {percentage}%
-        </StatHelpText>
-      </Stat>
-    </Box>
-  );
-};
-
-interface ProgressStatProps {
-  label: string;
-  value: number;
-  color?: string;
-}
-
-const ProgressStat = ({ label, value, color = "blue" }: ProgressStatProps) => {
-  return (
-    <Box>
-      <Flex justify="space-between" mb="2">
-        <Text fontSize="sm" fontWeight="medium">{label}</Text>
-        <Text fontSize="sm" fontWeight="medium">{value}%</Text>
-      </Flex>
-      <Progress value={value} size="sm" colorScheme={color} borderRadius="full" />
-    </Box>
-  );
-};
-
-interface CircularStatCardProps {
-  label: string;
-  value: number;
-  color?: string;
-}
-
-const CircularStatCard = ({ label, value, color = "blue" }: CircularStatCardProps) => {
-  return (
-    <Box textAlign="center">
-      <CircularProgress 
-        value={value} 
-        size="100px" 
-        thickness="8px"
-        color={`${color}.400`}
-      >
-      </CircularProgress>
-      <Text mt="2" fontSize="sm" fontWeight="medium">{label}</Text>
-      <Text fontSize="lg" fontWeight="bold">{value}%</Text>
-    </Box>
-  );
-};
-
-export default function DashboardPage() {
-  const cardBg = useColorModeValue('white', 'gray.700');
+    );
+  }
 
   return (
-    <Container maxW="container.xl">
-      {/* Stats Grid */}
-      <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing="6" mb="6">
-        <StatCard
-          title="Tổng Doanh Số"
-          value="20.000.000 ₫"
-          percentage={16.24}
-          icon={FiDollarSign}
-          isIncrease={true}
-        />
-        <StatCard
-          title="Tổng Số Đơn Hàng "
-          value="500 đơn"
-          percentage={4.82}
-          icon={FiShoppingBag}
-          isIncrease={false}
-        />
-        <StatCard
-          title="Khách Mỗi Ngày"
-          value="500"
-          percentage={2.45}
-          icon={FiUsers}
-          isIncrease={true}
-        />
-        <StatCard
-          title="Đánh Giá"
-          value="1.75%"
-          percentage={1.75}
-          icon={FiBarChart}
-          isIncrease={true}
-        />
-      </SimpleGrid>
+    <Stack spacing={6} p={6}>
+      {/* Stats Overview */}
+      <Grid templateColumns="repeat(4, 1fr)" gap={6}>
+        <Card bg="white" shadow="sm">
+          <CardBody>
+            <Stat>
+              <Flex align="center">
+                <Box p={3} bg="green.50" borderRadius="full" mr={4}>
+                  <Icon as={FiDollarSign} boxSize={6} color="green.500" />
+                </Box>
+                <Box>
+                  <StatLabel color="gray.500">Tổng doanh thu</StatLabel>
+                  <StatNumber fontSize="2xl" color="green.500">
+                    {formatCurrency(income)}
+                  </StatNumber>
+                </Box>
+              </Flex>
+            </Stat>
+          </CardBody>
+        </Card>
 
-      {/* Charts Grid */}
-      <SimpleGrid columns={{ base: 1, lg: 2 }} spacing="6" mb="6">
-        <Box bg={cardBg} p="6" borderRadius="lg" shadow="sm">
-          <Text fontSize="lg" fontWeight="medium" mb="4">Tiến độ hàng tháng</Text>
-          <Stack spacing="4">
-            <ProgressStat label="Doanh thu" value={75} />
-            <ProgressStat label="bán hàng" value={65} />
-            <ProgressStat label="Người dụng" value={85} />
-          </Stack>
-        </Box>
+        <Card bg="white" shadow="sm">
+          <CardBody>
+            <Stat>
+              <Flex align="center">
+                <Box p={3} bg="blue.50" borderRadius="full" mr={4}>
+                  <Icon as={FiShoppingBag} boxSize={6} color="blue.500" />
+                </Box>
+                <Box>
+                  <StatLabel color="gray.500">Tổng đơn hàng</StatLabel>
+                  <StatNumber fontSize="2xl" color="blue.500">
+                    {orders}
+                  </StatNumber>
+                </Box>
+              </Flex>
+            </Stat>
+          </CardBody>
+        </Card>
 
-        <Box bg={cardBg} p="6" borderRadius="lg" shadow="sm">
-          <Text fontSize="lg" fontWeight="medium" mb="4">Thống kê hàng tháng</Text>
-          <SimpleGrid columns={3} spacing="4">
-            <CircularStatCard label="Lợi nhuận" value={68} />
-            <CircularStatCard label="Doanh thu" value={75} />
-            <CircularStatCard label="Chi phí" value={55} />
-          </SimpleGrid>
-        </Box>
-      </SimpleGrid>
+        <Card bg="white" shadow="sm">
+          <CardBody>
+            <Stat>
+              <Flex align="center">
+                <Box p={3} bg="purple.50" borderRadius="full" mr={4}>
+                  <Icon as={FiUsers} boxSize={6} color="purple.500" />
+                </Box>
+                <Box>
+                  <StatLabel color="gray.500">Khách hàng mỗi ngày</StatLabel>
+                  <StatNumber fontSize="2xl" color="purple.500">
+                    {members}
+                  </StatNumber>
+                </Box>
+              </Flex>
+            </Stat>
+          </CardBody>
+        </Card>
 
-      {/* Bottom Grid */}
-      <SimpleGrid columns={{ base: 1, lg: 2 }} spacing="6">
-        <Box bg={cardBg} p="6" borderRadius="lg" shadow="sm">
-          <Text fontSize="lg" fontWeight="medium" mb="4">Cập nhật thu nhập</Text>
-          <Stack spacing="4">
-            <ProgressStat label="Tiếp thị" value={50} color="blue" />
-            <ProgressStat label="Thanh toán" value={70} color="green" />
-            <ProgressStat label="Doanh thu" value={85} color="purple" />
-          </Stack>
-        </Box>
+        <Card bg="white" shadow="sm">
+          <CardBody>
+            <Stat>
+              <Flex align="center">
+                <Box p={3} bg="yellow.50" borderRadius="full" mr={4}>
+                  <Icon as={FiStar} boxSize={6} color="yellow.500" />
+                </Box>
+                <Box>
+                  <StatLabel color="gray.500">Đánh giá</StatLabel>
+                  <StatNumber fontSize="2xl" color="yellow.500">
+                    {reviews}
+                  </StatNumber>
+                </Box>
+              </Flex>
+            </Stat>
+          </CardBody>
+        </Card>
+      </Grid>
 
-        <Box bg={cardBg} p="6" borderRadius="lg" shadow="sm">
-          <Text fontSize="lg" fontWeight="medium" mb="4">Tổng quan về hiệu suất</Text>
-          <Flex justify="space-around" align="center" h="full">
-            <CircularStatCard label="Hoàn thành" value={75} color="green" />
-            <CircularStatCard label="Chưa giải quyết" value={45} color="orange" />
-            <CircularStatCard label="Đã hủy" value={25} color="red" />
+      {/* Revenue Chart */}
+      <Card>
+        <CardBody>
+          <Flex justify="space-between" align="center" mb={6}>
+            <Heading size="md">Biểu đồ doanh thu</Heading>
+            <HStack spacing={4}>
+              <Select
+                w="150px"
+                value={selectedMonth}
+                onChange={(e) => setSelectedMonth(Number(e.target.value))}
+              >
+                {Array.from({length: 12}, (_, i) => (
+                  <option key={i + 1} value={i + 1}>Tháng {i + 1}</option>
+                ))}
+              </Select>
+
+              <Select
+                w="120px"
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(Number(e.target.value))}
+              >
+                <option value={2024}>2024</option>
+                <option value={2023}>2023</option>
+              </Select>
+            </HStack>
           </Flex>
-        </Box>
-      </SimpleGrid>
-    </Container>
+
+          <Box h="400px">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart 
+                data={dailyStats}
+                margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="date" />
+                <YAxis />
+                <Tooltip content={<CustomTooltip />} />
+                <Bar 
+                  dataKey="totalIncome" 
+                  name="Doanh thu"
+                  fill="#82ca9d" 
+                  radius={[4, 4, 0, 0]}
+                />
+                <Bar 
+                  dataKey="totalOrder" 
+                  name="Đơn hàng"
+                  fill="#8884d8"
+                  radius={[4, 4, 0, 0]}
+                />
+                <Bar 
+                  dataKey="totalBooking" 
+                  name="Đặt chỗ"
+                  fill="#ffc658" 
+                  radius={[4, 4, 0, 0]}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </Box>
+        </CardBody>
+      </Card>
+    </Stack>
   );
 }

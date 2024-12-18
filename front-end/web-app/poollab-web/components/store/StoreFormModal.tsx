@@ -60,10 +60,10 @@ export const StoreFormModal = ({
       phoneNumber: validatedValue
     }));
 
-    if (validatedValue && validatedValue.length < 10) {
+    if (validatedValue && validatedValue.length < 9) {
       setErrors(prev => ({
         ...prev,
-        phoneNumber: 'Số điện thoại phải có ít nhất 10 số'
+        phoneNumber: 'Số điện thoại phải có ít nhất 9 số'
       }));
     } else {
       setErrors(prev => {

@@ -1,26 +1,31 @@
+import { ReviewResponse } from "@/utils/types/feedback.types";
+
 const BASE_URL = 'https://poollabwebapi20241008201316.azurewebsites.net/api';
 
-export const feedbackApi = {
-  getAllFeedback: async (params: {
-    CusName?: string;
-    StoreId?: string;
-    SortBy: number;
-    SortAscending: boolean;
-  }) => {
+export const reviewApi = {
+  getAllReviews: async (
+    page: number = 1,
+    filters: {
+      username?: string,
+      storeName?: string
+    } = {}
+  ): Promise<ReviewResponse> => {
     const token = localStorage.getItem('token');
-    const queryString = new URLSearchParams({
-      ...(params.CusName && { CusName: params.CusName }),
-      ...(params.StoreId && { StoreId: params.StoreId }),
-      SortBy: params.SortBy.toString(),
-      SortAscending: params.SortAscending.toString()
-    }).toString();
+    let url = `${BASE_URL}/review/getallreview?SortBy=createdDate&SortAscending=false&PageNumber=${page}&PageSize=10`;
+    
+    if (filters.username) {
+      url += `&Username=${encodeURIComponent(filters.username)}`;
+    }
+    if (filters.storeName) {
+      url += `&StoreName=${encodeURIComponent(filters.storeName)}`;
+    }
 
-    const response = await fetch(
-      `${BASE_URL}/review/getallreview?${queryString}`,
-      {
-        headers: { Authorization: `Bearer ${token}` },
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
       }
-    );
+    });
     return response.json();
   }
 };

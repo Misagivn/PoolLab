@@ -6,24 +6,14 @@ import {
   ModalBody,
   ModalCloseButton,
   Stack,
-  HStack,
-  Box,
+  VStack,
   Text,
+  Box,
+  HStack,
   Badge,
-  Grid,
-  Icon,
   Divider,
 } from '@chakra-ui/react';
-import { 
-  FiCalendar, 
-  FiClock, 
-  FiDollarSign, 
-  FiMapPin,
-  FiUser,
-  FiUsers,
-} from 'react-icons/fi';
 import { Course } from '@/utils/types/course.types';
-import { formatCurrency } from '@/utils/format';
 
 interface CourseDetailModalProps {
   isOpen: boolean;
@@ -34,114 +24,76 @@ interface CourseDetailModalProps {
 export const CourseDetailModal = ({ isOpen, onClose, course }: CourseDetailModalProps) => {
   if (!course) return null;
 
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND'
+    }).format(price);
+  };
+
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="lg" isCentered>
+    <Modal isOpen={isOpen} onClose={onClose} size="lg">
       <ModalOverlay />
-      <ModalContent mx={4}>
+      <ModalContent>
         <ModalHeader>Chi tiết khóa học</ModalHeader>
         <ModalCloseButton />
         <ModalBody pb={6}>
-          <Stack spacing={6}>
-            {/* Course Title & Status */}
-            <Stack>
-              <Text fontSize="2xl" fontWeight="bold">{course.title}</Text>
-              <HStack>
-                <Badge 
-                  colorScheme={course.status === 'Kích Hoạt' ? 'green' : 'red'}
-                  fontSize="sm"
-                >
-                  {course.status === 'Kích Hoạt' ? 'Đang hoạt động' : 'Đã kết thúc'}
+          <Stack spacing={4}>
+            <Box>
+              <Text fontWeight="bold" fontSize="xl">
+                {course.title}
+              </Text>
+              <HStack spacing={2} mt={1}>
+                <Badge colorScheme={course.status === 'Kích Hoạt' ? 'green' : 'red'}>
+                  {course.status}
                 </Badge>
                 <Badge colorScheme="blue">{course.level}</Badge>
               </HStack>
-            </Stack>
+            </Box>
 
             <Divider />
 
-            {/* Course Info */}
-            <Grid templateColumns="repeat(2, 1fr)" gap={4}>
+            <VStack align="start" spacing={3}>
               <Box>
-                <HStack color="gray.600" mb={1}>
-                  <Icon as={FiMapPin} />
-                  <Text>Cơ sở</Text>
-                </HStack>
-                <Text fontWeight="medium">{course.storeName}</Text>
-                <Text fontSize="sm" color="gray.600">{course.address}</Text>
+                <Text fontWeight="semibold">Thông tin cơ bản:</Text>
+                <Text>Giá: {formatPrice(course.price)}</Text>
+                <Text>Số lượng học viên: {course.quantity}</Text>
+                <Text>Số học viên đã đăng ký: {course.noOfUser}</Text>
               </Box>
 
               <Box>
-                <HStack color="gray.600" mb={1}>
-                  <Icon as={FiUser} />
-                  <Text>Giảng viên</Text>
-                </HStack>
-                <Text fontWeight="medium">{course.accountName}</Text>
+                <Text fontWeight="semibold">Thời gian học:</Text>
+                <Text>Lịch học: {course.schedule}</Text>
+                <Text>Thời gian: {course.startTime?.split('T')[1]} - {course.endTime?.split('T')[1]}</Text>
+                <Text>Thời gian học: {new Date(course.startDate).toLocaleDateString('vi-VN')} - {new Date(course.endDate).toLocaleDateString('vi-VN')}</Text>
               </Box>
 
               <Box>
-                <HStack color="gray.600" mb={1}>
-                  <Icon as={FiDollarSign} />
-                  <Text>Học phí</Text>
-                </HStack>
-                <Text fontWeight="medium" color="blue.500">
-                  {formatCurrency(course.price)}
-                </Text>
+                <Text fontWeight="semibold">Địa điểm:</Text>
+                <Text>Cửa hàng: {course.storeName}</Text>
+                <Text>Địa chỉ: {course.address}</Text>
               </Box>
 
               <Box>
-                <HStack color="gray.600" mb={1}>
-                  <Icon as={FiUsers} />
-                  <Text>Số lượng học viên</Text>
-                </HStack>
-                <Text fontWeight="medium">
-                  {course.noOfUser}/{course.quantity} học viên
-                </Text>
+                <Text fontWeight="semibold">Giảng viên:</Text>
+                <Text>{course.accountName}</Text>
               </Box>
-            </Grid>
 
-            <Divider />
+              <Box width="100%">
+                <Text fontWeight="semibold">Mô tả khóa học:</Text>
+                <Text whiteSpace="pre-wrap">{course.descript}</Text>
+              </Box>
 
-            {/* Schedule Info */}
-            <Stack spacing={4}>
-              <Text fontWeight="semibold">Lịch học</Text>
-              
-              <Grid templateColumns="repeat(2, 1fr)" gap={4}>
-                <Box>
-                  <HStack color="gray.600" mb={1}>
-                    <Icon as={FiCalendar} />
-                    <Text>Thời gian</Text>
-                  </HStack>
-                  <Text>{course.schedule}</Text>
-                </Box>
-
-                <Box>
-                  <HStack color="gray.600" mb={1}>
-                    <Icon as={FiClock} />
-                    <Text>Giờ học</Text>
-                  </HStack>
-                  <Text>{course.startTime} - {course.endTime}</Text>
-                </Box>
-
-                <Box>
-                  <Text color="gray.600" mb={1}>Ngày bắt đầu</Text>
-                  <Text>{new Date(course.startDate).toLocaleDateString('vi-VN')}</Text>
-                </Box>
-
-                <Box>
-                  <Text color="gray.600" mb={1}>Ngày kết thúc</Text>
-                  <Text>{new Date(course.endDate).toLocaleDateString('vi-VN')}</Text>
-                </Box>
-              </Grid>
-            </Stack>
-
-            {course.descript && (
-              <>
-                <Divider />
-                <Stack spacing={2}>
-                  <Text fontWeight="semibold">Mô tả khóa học</Text>
-                  <Text>{course.descript}</Text>
-                </Stack>
-              </>
-            )}
+              <Box width="100%">
+                <Text fontWeight="semibold">Thông tin thêm:</Text>
+                <Text>Ngày tạo: {new Date(course.createdDate).toLocaleDateString('vi-VN')}</Text>
+                {course.updatedDate && (
+                  <Text>
+                    Cập nhật lần cuối: {new Date(course.updatedDate).toLocaleDateString('vi-VN')}
+                  </Text>
+                )}
+              </Box>
+            </VStack>
           </Stack>
         </ModalBody>
       </ModalContent>

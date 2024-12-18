@@ -42,7 +42,7 @@ import {
   FiClock,
 } from 'react-icons/fi';
 import { useEvents } from '@/hooks/useEvent';
-// import { EventDetailModal } from '@/components/event/EventDetailModal';
+import { EventDetailModal } from '@/components/event/EventDetailModel';
 import { EventFormModal } from '@/components/event/EventFormModal';
 import { Event } from '@/utils/types/event.types';
 import { ProductPagination } from '@/components/common/paginations';
@@ -161,7 +161,7 @@ export default function EventPage() {
               <Icon as={FiSearch} color="gray.400" />
             </InputLeftElement>
             <Input
-              placeholder="Tìm kiếm sự kiện..."
+              placeholder="Tìm kiếm"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -350,11 +350,11 @@ export default function EventPage() {
         </AlertDialog>
 
         {/* Event Detail Modal */}
-        {/* <EventDetailModal
+        <EventDetailModal
           isOpen={isDetailOpen}
           onClose={onDetailClose}
           event={selectedEvent}
-        /> */}
+        />
 
         {/* Event Form Modal */}
         <EventFormModal

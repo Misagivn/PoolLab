@@ -160,8 +160,37 @@ export const useStaff = () => {
     setSelectedStaff(staff);
   };
 
-  const getWorkingStatus = (status: string) => {
-    return status === 'Kích hoạt' ? 'Đang làm việc' : 'Đã nghỉ việc';
+
+  const updateStaffStatus = async (staffId: string, status: string) => {
+    try {
+      setLoading(true);
+      const response = await staffApi.updateAccountStatus(staffId, status);
+      
+      if (response.status === 200) {
+        toast({
+          title: 'Thành công',
+          description: 'Cập nhật trạng thái thành công',
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        });
+        setStaff(prev => prev.map(staff => 
+          staff.id === staffId 
+            ? { ...staff, status } 
+            : staff
+        ));
+      }
+    } catch (err) {
+      toast({
+        title: 'Lỗi',
+        description: 'Không thể cập nhật trạng thái',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return {
@@ -172,8 +201,8 @@ export const useStaff = () => {
     fetchStaff,
     createStaff,
     updateStaff,
+    updateStaffStatus,
     uploadAvatar,
     selectStaff,
-    getWorkingStatus
   };
 };

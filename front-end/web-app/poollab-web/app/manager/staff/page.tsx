@@ -31,13 +31,17 @@ import {
   FiRefreshCcw,
   FiUserPlus,
   FiInfo,
-  FiEdit2
+  FiEdit2,
+  FiLock, 
+  FiUnlock 
 } from 'react-icons/fi';
 import { useStaff } from '@/hooks/useStaff';
 import { StaffFormModal } from '@/components/staff/StaffFormModal';
 import { StaffDetailModal } from '@/components/staff/StaffDetailModal';
 import { UpdateStaffModal } from '@/components/staff/UpdateStaffModal';
+import { StatusUpdateModal } from '@/components/member/StatusUpdateModal';
 import { ProductPagination } from '@/components/common/paginations';
+import { Staff } from '@/utils/types/staff.types';
 
 export default function StaffPage() {
   const { 
@@ -47,12 +51,25 @@ export default function StaffPage() {
     fetchStaff,
     selectedStaff,
     selectStaff,
-    getWorkingStatus 
+    updateStaffStatus
   } = useStaff();
   
   const [searchQuery, setSearchQuery] = useState('');
-  const [filter, setFilter] = useState('all');
+  const [statusStaff, setStatusStaff] = useState<Staff | null>(null);
   
+  const {
+    isOpen: isStatusOpen,
+    onOpen: onStatusOpen,
+    onClose: onStatusClose
+  } = useDisclosure();
+
+  const handleUpdateStatus = async (status: string) => {
+    if (!statusStaff) return;
+    await updateStaffStatus(statusStaff.id, status);
+    onStatusClose();
+  };
+
+
   const { 
     isOpen: isDetailOpen, 
     onOpen: onDetailOpen, 
@@ -78,7 +95,7 @@ export default function StaffPage() {
   // Fetch new data when search or filter changes
   useEffect(() => {
     fetchStaff(1);
-  }, [searchQuery, filter, fetchStaff]);
+  }, [searchQuery, fetchStaff]);
 
   const handlePageChange = (page: number) => {
     fetchStaff(page);
@@ -86,7 +103,7 @@ export default function StaffPage() {
 
   const handleRefresh = () => {
     setSearchQuery('');
-    setFilter('all');
+    // setFilter('all');
     fetchStaff(1);
   };
 
@@ -126,7 +143,7 @@ export default function StaffPage() {
             />
           </InputGroup>
 
-          <Select
+          {/* <Select
             w="200px"
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
@@ -134,7 +151,7 @@ export default function StaffPage() {
             <option value="all">Tất cả trạng thái</option>
             <option value="đang làm việc">Đang làm việc</option>
             <option value="đã nghỉ việc">Đã nghỉ việc</option>
-          </Select>
+          </Select> */}
 
           <IconButton
             aria-label="Refresh"
@@ -180,9 +197,9 @@ export default function StaffPage() {
                   <Td>{member.phoneNumber || "Chưa cập nhật"}</Td>
                   <Td>
                     <Badge
-                      colorScheme={member.status === 'Kích hoạt' ? 'green' : 'red'}
+                      colorScheme={member.status === 'Kích Hoạt' ? 'green' : 'red'}
                     >
-                      {getWorkingStatus(member.status)}
+                      {member.status === 'Kích Hoạt' ? 'Hoạt động' : 'Đã khóa'}
                     </Badge>
                   </Td>
                   <Td>
@@ -206,6 +223,18 @@ export default function StaffPage() {
                           selectStaff(member);
                           onDetailOpen();
                         }}
+                      />
+
+                      <IconButton
+                              aria-label="Update status"
+                              icon={<Icon as={member.status === 'Kích Hoạt' ? FiLock : FiUnlock} />}
+                              size="sm"
+                              variant="ghost"
+                              colorScheme={member.status === 'Kích Hoạt' ? 'red' : 'green'}
+                              onClick={() => {
+                                setStatusStaff(member);
+                                onStatusOpen();
+                              }}
                       />
                     </HStack>
                   </Td>
@@ -260,6 +289,14 @@ export default function StaffPage() {
           isOpen={isUpdateOpen}
           onClose={onUpdateClose}
           staff={selectedStaff}
+        />
+
+        <StatusUpdateModal
+              isOpen={isStatusOpen}
+              onClose={onStatusClose}
+              member={statusStaff}
+              onUpdateStatus={handleUpdateStatus}
+              isLoading={loading}
         />
       </Stack>
     </Box>

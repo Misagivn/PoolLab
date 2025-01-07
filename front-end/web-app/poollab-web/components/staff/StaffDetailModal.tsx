@@ -56,9 +56,9 @@ export const StaffDetailModal = ({
                 <Text color="gray.500">{staff.userName}</Text>
                 <Badge
                   mt={2}
-                  colorScheme={staff.status === 'Kích hoạt' ? 'green' : 'red'}
+                  colorScheme={staff.status === 'Kích Hoạt' ? 'green' : 'red'}
                 >
-                  {getWorkingStatus(staff.status)}
+                  {staff.status === 'Kích Hoạt' ? 'Hoạt động' : 'Đã khóa'}
                 </Badge>
               </Box>
             </Flex>

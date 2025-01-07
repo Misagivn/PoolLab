@@ -316,7 +316,7 @@ export default function DashboardPage() {
                 value={selectedYear}
                 onChange={(e) => setSelectedYear(Number(e.target.value))}
               >
-                {Array.from({length: 3}, (_, i) => {
+                {Array.from({length: 2}, (_, i) => {
                   const year = new Date().getFullYear() - i;
                   return (
                     <option key={year} value={year}>{year}</option>

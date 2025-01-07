@@ -60,9 +60,9 @@ export const OrderDetailModal = ({
     return amount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
   };
 
-  const formatDiscount = (discount: number) => {
-    return `${discount}%`;
-  };
+  // const formatDiscount = (discount: number) => {
+  //   return `${discount}%`;
+  // };
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="lg">
@@ -148,11 +148,11 @@ export const OrderDetailModal = ({
               </HStack>
               <HStack justify="space-between">
                 <Text>Giảm giá:</Text>
-                <Text>{formatDiscount(order.discount)}</Text>
+                <Text>{formatCurrency(order.discount)}</Text>
               </HStack>
               {order.finalPrice !== null && (
                 <HStack justify="space-between">
-                  <Text>Số tiền sau giảm giá:</Text>
+                  <Text>Số tiền cần trả:</Text>
                   <Text fontWeight="bold">{formatCurrency(order.finalPrice)}</Text>
                 </HStack>
               )}

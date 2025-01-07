@@ -32,6 +32,7 @@ export const adminRoutes: RouteConfig[] = [
     label: 'Giao dịch',
     icon: FiDollarSign,
   },
+  
   {
     path: '/dashboard/config',
     label: 'Cấu Hình',

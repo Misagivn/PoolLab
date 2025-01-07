@@ -52,9 +52,9 @@ export const MemberDetailModal = ({
                 <Text color="gray.500">{member.userName}</Text>
                 <Badge
                   mt={2}
-                  colorScheme={member.status === 'Kích hoạt' ? 'green' : 'red'}
+                  colorScheme={member.status === 'Kích Hoạt' ? 'green' : 'red'}
                 >
-                  {member.status === 'Kích hoạt' ? 'Hoạt động' : 'Ngừng hoạt động'}
+                  {member.status === 'Kích Hoạt' ? 'Hoạt động' : 'Ngừng hoạt động'}
                 </Badge>
               </Box>
             </Flex>

@@ -60,10 +60,6 @@ export const OrderDetailModal = ({
     return amount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
   };
 
-  // const formatDiscount = (discount: number) => {
-  //   return `${discount}%`;
-  // };
-
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="lg">
       <ModalOverlay />
@@ -85,6 +81,9 @@ export const OrderDetailModal = ({
             <VStack align="stretch" spacing={2}>
               <Text fontWeight="bold">Thông tin khách hàng</Text>
               <Text>{order.username}</Text>
+              {order.orderBy && (
+                <Text color="gray.600">Nhân viên phục vụ: {order.orderBy}</Text>
+              )}
             </VStack>
 
             <Divider />

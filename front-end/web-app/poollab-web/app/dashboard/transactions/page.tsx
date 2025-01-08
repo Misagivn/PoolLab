@@ -22,20 +22,28 @@ import {
   Badge,
   Card,
   CardBody,
+  useDisclosure,
+  Tooltip,
 } from '@chakra-ui/react';
-import { FiSearch, FiRefreshCcw } from 'react-icons/fi';
+import { FiSearch, FiRefreshCcw, FiExternalLink } from 'react-icons/fi';
 import { useTransactions } from '@/hooks/useTransactions';
 import { ProductPagination } from '@/components/common/paginations';
 import { formatCurrency, formatDateTime } from '@/utils/format';
+import { OrderDetailModal } from '@/components/order/OrderDetailModal';
 
 export default function TransactionPage() {
+  const { isOpen, onOpen, onClose } = useDisclosure();
   const { 
     data: transactions, 
     loading,
     pagination,
     searchUsername,
     setSearchUsername,
-    fetchTransactions
+    fetchTransactions,
+    orderCodes,
+    selectedOrder,
+    detailLoading,
+    handleViewOrder
   } = useTransactions();
 
   const handleRefresh = () => {
@@ -108,6 +116,26 @@ export default function TransactionPage() {
                     <Td>
                       <Text>{transaction.paymentInfo}</Text>
                       <Text fontSize="sm" color="gray.600">{transaction.paymentMethod}</Text>
+                      {transaction.orderId && orderCodes[transaction.orderId] && (
+                        <HStack spacing={1} mt={1}>
+                          <Text fontSize="sm" color="blue.500">
+                            Mã đơn: {orderCodes[transaction.orderId]}
+                          </Text>
+                          <Tooltip label="Xem chi tiết đơn hàng">
+                            <IconButton
+                              aria-label="View order details"
+                              icon={<Icon as={FiExternalLink} />}
+                              size="xs"
+                              variant="ghost"
+                              color="blue.500"
+                              onClick={() => {
+                                handleViewOrder(transaction.orderId);
+                                onOpen();
+                              }}
+                            />
+                          </Tooltip>
+                        </HStack>
+                      )}
                     </Td>
                     <Td>
                       <Badge colorScheme={transaction.status === 'Hoàn Tất' ? 'green' : 'yellow'}>
@@ -143,6 +171,13 @@ export default function TransactionPage() {
           />
         )}
       </Stack>
+
+      <OrderDetailModal
+        isOpen={isOpen}
+        onClose={onClose}
+        order={selectedOrder}
+        loading={detailLoading}
+      />
     </Box>
   );
 }

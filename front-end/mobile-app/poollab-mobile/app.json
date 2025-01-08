@@ -4,11 +4,11 @@
     "slug": "poollab",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/logo_icon.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/logo_long.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },

@@ -18,6 +18,7 @@ import {
   Icon,
 } from '@chakra-ui/react';
 import { useState, useEffect } from 'react';
+import { jwtDecode } from 'jwt-decode';
 import {
   BarChart,
   Bar,
@@ -29,11 +30,12 @@ import {
 } from 'recharts';
 import { FiDollarSign, FiShoppingBag, FiUsers, FiStar } from 'react-icons/fi';
 import { useManagerDashboard } from '@/hooks/useDashBoardMana';
+import { JWTPayload } from '@/utils/types/area.types';
 
 export default function ManagerDashboard() {
-  // Replace with actual store ID
-  const storeId = '8a78e8ab-2e80-4042-bf08-e205672f5464';
-  const [selectedYear, setSelectedYear] = useState(2024);
+  const currentYear = new Date().getFullYear();
+  const [storeId, setStoreId] = useState<string>('');
+  const [selectedYear, setSelectedYear] = useState(currentYear);
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
 
   const {
@@ -46,9 +48,25 @@ export default function ManagerDashboard() {
     fetchDashboardData
   } = useManagerDashboard(storeId);
 
+  // Get storeId from JWT token
   useEffect(() => {
-    fetchDashboardData(selectedYear, selectedMonth);
-  }, [selectedYear, selectedMonth, fetchDashboardData]);
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        const decoded = jwtDecode(token) as JWTPayload;
+        setStoreId(decoded.storeId);
+      } catch (error) {
+        console.error('Error decoding token:', error);
+      }
+    }
+  }, []);
+
+  // Fetch dashboard data
+  useEffect(() => {
+    if (storeId) {
+      fetchDashboardData(selectedYear, selectedMonth);
+    }
+  }, [selectedYear, selectedMonth, storeId, fetchDashboardData]);
 
   const formatCurrency = (value: string | number) => {
     return new Intl.NumberFormat('vi-VN', {
@@ -185,8 +203,9 @@ export default function ManagerDashboard() {
                 value={selectedYear}
                 onChange={(e) => setSelectedYear(Number(e.target.value))}
               >
-                <option value={2024}>2024</option>
-                <option value={2023}>2023</option>
+                {[currentYear, currentYear - 1].map((year) => (
+                  <option key={year} value={year}>{year}</option>
+                ))}
               </Select>
             </HStack>
           </Flex>

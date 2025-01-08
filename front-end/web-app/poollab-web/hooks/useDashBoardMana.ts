@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useToast } from '@chakra-ui/react';
 import { managerDashboardApi } from '@/apis/dashboardManager.api';
+import { DailyStats } from '@/utils/types/dashboardMana.types';
 
 export const useManagerDashboard = (storeId: string) => {
   const [loading, setLoading] = useState(true);
@@ -8,10 +9,12 @@ export const useManagerDashboard = (storeId: string) => {
   const [orders, setOrders] = useState('0');
   const [members, setMembers] = useState('0');
   const [reviews, setReviews] = useState('0');
-  const [dailyStats, setDailyStats] = useState<any[]>([]);
+  const [dailyStats, setDailyStats] = useState<DailyStats[]>([]);
   const toast = useToast();
 
   const fetchDashboardData = useCallback(async (year: number, month: number) => {
+    if (!storeId) return;
+    
     try {
       setLoading(true);
       const [

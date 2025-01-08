@@ -122,6 +122,7 @@ const styles = StyleSheet.create({
     elevation: 6,
     borderRadius: 20,
     borderCurve: "continuous",
+    flexDirection: "row",
   },
   item2: {
     backgroundColor: theme.colors.greenCheck,

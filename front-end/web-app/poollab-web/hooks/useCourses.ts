@@ -1,18 +1,25 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useToast } from '@chakra-ui/react';
-import { Course, Member } from '@/utils/types/course.types';
+import { Course } from '@/utils/types/course.types';
 import { courseApi } from '@/apis/course';
+import { jwtDecode } from 'jwt-decode';
+
+interface JWTPayload {
+  storeId: string;
+  accountId: string;
+  [key: string]: any;
+}
 
 export const useCourses = () => {
   const [courses, setCourses] = useState<Course[]>([]);
-  const [members, setMembers] = useState<Member[]>([]);
-  const [pagination, setPagination] = useState({
-    totalItems: 0,
-    pageSize: 10,
-    totalPages: 1,
-    currentPage: 1
-  });
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    totalItems: 0,
+    pageSize: 10
+  });
   const toast = useToast();
 
   const fetchCourses = useCallback(async (page: number = 1) => {
@@ -23,10 +30,10 @@ export const useCourses = () => {
       if (response.status === 200) {
         setCourses(response.data.items);
         setPagination({
-          totalItems: response.data.totalItem,
-          pageSize: response.data.pageSize,
+          currentPage: response.data.pageNumber,
           totalPages: response.data.totalPages,
-          currentPage: response.data.pageNumber
+          totalItems: response.data.totalItem,
+          pageSize: response.data.pageSize
         });
       }
     } catch (err) {
@@ -43,40 +50,42 @@ export const useCourses = () => {
     }
   }, [toast]);
 
-  const fetchMembers = useCallback(async () => {
-    try {
-      const response = await courseApi.getMembers();
-      if (response.status === 200) {
-        setMembers(response.data.items);
-      }
-    } catch (err) {
-      toast({
-        title: 'Lỗi',
-        description: 'Không thể tải danh sách thành viên',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-    }
-  }, [toast]);
+  const getUserInfo = (): { storeId: string; accountId: string } => {
+    const token = localStorage.getItem('token');
+    if (!token) throw new Error('No token found');
+    
+    const decoded = jwtDecode<JWTPayload>(token);
+    return {
+      storeId: decoded.storeId,
+      accountId: decoded.accountId
+    };
+  };
 
-  const createCourse = async (data: any) => {
+  const createCourse = async (data: Omit<Course, 'id' | 'status' | 'createdDate' | 'updatedDate'>) => {
     try {
-      const response = await courseApi.createCourse(data);
+      const userInfo = getUserInfo();
+      const createData = {
+        ...data,
+        storeId: userInfo.storeId,
+        accountId: userInfo.accountId,
+      };
+
+      const response = await courseApi.createCourse(createData);
       if (response.status === 200) {
         toast({
           title: 'Thành công',
-          description: 'Tạo khóa học mới thành công',
+          description: 'Thêm khóa học mới thành công',
           status: 'success',
           duration: 3000,
           isClosable: true,
         });
         await fetchCourses();
+        return response.data;
       }
     } catch (err) {
       toast({
         title: 'Lỗi',
-        description: 'Không thể tạo khóa học mới',
+        description: 'Không thể thêm khóa học mới',
         status: 'error',
         duration: 3000,
         isClosable: true,
@@ -85,9 +94,16 @@ export const useCourses = () => {
     }
   };
 
-  const updateCourse = async (courseId: string, data: any) => {
+  const updateCourse = async (courseId: string, data: Partial<Course>) => {
     try {
-      const response = await courseApi.updateCourse(courseId, data);
+      const userInfo = getUserInfo();
+      const updateData = {
+        ...data,
+        storeId: userInfo.storeId,
+        accountId: userInfo.accountId,
+      };
+
+      const response = await courseApi.updateCourse(courseId, updateData);
       if (response.status === 200) {
         toast({
           title: 'Thành công',
@@ -96,7 +112,8 @@ export const useCourses = () => {
           duration: 3000,
           isClosable: true,
         });
-        await fetchCourses();
+        await fetchCourses(pagination.currentPage);
+        return response.data;
       }
     } catch (err) {
       toast({
@@ -109,7 +126,7 @@ export const useCourses = () => {
       throw err;
     }
   };
-
+  
   const cancelCourse = async (courseId: string) => {
     try {
       const response = await courseApi.cancelCourse(courseId);
@@ -121,7 +138,7 @@ export const useCourses = () => {
           duration: 3000,
           isClosable: true,
         });
-        await fetchCourses();
+        await fetchCourses(pagination.currentPage);
       }
     } catch (err) {
       toast({
@@ -135,41 +152,19 @@ export const useCourses = () => {
     }
   };
 
-  const deleteCourse = async (courseId: string) => {
-    try {
-      const response = await courseApi.deleteCourse(courseId);
-      if (response.status === 200) {
-        toast({
-          title: 'Thành công',
-          description: 'Xóa khóa học thành công',
-          status: 'success',
-          duration: 3000,
-          isClosable: true,
-        });
-        await fetchCourses();
-      }
-    } catch (err) {
-      toast({
-        title: 'Lỗi',
-        description: 'Không thể xóa khóa học',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-      throw err;
-    }
-  };
+  useEffect(() => {
+    fetchCourses();
+  }, [fetchCourses]);
 
   return {
     data: courses,
-    members,
     loading,
+    selectedCourse,
     pagination,
     fetchCourses,
-    fetchMembers,
     createCourse,
     updateCourse,
     cancelCourse,
-    deleteCourse
+    selectCourse: setSelectedCourse
   };
 };

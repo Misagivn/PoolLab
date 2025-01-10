@@ -22,17 +22,9 @@ import {
   Icon,
   useDisclosure,
   Badge,
-  Avatar,
-  AlertDialog,
-  AlertDialogOverlay,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogBody,
-  AlertDialogFooter,
-  Select,
   VStack,
 } from '@chakra-ui/react';
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { 
   FiSearch, 
   FiRefreshCcw,
@@ -41,48 +33,33 @@ import {
   FiPlus,
   FiMapPin,
   FiCalendar,
-  FiTrash2,
-  FiBan,
+  FiClock,
+  FiUsers,
+  FiLock,
+  FiUnlock
 } from 'react-icons/fi';
 import { useCourses } from '@/hooks/useCourses';
 import { CourseDetailModal } from '@/components/course/CourseDetailModal';
 import { CourseFormModal } from '@/components/course/CourseFormModal';
-import { Course } from '@/utils/types/course.types';
+import { CourseStatusModal } from '@/components/course/CourseStatusModal';
 import { ProductPagination } from '@/components/common/paginations';
+import { formatCurrency, formatSchedule } from '@/utils/format';
+import { Course } from '@/utils/types/course.types';
 
 export default function CoursePage() {
   const { 
     data: courses, 
-    members,
     loading,
     pagination,
-    fetchCourses, 
-    fetchMembers,
+    selectedCourse,
+    fetchCourses,
     createCourse,
     updateCourse,
     cancelCourse,
-    deleteCourse,
+    selectCourse
   } = useCourses();
   
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [levelFilter, setLevelFilter] = useState('all');
-  const cancelRef = useRef(null);
-  const [courseToDelete, setCourseToDelete] = useState<Course | null>(null);
-  const [courseToCancel, setCourseToCancel] = useState<Course | null>(null);
-  
-  const { 
-    isOpen: isDeleteOpen, 
-    onOpen: onDeleteOpen, 
-    onClose: onDeleteClose 
-  } = useDisclosure();
-
-  const { 
-    isOpen: isCancelOpen, 
-    onOpen: onCancelOpen, 
-    onClose: onCancelClose 
-  } = useDisclosure();
 
   // Modals state
   const { 
@@ -97,16 +74,17 @@ export default function CoursePage() {
     onClose: onFormClose 
   } = useDisclosure();
 
-  useEffect(() => {
-    fetchCourses(1);
-    fetchMembers();
-  }, [fetchCourses, fetchMembers]);
+  const { 
+    isOpen: isStatusOpen, 
+    onOpen: onStatusOpen, 
+    onClose: onStatusClose 
+  } = useDisclosure();
 
   const handlePageChange = (page: number) => {
     fetchCourses(page);
   };
 
-  const handleAddCourse = async (data: any) => {
+  const handleAddCourse = async (data: Partial<Course>) => {
     try {
       await createCourse(data);
       onFormClose();
@@ -115,88 +93,62 @@ export default function CoursePage() {
     }
   };
 
-  const handleUpdateCourse = async (data: any) => {
+  const handleUpdateCourse = async (data: Partial<Course>) => {
     if (!selectedCourse) return;
     try {
-      await updateCourse(selectedCourse.id, {
-        ...data,
-        status: selectedCourse.status
-      });
+      await updateCourse(selectedCourse.id, data);
       onFormClose();
-      setSelectedCourse(null);
+      selectCourse(null);
     } catch (error) {
       console.error('Error updating course:', error);
     }
   };
 
-  const handleCancelCourse = async () => {
-    if (!courseToCancel) return;
+  const handleUpdateStatus = async () => {
+    if (!selectedCourse) return;
     try {
-      await cancelCourse(courseToCancel.id);
-      onCancelClose();
-      setCourseToCancel(null);
+      if (selectedCourse.status === 'Kích Hoạt') {
+        await cancelCourse(selectedCourse.id);
+      } else {
+        await updateCourse(selectedCourse.id, { ...selectedCourse, status: 'Kích Hoạt' });
+      }
+      onStatusClose();
+      selectCourse(null);
     } catch (error) {
-      console.error('Error canceling course:', error);
+      console.error('Error updating status:', error);
     }
   };
 
-  const handleDeleteCourse = async () => {
-    if (!courseToDelete) return;
-    try {
-      await deleteCourse(courseToDelete.id);
-      onDeleteClose();
-      setCourseToDelete(null);
-    } catch (error) {
-      console.error('Error deleting course:', error);
-    }
-  };
+  const filteredCourses = (courses || []).filter(course => 
+    course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    course.storeName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    course.level.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
-  const filteredCourses = courses.filter(course => {
-    const matchesSearch = 
-      course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      course.accountName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      course.storeName.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const matchesStatus = statusFilter === 'all' || course.status === statusFilter;
-    const matchesLevel = levelFilter === 'all' || course.level === levelFilter;
-
-    return matchesSearch && matchesStatus && matchesLevel;
-  });
-
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND'
-    }).format(price);
-  };
-
-  if (loading) {
+  if (loading && courses.length === 0) {
     return (
-      <Flex h="100%" align="center" justify="center" p={6}>
+      <Flex h="100vh" align="center" justify="center">
         <Spinner size="xl" color="blue.500" />
       </Flex>
     );
   }
 
   return (
-    <Box p={{ base: 4, md: 6 }}>
-      <Stack spacing={6}>
-        {/* Header */}
-        <Flex direction={{ base: 'column', sm: 'row' }} justify="space-between" align={{ base: 'stretch', sm: 'center' }} gap={4}>
-          <Heading size={{ base: "md", md: "lg" }}>Quản lý khóa học</Heading>
+    <Box p={4}>
+      <Stack spacing={4}>
+        <Flex justify="space-between" align="center">
+          <Heading size="lg">Quản lý khóa học</Heading>
           <Button
             leftIcon={<Icon as={FiPlus} />}
             colorScheme="blue"
             onClick={onFormOpen}
-            w={{ base: "full", sm: "auto" }}
           >
             Thêm khóa học
           </Button>
         </Flex>
 
-        {/* Search and Filters */}
-        <Stack direction={{ base: 'column', md: 'row' }} spacing={4}>
-          <InputGroup maxW={{ base: "100%", md: "320px" }}>
+        <HStack spacing={4}>
+          <InputGroup maxW="320px">
             <InputLeftElement>
               <Icon as={FiSearch} color="gray.400" />
             </InputLeftElement>
@@ -207,46 +159,23 @@ export default function CoursePage() {
             />
           </InputGroup>
 
-          <Select
-            maxW={{ base: "100%", md: "200px" }}
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-          >
-            <option value="all">Tất cả trạng thái</option>
-            <option value="Kích Hoạt">Đang hoạt động</option>
-            <option value="Vô Hiệu">Đã hủy</option>
-          </Select>
-
-          <Select
-            maxW={{ base: "100%", md: "200px" }}
-            value={levelFilter}
-            onChange={(e) => setLevelFilter(e.target.value)}
-          >
-            <option value="all">Tất cả cấp độ</option>
-            <option value="level 1">Cơ bản</option>
-            <option value="level 2">Trung cấp</option>
-            <option value="level 3">Nâng cao</option>
-          </Select>
-
           <IconButton
             aria-label="Refresh"
             icon={<Icon as={FiRefreshCcw} />}
             onClick={() => {
               setSearchQuery('');
-              setStatusFilter('all');
-              setLevelFilter('all');
               fetchCourses(1);
             }}
           />
-        </Stack>
+        </HStack>
 
-        {/* Courses Table */}
-        <Table variant="simple" bg="white" boxShadow="sm" rounded="lg">
+        <Table variant="simple">
           <Thead bg="gray.50">
             <Tr>
               <Th>KHÓA HỌC</Th>
-              <Th>THÔNG TIN</Th>
-              <Th>LỊCH HỌC</Th>
+              <Th>THỜI GIAN</Th>
+              <Th>SỐ LƯỢNG</Th>
+              <Th isNumeric>HỌC PHÍ</Th>
               <Th>TRẠNG THÁI</Th>
               <Th width="100px" textAlign="right">THAO TÁC</Th>
             </Tr>
@@ -255,54 +184,55 @@ export default function CoursePage() {
             {filteredCourses.map((course) => (
               <Tr key={course.id}>
                 <Td>
-                  <VStack align="start" spacing={1}>
+                  <Box>
                     <Text fontWeight="medium">{course.title}</Text>
-                    <HStack spacing={2}>
-                      <Badge colorScheme="blue">{course.level}</Badge>
-                      <Text fontSize="sm" color="gray.600">
-                        {formatPrice(course.price)}
-                      </Text>
-                    </HStack>
-                  </VStack>
-                </Td>
-                <Td>
-                  <VStack align="start" spacing={1}>
-                    <HStack>
-                      <Avatar 
-                        size="sm" 
-                        name={course.accountName} 
-                        src={course.accountAvatar} 
-                      />
-                      <Text>{course.accountName}</Text>
-                    </HStack>
-                    <HStack color="gray.600" fontSize="sm">
-                      <Icon as={FiMapPin} />
-                      <Text>{course.storeName}</Text>
-                    </HStack>
-                  </VStack>
-                </Td>
-                <Td>
-                  <VStack align="start" spacing={1}>
-                    <Text fontSize="sm">{course.schedule}</Text>
-                    <HStack color="gray.600" fontSize="sm">
-                      <Icon as={FiCalendar} />
-                      <Text>
-                        {course.startTime?.split('T')[1]} - {course.endTime?.split('T')[1]}
-                      </Text>
-                    </HStack>
-                  </VStack>
-                </Td>
-                <Td>
-                  <VStack align="start" spacing={1}>
-                    <Badge 
-                      colorScheme={course.status === 'Kích Hoạt' ? 'green' : 'red'}
-                    >
-                      {course.status}
+                    <VStack align="start" spacing={1} mt={1}>
+                      <HStack color="gray.600" fontSize="sm">
+                        <Icon as={FiMapPin} />
+                        <Text fontWeight="medium">{course.storeName}</Text>
+                      </HStack>
+                      {course.address && (
+                        <Text color="gray.500" fontSize="sm" pl={6}>
+                          {course.address}
+                        </Text>
+                      )}
+                    </VStack>
+                    <Badge colorScheme="blue" mt={1}>
+                      {course.level}
                     </Badge>
-                    <Text fontSize="sm">
-                      {course.noOfUser}/{course.quantity} học viên
-                    </Text>
+                  </Box>
+                </Td>
+                <Td>
+                  <VStack align="start" spacing={1}>
+                    <HStack fontSize="sm">
+                      <Icon as={FiCalendar} />
+                      <Text>{formatSchedule(course.schedule)}</Text>
+                    </HStack>
+                    <HStack fontSize="sm">
+                      <Icon as={FiClock} />
+                      <Text>
+                        {course.startTime.substring(0, 5)} - {course.endTime.substring(0, 5)}
+                      </Text>
+                    </HStack>
                   </VStack>
+                </Td>
+                <Td>
+                  <HStack>
+                    <Icon as={FiUsers} />
+                    <Text>{course.noOfUser}/{course.quantity}</Text>
+                  </HStack>
+                </Td>
+                <Td isNumeric>
+                  <Text color="green.500" fontWeight="medium">
+                    {formatCurrency(course.price)}
+                  </Text>
+                </Td>
+                <Td>
+                  <Badge
+                    colorScheme={course.status === 'Kích Hoạt' ? 'green' : 'red'}
+                  >
+                    {course.status}
+                  </Badge>
                 </Td>
                 <Td>
                   <HStack spacing={2} justify="flex-end">
@@ -312,44 +242,29 @@ export default function CoursePage() {
                       size="sm"
                       variant="ghost"
                       onClick={() => {
-                        setSelectedCourse(course);
+                        selectCourse(course);
                         onDetailOpen();
                       }}
                     />
-                    {course.status === 'Kích Hoạt' && (
-                      <>
-                        <IconButton
-                          aria-label="Edit course"
-                          icon={<Icon as={FiEdit2} />}
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => {
-                            setSelectedCourse(course);
-                            onFormOpen();
-                          }}
-                        />
-                        <IconButton
-                          aria-label="Cancel course"
-                          icon={<Icon as={FiBan} />}
-                          size="sm"
-                          variant="ghost"
-                          colorScheme="orange"
-                          onClick={() => {
-                            setCourseToCancel(course);
-                            onCancelOpen();
-                          }}
-                        />
-                      </>
-                    )}
                     <IconButton
-                      aria-label="Delete course"
-                      icon={<Icon as={FiTrash2} />}
+                      aria-label="Edit course"
+                      icon={<Icon as={FiEdit2} />}
                       size="sm"
                       variant="ghost"
-                      colorScheme="red"
                       onClick={() => {
-                        setCourseToDelete(course);
-                        onDeleteOpen();
+                        selectCourse(course);
+                        onFormOpen();
+                      }}
+                    />
+                    <IconButton
+                      aria-label="Update status"
+                      icon={<Icon as={course.status === 'Kích Hoạt' ? FiLock : FiUnlock} />}
+                      size="sm"
+                      variant="ghost"
+                      colorScheme={course.status === 'Kích Hoạt' ? 'red' : 'green'}
+                      onClick={() => {
+                        selectCourse(course);
+                        onStatusOpen();
                       }}
                     />
                   </HStack>
@@ -359,17 +274,6 @@ export default function CoursePage() {
           </Tbody>
         </Table>
 
-        {/* Pagination */}
-        {!searchQuery && statusFilter === 'all' && levelFilter === 'all' && filteredCourses.length > 0 && (
-          <ProductPagination
-            currentPage={pagination.currentPage}
-            totalPages={pagination.totalPages}
-            onPageChange={handlePageChange}
-            loading={loading}
-          />
-        )}
-
-        {/* Empty State */}
         {filteredCourses.length === 0 && (
           <Flex 
             direction="column" 
@@ -379,105 +283,45 @@ export default function CoursePage() {
             bg="gray.50"
             borderRadius="lg"
           >
-            <Icon as={FiCalendar} fontSize="3xl" color="gray.400" mb={2} />
             <Text color="gray.500">
               Không tìm thấy khóa học nào
             </Text>
-            <Button
-              mt={4}
-              size="sm"
-              leftIcon={<Icon as={FiRefreshCcw} />}
-              onClick={() => {
-                setSearchQuery('');
-                setStatusFilter('all');
-                setLevelFilter('all');
-                fetchCourses(1);
-              }}
-            >
-              Đặt lại bộ lọc
-            </Button>
           </Flex>
         )}
 
-        {/* Delete Confirmation Dialog */}
-        <AlertDialog
-          isOpen={isDeleteOpen}
-          leastDestructiveRef={cancelRef}
-          onClose={onDeleteClose}
-        >
-          <AlertDialogOverlay>
-            <AlertDialogContent>
-              <AlertDialogHeader fontSize="lg" fontWeight="bold">
-                Xóa khóa học
-              </AlertDialogHeader>
+        {filteredCourses.length > 0 && (
+          <ProductPagination
+            currentPage={pagination.currentPage}
+            totalPages={pagination.totalPages}
+            onPageChange={handlePageChange}
+            loading={loading}
+          />
+        )}
 
-              <AlertDialogBody>
-                Bạn có chắc chắn muốn xóa khóa học "{courseToDelete?.title}"? 
-                Hành động này không thể hoàn tác.
-              </AlertDialogBody>
-
-              <AlertDialogFooter>
-                <Button ref={cancelRef} onClick={onDeleteClose}>
-                  Hủy
-                </Button>
-                <Button colorScheme="red" onClick={handleDeleteCourse} ml={3}>
-                  Xóa
-                </Button>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialogOverlay>
-        </AlertDialog>
-
-        {/* Cancel Course Dialog */}
-        <AlertDialog
-          isOpen={isCancelOpen}
-          leastDestructiveRef={cancelRef}
-          onClose={onCancelClose}
-        >
-          <AlertDialogOverlay>
-            <AlertDialogContent>
-              <AlertDialogHeader fontSize="lg" fontWeight="bold">
-                Hủy khóa học
-              </AlertDialogHeader>
-
-              <AlertDialogBody>
-                Bạn có chắc chắn muốn hủy khóa học "{courseToCancel?.title}"?
-              </AlertDialogBody>
-
-              <AlertDialogFooter>
-                <Button ref={cancelRef} onClick={onCancelClose}>
-                Không
-                </Button>
-                <Button colorScheme="orange" onClick={handleCancelCourse} ml={3}>
-                  Hủy khóa học
-                </Button>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialogOverlay>
-        </AlertDialog>
-
-        {/* Course Detail Modal */}
+        {/* Modals */}
         <CourseDetailModal
           isOpen={isDetailOpen}
           onClose={onDetailClose}
           course={selectedCourse}
         />
 
-        {/* Course Form Modal */}
         <CourseFormModal
           isOpen={isFormOpen}
           onClose={() => {
             onFormClose();
-            setSelectedCourse(null);
+            selectCourse(null);
           }}
           onSubmit={selectedCourse ? handleUpdateCourse : handleAddCourse}
           initialData={selectedCourse}
           title={selectedCourse ? 'Chỉnh sửa khóa học' : 'Thêm khóa học mới'}
-          members={members}
-          selectedStore={{
-            id: selectedCourse?.storeId || localStorage.getItem('storeId') || '',
-            name: selectedCourse?.storeName || localStorage.getItem('storeName') || ''
-          }}
+        />
+
+        <CourseStatusModal
+          isOpen={isStatusOpen}
+          onClose={onStatusClose}
+          course={selectedCourse}
+          onUpdateStatus={handleUpdateStatus}
+          isLoading={loading}
         />
       </Stack>
     </Box>

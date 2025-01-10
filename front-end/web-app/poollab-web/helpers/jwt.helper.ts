@@ -1,7 +1,7 @@
 export interface JWTPayload {
   'http://schemas.microsoft.com/ws/2008/06/identity/claims/role': string;
   storeId?: string; 
-  companyId?: string;
+  // companyId?: string;
   role: string;
   accountId: string;
   accountStatus: string;

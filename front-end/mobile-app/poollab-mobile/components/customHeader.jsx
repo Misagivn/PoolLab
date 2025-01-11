@@ -4,11 +4,13 @@ import { theme } from "@/constants/theme";
 import Icon from "@/assets/icons/icons";
 import {getAccountId, getUserName, getUserBalance, getUserNameReact} from '@/data/userData'
 import { router } from "expo-router";
+import {getNotReadNoti} from '@/api/NotiAPI'
+import NotiIconWithBadge from '@/components/notiIconWithBadge'
 const CustomHeader = () => {
   //Get username from AsyncStorage
   const [userName, setUserName] = useState("");
   const [userBalance, setUserBalance] = useState(0);
-
+  const [haveNoti, setHaveNoti] = useState(false);
   const [userId, setUserId] = useState("");
   const loadStat = async () => {
     try {
@@ -20,6 +22,18 @@ const CustomHeader = () => {
         getUserBalance(userId).then((userBalance) => {
           if (userBalance) {
             setUserBalance(userBalance);
+          }
+        });
+        getNotReadNoti(userId).then((response) => {
+          if (response.data.status === 200) {
+            const notiCount = response.data.data;
+            if (notiCount > 0) {
+              console.log("notiCount", notiCount);
+              setHaveNoti(true);
+            } else {
+              console.log("notiCount", notiCount);
+              setHaveNoti(false);
+            }
           }
         });
       }
@@ -95,7 +109,7 @@ const CustomHeader = () => {
               <Icon name="refreshIcon" size={15} strokeWidth={3} color="white" />
             </Pressable>
           </View>
-          <Icon name="notiIcon" size={25} strokeWidth={2} color="black" />
+          <NotiIconWithBadge hasUnread={haveNoti} />
         </View>
       </View>
     </View>

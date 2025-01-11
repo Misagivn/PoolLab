@@ -3,7 +3,7 @@ export interface Course {
   title: string;
   descript: string;
   price: number;
-  schedule: string;  
+  schedule: string[];  
   startDate: string;
   endDate: string;
   startTime: string;

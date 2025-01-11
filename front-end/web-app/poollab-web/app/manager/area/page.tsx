@@ -128,8 +128,8 @@ export default function AreaPage() {
   };
 
   const filteredAreas = areas.filter(area => 
-    area.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    area.descript.toLowerCase().includes(searchQuery.toLowerCase())
+    (area?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false) ||
+    (area?.descript?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false)
   );
 
   if (loading) {
@@ -280,8 +280,8 @@ export default function AreaPage() {
             setSelectedArea(null);
           }}
           onSubmit={selectedArea ? handleEditArea : handleAddArea}
-          initialData={selectedArea}
-          title={selectedArea ? 'Chỉnh sửa khu vực' : 'Thêm khu vực mới'}
+          initialData={selectedArea ?? undefined}
+          title={selectedArea != null ?'Chỉnh sửa khu vực' : 'Thêm khu vực mới'}
         />
 
         {/* Delete Confirmation Dialog */}

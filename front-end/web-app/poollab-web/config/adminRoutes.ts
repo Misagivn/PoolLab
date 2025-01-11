@@ -32,7 +32,22 @@ export const adminRoutes: RouteConfig[] = [
     label: 'Giao dịch',
     icon: FiDollarSign,
   },
-  
+  {
+    path: '/dashboard/transaction',
+    label: 'Giao dịch',
+    icon: FiDollarSign,
+    subRoutes: [
+      {
+        path: '/dashboard/transaction/getalltransaction',
+        label: 'Hóa Đơn'
+      },
+      {
+        path: '/dashboard/transaction/getallorder',
+        label: 'Đặt bàn'
+      },
+
+    ],
+  },
   {
     path: '/dashboard/config',
     label: 'Cấu Hình',

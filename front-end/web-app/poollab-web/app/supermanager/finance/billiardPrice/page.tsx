@@ -186,8 +186,7 @@ export default function BilliardPricePage() {
             <Tr>
               <Th>TÊN</Th>
               <Th>MÔ TẢ</Th>
-              <Th>Giá TIỀN</Th>
-              <Th>GIÁ CHỌN</Th>
+              <Th>GIÁ TIỀN</Th>
               <Th>THỜI GIAN BẮT ĐẦU</Th>
               <Th>THỜI GIAN KẾT THÚC</Th>
               <Th>TRẠNG THÁI</Th>
@@ -200,13 +199,10 @@ export default function BilliardPricePage() {
                 <Td fontWeight="medium">{price.name}</Td>
                 <Td>{price.descript || '-'}</Td>
                 <Td>{formatPrice(price.oldPrice)}</Td>
-                <Td>{price.newPrice ? formatPrice(price.newPrice) : '-'}</Td>
                 <Td>{formatDateTime(price.timeStart)}</Td>
                 <Td>{formatDateTime(price.timeEnd)}</Td>
                 <Td>
-                  <Badge
-                    colorScheme={price.status === 'Kích hoạt' ? 'green' : 'gray'}
-                  >
+                <Badge colorScheme="green">
                     {price.status}
                   </Badge>
                 </Td>
@@ -240,7 +236,7 @@ export default function BilliardPricePage() {
 
             {prices.length === 0 && !loading && (
               <Tr>
-                <Td colSpan={8}>
+                <Td colSpan={7}>
                   <Flex 
                     direction="column" 
                     align="center" 

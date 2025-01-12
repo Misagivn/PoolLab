@@ -28,6 +28,7 @@ import {
   AlertDialogContent,
   AlertDialogOverlay,
   useToast,
+  Image,
 } from '@chakra-ui/react';
 import { useState, useEffect, useRef } from 'react';
 import { 
@@ -195,7 +196,28 @@ export default function AreaPage() {
               <Tr key={area.id}>
                 <Td>
                   <HStack spacing={3}>
-                    <Icon as={FiMapPin} color="blue.500" />
+                    {area.areaImg ? (
+                      <Image
+                        src={area.areaImg}
+                        alt={area.name}
+                        boxSize="32px"
+                        objectFit="cover"
+                        borderRadius="md"
+                        fallback={<Icon as={FiMapPin} color="blue.500" />}
+                      />
+                    ) : (
+                      <Box
+                        w="32px"
+                        h="32px"
+                        bg="gray.100"
+                        borderRadius="md"
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="center"
+                      >
+                        <Icon as={FiMap} color="gray.400" />
+                      </Box>
+                    )}
                     <Text fontWeight="medium">{area.name}</Text>
                   </HStack>
                 </Td>
@@ -239,6 +261,7 @@ export default function AreaPage() {
             ))}
           </Tbody>
         </Table>
+
 
         {/* Empty State */}
         {filteredAreas.length === 0 && (

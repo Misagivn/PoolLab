@@ -149,12 +149,14 @@ export const OrderDetailModal = ({
                 <Text>Giảm giá:</Text>
                 <Text>{formatCurrency(order.discount)}</Text>
               </HStack>
-              {order.finalPrice !== null && (
-                <HStack justify="space-between">
-                  <Text>Số tiền cần trả:</Text>
-                  <Text fontWeight="bold">{formatCurrency(order.finalPrice)}</Text>
-                </HStack>
-              )}
+              <HStack justify="space-between">
+                <Text>Phí phát sinh:</Text>
+                <Text>{formatCurrency(order.additionalFee || 0)}</Text>
+              </HStack>
+              <HStack justify="space-between">
+                <Text>Số tiền cần trả:</Text>
+                <Text fontWeight="bold">{formatCurrency(order.finalPrice || 0)}</Text>
+              </HStack>
               <HStack justify="space-between">
                 <Text>Khách trả:</Text>
                 <Text>{formatCurrency(order.customerPay)}</Text>

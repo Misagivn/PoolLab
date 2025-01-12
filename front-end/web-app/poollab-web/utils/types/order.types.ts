@@ -38,6 +38,8 @@ export interface OrderDetail {
   finalPrice: number | null;
   customerPay: number;
   excessCash: number;
+  additionalFee: number | null;
+  paymentMethod: string | null;
   status: string;
 }
 

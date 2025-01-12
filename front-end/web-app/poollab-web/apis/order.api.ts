@@ -18,13 +18,12 @@ export const orderApi = {
       SortAscending: 'false'
     });
 
-    if (username) {
-      queryParams.append('Username', username);
+    if (username.trim()) {
+      queryParams.append('Username', username.trim());
     }
 
-
     const response = await fetch(
-      `${BASE_URL}/Order/GetAllOrder?${queryParams.toString()}`, 
+      `${BASE_URL}/Order/GetAllOrder?${queryParams}`, 
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -32,6 +31,11 @@ export const orderApi = {
         }
       }
     );
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch orders');
+    }
+
     return response.json();
   },
 

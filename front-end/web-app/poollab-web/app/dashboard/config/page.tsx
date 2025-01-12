@@ -74,11 +74,11 @@ export const ConfigPage: React.FC = () => {
         <CardHeader>
           <Flex justifyContent="space-between" alignItems="center">
             <Heading size="lg">Cấu hình hệ thống</Heading>
-            {config && (
+            {/* {config && (
               <Badge colorScheme={config.status === 'Hoạt Động' ? 'green' : 'red'}>
                 {config.status}
               </Badge>
-            )}
+            )} */}
           </Flex>
         </CardHeader>
         <CardBody>

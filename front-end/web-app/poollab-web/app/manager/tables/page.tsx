@@ -32,7 +32,7 @@ import {
 } from '@chakra-ui/react';
 import { useEffect, useState, useRef } from 'react';
 import { FiPlus, FiEdit2, FiTrash2, FiRefreshCcw, FiSearch, FiEye } from 'react-icons/fi';
-import { BilliardTable } from '@/utils/types/table.types';
+import { BilliardTable, BilliardTableFormData } from '@/utils/types/table.types';
 import { billiardTableApi } from '@/apis/table.api';
 import { BilliardTableFormModal } from '@/components/billiardTablesupdate/BilliardTableFormModal';
 import { BilliardTableDetailModal } from '@/components/billiardTablesupdate/BilliardTableDetailModal';
@@ -94,17 +94,20 @@ export default function BilliardTablePage() {
     fetchTables(1);
   }, [searchQuery, fetchTables]);
 
-  const handleAddTable = async (data: Omit<BilliardTable, 'id' | 'status'>) => {
+  const handleAddTable = async (data: Omit<BilliardTableFormData, 'id'>) => {
     try {
       const token = localStorage.getItem('token');
       if (!token) throw new Error('No token found');
-
+  
       const decoded = jwtDecode(token) as JWTPayload;
-      const response = await billiardTableApi.createTable({
+      
+      const tableData = {
         ...data,
-        storeId: decoded.storeId,
-      });
-
+        storeId: decoded.storeId
+      };
+  
+      const response = await billiardTableApi.createTable(tableData);
+  
       if (response.status === 200) {
         toast({
           title: 'Thành công',

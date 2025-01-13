@@ -1,103 +1,165 @@
+import { JWTPayload } from "@/helpers/jwt.helper";
 import { BilliardTableFormData } from "@/utils/types/table.types";
+import { jwtDecode } from "jwt-decode";
 
 const BASE_URL = 'https://poollabwebapi20241008201316.azurewebsites.net/api';
 
 export const billiardTableApi = {
-  getAllTables: async (page: number = 1, pageSize: number = 10, storeId?: string) => {
-    const token = localStorage.getItem('token');
-    const url = new URL(`${BASE_URL}/billiardtable/getallbilliardtable`);
-    
-    // Add query parameters
-    url.searchParams.append('PageNumber', page.toString());
-    url.searchParams.append('PageSize', pageSize.toString());
-    url.searchParams.append('SortBy', 'createdDate');
-    url.searchParams.append('SortAscending', 'false');
-    if (storeId) {
-      url.searchParams.append('StoreID', storeId);
+  getAllTables: async (page: number = 1, pageSize: number = 10) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error('No token found');
+
+      const decoded = jwtDecode(token) as { storeId: string };
+      
+      // Đảm bảo gửi đúng các tham số pagination
+      const url = `${BASE_URL}/billiardtable/getallbilliardtable?` + 
+                 `StroreID=${decoded.storeId}&` +
+                 `PageNumber=${page}&` +
+                 `PageSize=${pageSize}&` +
+                 `SortBy=createdDate&` +
+                 `SortAscending=false`;
+
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch tables');
+      }
+
+      return response.json();
+    } catch (error) {
+      console.error('Error in getAllTables:', error);
+      throw error;
     }
-    
-    const response = await fetch(url.toString(), {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
-    });
-    return response.json();
   },
-  
-  getTableById: async (id: string) => {
-    const token = localStorage.getItem('token');
-    const response = await fetch(
-      `${BASE_URL}/billiardtable/getbilliardtablebyid/${id}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
+
+  getTableById: async (tableId: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error('No token found');
+
+      const response = await fetch(
+        `${BASE_URL}/billiardtable/getbilliardtablebyid/${tableId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
         }
-      }
-    );
-    return response.json();
+      );
+      return response.json();
+    } catch (error) {
+      console.error('Error in getTableById:', error);
+      throw error;
+    }
   },
 
-  createTable: async (data: Omit<BilliardTableFormData, 'id'>) => {
-    const token = localStorage.getItem('token');
-    const response = await fetch(
-      `${BASE_URL}/billiardtable/createnewtable`,
-      {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-      }
-    );
-    return response.json();
-  },
+  createTable: async (data: BilliardTableFormData): Promise<any> => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error('No token found');
 
-  updateTable: async (id: string, data: Omit<BilliardTableFormData, 'id'>) => {
-    const token = localStorage.getItem('token');
-    const response = await fetch(
-      `${BASE_URL}/billiardtable/updateinfotable/${id}`,
-      {
-        method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-      }
-    );
-    return response.json();
-  },
+      // Lấy storeId từ token
+      const decoded = jwtDecode(token) as { storeId: string };
 
-  deleteTable: async (id: string) => {
-    const token = localStorage.getItem('token');
-    const response = await fetch(
-      `${BASE_URL}/billiardtable/deletetable/${id}`,
-      {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
+      const response = await fetch(
+        `${BASE_URL}/billiardtable/createnewtable`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            ...data,
+            storeId: decoded.storeId
+          })
         }
-      }
-    );
-    return response.json();
+      );
+      return response.json();
+    } catch (error) {
+      console.error('Error in createTable:', error);
+      throw error;
+    }
   },
 
-  uploadImage: async (formData: FormData) => {
-    const token = localStorage.getItem('token');
-    const response = await fetch(
-      `${BASE_URL}/billiardtable/uploadfilebidatable`,
-      {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData
+  updateTable: async (tableId: string, data: BilliardTableFormData): Promise<any> => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error('No token found');
+
+      const response = await fetch(
+        `${BASE_URL}/billiardtable/updateinfotable/${tableId}`,
+        {
+          method: 'PUT',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        }
+      );
+      return response.json();
+    } catch (error) {
+      console.error('Error in updateTable:', error);
+      throw error;
+    }
+  },
+
+  deleteTable: async (tableId: string): Promise<any> => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error('No token found');
+
+      const response = await fetch(
+        `${BASE_URL}/billiardtable/deletetable/${tableId}`,
+        {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to delete table');
       }
-    );
-    return response.json();
+
+      return response.json();
+    } catch (error) {
+      console.error('Error in deleteTable:', error);
+      throw error;
+    }
+  },
+
+  uploadImage: async (file: File): Promise<any> => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error('No token found');
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch(
+        `${BASE_URL}/billiardtable/uploadfilebidatable`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`
+          },
+          body: formData
+        }
+      );
+      return response.json();
+    } catch (error) {
+      console.error('Error in uploadImage:', error);
+      throw error;
+    }
   }
 };

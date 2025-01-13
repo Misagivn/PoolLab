@@ -28,13 +28,13 @@ export interface CreateCourseDTO {
   descript: string;
   price: number;
   schedule: string[];  
-  courseMonth: string;
-  startTime: string;
-  endTime: string; 
-  level: string;
-  quantity: number;
-  storeId: string;
-  accountId: string;
+  courseMonth: string; 
+  startTime: string;   
+  endTime: string;    
+  level: string;       
+  quantity: number;    
+  storeId: string;     
+  accountId: string;   
 }
 
 
@@ -68,3 +68,4 @@ export interface PaginatedCourseResponse {
     pageNumber: number;
   };
 }
+

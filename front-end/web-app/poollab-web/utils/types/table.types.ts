@@ -23,5 +23,5 @@ export interface BilliardTableFormData {
   areaId: string;
   billiardTypeId: string;
   priceId: string;
-  // storeId?: string;
+  storeId?: string;
 }

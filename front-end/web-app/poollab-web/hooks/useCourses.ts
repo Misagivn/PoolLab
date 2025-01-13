@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useToast } from '@chakra-ui/react';
-import { Course } from '@/utils/types/course.types';
+import { Course, CreateCourseDTO } from '@/utils/types/course.types';
 import { courseApi } from '@/apis/course';
 
 export const useCourses = () => {
@@ -43,26 +43,17 @@ export const useCourses = () => {
     }
   }, [toast]);
 
-  const createCourse = async (data: Omit<Course, 'courseMonth' | 'id' | 'status' | 'createdDate' | 'updatedDate'>) => {
+  const createCourse = async (data: CreateCourseDTO) => {
     try {
-    // Tính courseMonth từ startDate và endDate
-    const startDate = new Date(data.startDate);
-    const endDate = new Date(data.endDate);
-
-    const courseMonth =
-      (endDate.getFullYear() - startDate.getFullYear()) * 12 +
-      (endDate.getMonth() - startDate.getMonth());
-
-      // Chuyển đổi schedule từ array sang string nếu cần
       const createData = {
         ...data,
-        courseMonth: `${courseMonth}`,
-        schedule: data.schedule
+        price: Number(data.price) || 0,
+        quantity: Number(data.quantity) || 1
       };
-
-      console.log('Creating course with data:', createData); // Debug log
-
+  
+      console.log('Creating course with data:', createData);
       const response = await courseApi.createCourse(createData);
+      
       if (response.status === 200) {
         toast({
           title: 'Thành công',
@@ -89,35 +80,16 @@ export const useCourses = () => {
 
   const updateCourse = async (courseId: string, data: Partial<Course>) => {
     try {
-      if (!data.title) {
-        throw new Error('Title is required');
-      }
-
       const updateData = {
-        title: data.title ?? '', // Đảm bảo title không undefined
-        descript: data.descript ?? '', // Cung cấp giá trị mặc định
-        price: data.price ?? 0,
-        schedule: Array.isArray(data.schedule) ? data.schedule.join(',') : data.schedule ?? '',
-        startDate: data.startDate ?? '',
-        endDate: data.endDate ?? '',
-        startTime: data.startTime ?? '',
-        endTime: data.endTime ?? '',
-        level: data.level ?? '',
-        quantity: data.quantity ?? 0,
-        storeId: data.storeId ?? '',
-        accountId: data.accountId ?? '',
-        status: data.status ?? ''
+        ...data,
+        price: Number(data.price) || 0,
+        quantity: Number(data.quantity) || 1,
+        schedule: Array.isArray(data.schedule) ? data.schedule.join(',') : data.schedule
       };
-
-      // const updateData = {
-      //   ...data,
-      //   title: data.title != undefined ? data.title : "",
-      //   schedule: Array.isArray(data.schedule) ? data.schedule.join(',') : data.schedule
-      // };
-
-      console.log('Updating course with data:', updateData); // Debug log
-
+  
+      console.log('Updating course with data:', updateData);
       const response = await courseApi.updateCourse(courseId, updateData);
+      
       if (response.status === 200) {
         toast({
           title: 'Thành công',
@@ -154,11 +126,14 @@ export const useCourses = () => {
           isClosable: true,
         });
         await fetchCourses(pagination.currentPage);
+      } else {
+        throw new Error(response.message || 'Failed to cancel course');
       }
     } catch (err) {
+      console.error('Error canceling course:', err);
       toast({
         title: 'Lỗi',
-        description: 'Không thể hủy khóa học',
+        description: err instanceof Error ? err.message : 'Không thể hủy khóa học',
         status: 'error',
         duration: 3000,
         isClosable: true,

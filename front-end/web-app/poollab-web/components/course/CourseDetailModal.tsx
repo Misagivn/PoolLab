@@ -174,9 +174,9 @@ export const CourseDetailModal = ({
             <Box>
               <Text fontWeight="semibold" mb={2}>Thông tin thêm:</Text>
               <Stack spacing={1}>
-                <Text fontSize="sm" color="gray.600">
+                {/* <Text fontSize="sm" color="gray.600">
                   Người tạo: {course.accountName}
-                </Text>
+                </Text> */}
                 <Text fontSize="sm" color="gray.600">
                   Ngày tạo: {formatDateTime(course.createdDate)}
                 </Text>

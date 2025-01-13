@@ -23,6 +23,7 @@ import {
   HStack,
   Select,
   Text,
+  FormHelperText,
 } from '@chakra-ui/react';
 import { Course, CreateCourseDTO } from '@/utils/types/course.types';
 import { useStores } from '@/hooks/useStores';
@@ -46,6 +47,13 @@ const DAYS_OF_WEEK = [
   { value: 'Sunday', label: 'Chủ nhật' }
 ];
 
+const COURSE_STATUS = {
+  ACTIVE: 'Kích Hoạt',
+  INACTIVE: 'Vô Hiệu',
+  OPENED: 'Đã Mở', 
+  COMPLETED: 'Kết Thúc'
+} as const;
+
 export const CourseFormModal = ({
   isOpen,
   onClose,
@@ -57,7 +65,6 @@ export const CourseFormModal = ({
   const { data: members = [] } = useMembers();
   const toast = useToast();
 
-  // State for selected store display
   const [selectedStore, setSelectedStore] = useState<{
     id: string;
     name: string;
@@ -73,13 +80,29 @@ export const CourseFormModal = ({
     startTime: '',
     endTime: '',
     level: '',
-    quantity: 0,
+    quantity: 1,
     storeId: '',
     accountId: ''
   });
 
+  const [searchInstructor, setSearchInstructor] = useState('');
+  const [showInstructorDropdown, setShowInstructorDropdown] = useState(false);
+  const instructorRef = useRef(null);
   const [errors, setErrors] = useState<{[key: string]: string}>({});
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (instructorRef.current && !instructorRef.current.contains(event.target)) {
+        setShowInstructorDropdown(false);
+      }
+    };
+  
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   useEffect(() => {
     if (initialData) {
@@ -87,17 +110,20 @@ export const CourseFormModal = ({
         title: initialData.title || '',
         descript: initialData.descript || '',
         price: initialData.price || 0,
-        schedule: initialData.schedule.split(',').map(day => day.trim()),
+        schedule: Array.isArray(initialData.schedule) 
+          ? initialData.schedule 
+          : initialData.schedule.split(',').map(day => day.trim()),
         courseMonth: initialData.startDate?.split('T')[0].substring(0, 7) || '',
         startTime: initialData.startTime || '',
         endTime: initialData.endTime || '',
         level: initialData.level || '',
-        quantity: initialData.quantity || 0,
+        quantity: initialData.quantity || 1,
         storeId: initialData.storeId || '',
         accountId: initialData.accountId || ''
       });
 
-      // Set selected store for edit mode
+      const instructor = members.find(m => m.id === initialData.accountId);
+      setSearchInstructor(instructor?.fullName || '');
       const store = stores.find(s => s.id === initialData.storeId);
       if (store) {
         setSelectedStore({
@@ -107,7 +133,7 @@ export const CourseFormModal = ({
         });
       }
     } else {
-      // Reset form for new course
+      setSearchInstructor('');
       setFormData({
         title: '',
         descript: '',
@@ -117,13 +143,13 @@ export const CourseFormModal = ({
         startTime: '',
         endTime: '',
         level: '',
-        quantity: 0,
+        quantity: 1,
         storeId: '',
         accountId: ''
       });
       setSelectedStore(null);
     }
-  }, [initialData, isOpen, stores]);
+  }, [initialData, isOpen, stores,members ]);
 
   const validateForm = () => {
     const newErrors: {[key: string]: string} = {};
@@ -131,17 +157,26 @@ export const CourseFormModal = ({
     if (!formData.title?.trim()) {
       newErrors.title = 'Tên khóa học là bắt buộc';
     }
-    if (formData.schedule.length === 0) {
+    if (!formData.schedule || formData.schedule.length === 0) {
       newErrors.schedule = 'Vui lòng chọn ít nhất một ngày học';
     }
     if (!formData.courseMonth) {
       newErrors.courseMonth = 'Tháng học là bắt buộc';
     }
-    if (!formData.level?.trim()) {
+    if (!formData.level) {
       newErrors.level = 'Cấp độ là bắt buộc';
     }
-    if (!formData.quantity || formData.quantity <= 0) {
+    if (!formData.quantity || formData.quantity < 1) {
       newErrors.quantity = 'Số lượng học viên phải lớn hơn 0';
+    }
+    if (formData.quantity > 12) {
+      newErrors.quantity = 'Số lượng học viên tối đa là 12';
+    }
+    if (formData.price < 0) {
+      newErrors.price = 'Giá không thể âm';
+    }
+    if (formData.price > 2000000) {
+      newErrors.price = 'Giá khóa học tối đa là 2,000,000đ';
     }
     if (!formData.storeId) {
       newErrors.storeId = 'Vui lòng chọn cửa hàng';
@@ -155,7 +190,7 @@ export const CourseFormModal = ({
     if (!formData.endTime) {
       newErrors.endTime = 'Giờ kết thúc là bắt buộc';
     }
-
+  
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -166,18 +201,13 @@ export const CourseFormModal = ({
     try {
       setLoading(true);
       
-      const submitData: CreateCourseDTO = {
-        title: formData.title,
-        descript: formData.descript,
-        price: Number(formData.price),
-        schedule: formData.schedule,
-        courseMonth: `${formData.courseMonth.split('-')[1]}/${formData.courseMonth.split('-')[0]}`,
-        startTime: formData.startTime,
-        endTime: formData.endTime,
-        level: formData.level,
-        quantity: Number(formData.quantity),
-        storeId: formData.storeId,
-        accountId: formData.accountId
+      const [year, month] = formData.courseMonth.split('-');
+      const submitData = {
+        ...formData,
+        courseMonth: `${parseInt(month)}/${year}`,
+        price: Math.max(0, Number(formData.price)),
+        quantity: Math.max(1, Number(formData.quantity)),
+        schedule: formData.schedule
       };
   
       await onSubmit(submitData);
@@ -187,7 +217,7 @@ export const CourseFormModal = ({
       console.error('Error submitting form:', error);
       toast({
         title: 'Lỗi',
-        description: 'Không thể tạo khóa học. Vui lòng thử lại.',
+        description: error instanceof Error ? error.message : 'Không thể tạo khóa học. Vui lòng thử lại.',
         status: 'error',
         duration: 3000,
         isClosable: true,
@@ -205,6 +235,24 @@ export const CourseFormModal = ({
         : [...prev.schedule, day]
     }));
   };
+
+  // const handlePriceChange = (value: string) => {
+  //   const numberValue = Number(value);
+  //   setFormData(prev => ({
+  //     ...prev,
+  //     price: isNaN(numberValue) ? 0 : Math.max(0, numberValue)
+  //   }));
+  // };
+
+  // const handleQuantityChange = (value: string) => {
+  //   const numberValue = Number(value);
+  //   setFormData(prev => ({
+  //     ...prev,
+  //     quantity: isNaN(numberValue) ? 1 : Math.max(1, numberValue)
+  //   }));
+  // };
+
+  
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="xl">
@@ -249,22 +297,79 @@ export const CourseFormModal = ({
               <FormErrorMessage>{errors.storeId}</FormErrorMessage>
             </FormControl>
 
-            <FormControl isInvalid={!!errors.accountId} isRequired>
+            <FormControl isInvalid={!!errors.accountId} isRequired position="relative" ref={instructorRef}>
               <FormLabel>Giảng viên</FormLabel>
-              <Select
-                value={formData.accountId}
-                onChange={(e) => setFormData(prev => ({
-                  ...prev,
-                  accountId: e.target.value
-                }))}
-                placeholder="Chọn giảng viên"
-              >
-                {members.map((member) => (
-                  <option key={member.id} value={member.id}>
-                    {member.fullName}
-                  </option>
-                ))}
-              </Select>
+              {initialData ? (
+                // Nếu là update thì chỉ hiện tên giảng viên, không cho sửa
+                <Box p={2} bg="gray.50" borderRadius="md">
+                  <Text>{members.find(m => m.id === initialData.accountId)?.fullName}</Text>
+                </Box>
+              ) : (
+                // Nếu là thêm mới thì cho phép tìm và chọn giảng viên
+                <>
+                  <Input
+                    value={searchInstructor}
+                    onChange={(e) => {
+                      setSearchInstructor(e.target.value);
+                      setShowInstructorDropdown(true);
+                      if (!e.target.value) {
+                        setFormData(prev => ({
+                          ...prev,
+                          accountId: ''
+                        }));
+                      }
+                    }}
+                    onFocus={() => setShowInstructorDropdown(true)}
+                    placeholder="Tìm kiếm giảng viên"
+                  />
+                  {showInstructorDropdown && searchInstructor && (
+                    <Box
+                      position="absolute"
+                      top="100%"
+                      left={0}
+                      right={0}
+                      bg="white"
+                      boxShadow="lg"
+                      borderRadius="md"
+                      maxH="200px"
+                      overflowY="auto"
+                      zIndex={1000}
+                      mt={1}
+                    >
+                      {members
+                        .filter(member => 
+                          member.fullName.toLowerCase().includes(searchInstructor.toLowerCase())
+                        )
+                        .map(member => (
+                          <Box
+                            key={member.id}
+                            px={4}
+                            py={2}
+                            cursor="pointer"
+                            _hover={{ bg: "gray.50" }}
+                            onClick={() => {
+                              setFormData(prev => ({
+                                ...prev,
+                                accountId: member.id
+                              }));
+                              setSearchInstructor(member.fullName);
+                              setShowInstructorDropdown(false);
+                            }}
+                          >
+                            <Text>{member.fullName}</Text>
+                          </Box>
+                        ))}
+                      {members.filter(member => 
+                        member.fullName.toLowerCase().includes(searchInstructor.toLowerCase())
+                      ).length === 0 && (
+                        <Box px={4} py={2}>
+                          <Text color="gray.500">Không tìm thấy giảng viên</Text>
+                        </Box>
+                      )}
+                    </Box>
+                  )}
+                </>
+              )}
               <FormErrorMessage>{errors.accountId}</FormErrorMessage>
             </FormControl>
 
@@ -283,16 +388,33 @@ export const CourseFormModal = ({
 
             <FormControl isInvalid={!!errors.price} isRequired>
               <FormLabel>Giá khóa học</FormLabel>
-              <NumberInput
+              <Input
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 min={0}
+                max={2000000}
                 value={formData.price}
-                onChange={(valueString) => setFormData(prev => ({
-                  ...prev,
-                  price: parseInt(valueString) || 0
-                }))}
-              >
-                <NumberInputField placeholder="Nhập giá khóa học" />
-              </NumberInput>
+                onChange={(e) => {
+                  const value = e.target.value.replace(/\D/g, '');
+                  let numberValue = value === '' ? 0 : parseInt(value, 10);
+                  
+                  // Giới hạn giá tối đa là 2,000,000
+                  if (numberValue > 2000000) {
+                    numberValue = 2000000;
+                  }
+                  
+                  setFormData(prev => ({
+                    ...prev,
+                    price: numberValue
+                  }));
+                }}
+                onClick={(e) => {
+                  (e.target as HTMLInputElement).select();
+                }}
+                placeholder="Nhập giá khóa học (tối đa 2,000,000)"
+              />
+              <FormHelperText>Tối đa 2,000,000đ</FormHelperText>
               <FormErrorMessage>{errors.price}</FormErrorMessage>
             </FormControl>
 
@@ -373,16 +495,33 @@ export const CourseFormModal = ({
 
             <FormControl isInvalid={!!errors.quantity} isRequired>
               <FormLabel>Số lượng học viên</FormLabel>
-              <NumberInput
+              <Input
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 min={1}
+                max={12}
                 value={formData.quantity}
-                onChange={(valueString) => setFormData(prev => ({
-                  ...prev,
-                  quantity: parseInt(valueString) || 0
-                }))}
-              >
-                <NumberInputField placeholder="Nhập số lượng học viên" />
-              </NumberInput>
+                onChange={(e) => {
+                  const value = e.target.value.replace(/\D/g, '');
+                  let numberValue = value === '' ? 1 : parseInt(value, 10);
+                  
+                  // Giới hạn số lượng tối đa là 12
+                  if (numberValue > 12) {
+                    numberValue = 12;
+                  }
+                  
+                  setFormData(prev => ({
+                    ...prev,
+                    quantity: numberValue
+                  }));
+                }}
+                onClick={(e) => {
+                  (e.target as HTMLInputElement).select();
+                }}
+                placeholder="Nhập số lượng học viên (tối đa 12)"
+              />
+              <FormHelperText>Tối đa 12 học viên/lớp</FormHelperText>
               <FormErrorMessage>{errors.quantity}</FormErrorMessage>
             </FormControl>
 

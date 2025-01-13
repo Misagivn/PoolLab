@@ -205,16 +205,6 @@ export default function StaffPage() {
                   <Td>
                     <HStack spacing={2} justify="flex-end">
                       <IconButton
-                        aria-label="Edit staff"
-                        icon={<Icon as={FiEdit2} />}
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => {
-                          selectStaff(member);
-                          onUpdateOpen();
-                        }}
-                      />
-                      <IconButton
                         aria-label="View details"
                         icon={<Icon as={FiInfo} />}
                         size="sm"
@@ -225,6 +215,16 @@ export default function StaffPage() {
                         }}
                       />
 
+                      <IconButton
+                        aria-label="Edit staff"
+                        icon={<Icon as={FiEdit2} />}
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                          selectStaff(member);
+                          onUpdateOpen();
+                        }}
+                      />
                       <IconButton
                               aria-label="Update status"
                               icon={<Icon as={member.status === 'Kích Hoạt' ? FiLock : FiUnlock} />}

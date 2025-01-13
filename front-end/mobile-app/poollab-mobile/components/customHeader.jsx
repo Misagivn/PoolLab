@@ -2,10 +2,15 @@ import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { React, useState, useEffect } from "react";
 import { theme } from "@/constants/theme";
 import Icon from "@/assets/icons/icons";
-import {getAccountId, getUserName, getUserBalance, getUserNameReact} from '@/data/userData'
+import {
+  getAccountId,
+  getUserName,
+  getUserBalance,
+  getUserNameReact,
+} from "@/data/userData";
 import { router } from "expo-router";
-import {getNotReadNoti} from '@/api/NotiAPI'
-import NotiIconWithBadge from '@/components/notiIconWithBadge'
+import { getNotReadNoti } from "@/api/NotiAPI";
+import NotiIconWithBadge from "@/components/notiIconWithBadge";
 const CustomHeader = () => {
   //Get username from AsyncStorage
   const [userName, setUserName] = useState("");
@@ -16,7 +21,7 @@ const CustomHeader = () => {
     try {
       const userId = await getAccountId();
       const userName = await getUserName();
-      if (userId, userName) {
+      if ((userId, userName)) {
         setUserId(userId);
         setUserName(userName);
         getUserBalance(userId).then((userBalance) => {
@@ -28,16 +33,14 @@ const CustomHeader = () => {
           if (response.data.status === 200) {
             const notiCount = response.data.data;
             if (notiCount > 0) {
-              console.log("notiCount", notiCount);
               setHaveNoti(true);
             } else {
-              console.log("notiCount", notiCount);
               setHaveNoti(false);
             }
           }
         });
       }
-  } catch (error) {
+    } catch (error) {
       console.error("Error loading stored user:", error);
     }
   };
@@ -45,15 +48,15 @@ const CustomHeader = () => {
     try {
       const userName = await getUserNameReact(userId);
       const userBalance = await getUserBalance(userId);
-      if (userName, userBalance) {
-        setUserName(userName);      
+      if ((userName, userBalance)) {
+        setUserName(userName);
         setUserBalance(userBalance);
       }
     } catch (error) {
       console.error("Error loading stored user:", error);
     }
   };
-    useEffect(() => {
+  useEffect(() => {
     loadStat();
   }, []);
   return (
@@ -93,23 +96,30 @@ const CustomHeader = () => {
             />
             <Text>đ</Text>
             <Pressable
-            style={{
-              marginLeft: 5,
-              backgroundColor: theme.colors.primary,
-              justifyContent: "center",
-              alignItems: "center",
-              borderRadius: 20,
-              borderCurve: "continuous",
-              padding: 5,
-            }}
+              style={{
+                marginLeft: 5,
+                backgroundColor: theme.colors.primary,
+                justifyContent: "center",
+                alignItems: "center",
+                borderRadius: 20,
+                borderCurve: "continuous",
+                padding: 5,
+              }}
               onPress={() => {
                 reload_stat();
               }}
             >
-              <Icon name="refreshIcon" size={15} strokeWidth={3} color="white" />
+              <Icon
+                name="refreshIcon"
+                size={15}
+                strokeWidth={3}
+                color="white"
+              />
             </Pressable>
           </View>
-          <NotiIconWithBadge hasUnread={haveNoti} />
+          <Pressable onPress={() => router.push("/(notification)")}>
+            <NotiIconWithBadge hasUnread={haveNoti} />
+          </Pressable>
         </View>
       </View>
     </View>

@@ -68,7 +68,7 @@ const index = () => {
         title: `Khóa: ${title[index]}`,
         description: `Mentor: ${mentorName[index]}`,
         name: `Thời gian chơi: ${timeStart[index]} - ${timeEnd[index]}`,
-        data: `Địa điểm: ${address[index]} - ${storeName[index]}`,
+        data: `Địa điểm: \n ${address[index]} - ${storeName[index]}`,
         price: `Giá buổi học: ${price[index]}`,
       });
     });

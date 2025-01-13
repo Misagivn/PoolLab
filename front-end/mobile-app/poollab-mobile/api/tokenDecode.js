@@ -137,3 +137,14 @@ export const get_user_products = async () => {
     return null;
   }
 };
+
+export const get_noti_id = async () => {
+  try {
+    const notiId = await AsyncStorage.getItem("notiId");
+    console.log("notiId", notiId);
+    return notiId ? JSON.parse(notiId) : null;
+  } catch (error) {
+    console.error("Error getting noti id:", error);
+    return null;
+  }
+};

@@ -1,11 +1,12 @@
-import { StyleSheet, Text, View } from "react-native";
+import {  StyleSheet,  View } from "react-native";
 import React from "react";
 import Icon from "@/assets/icons/icons";
-const NotiIconWithBadge = ({hasUnread = false}) => {
+import { router } from "expo-router";
+const NotiIconWithBadge = ({ hasUnread = false }, ...props) => {
   return (
     <View style={styles.container}>
-      <Icon name="notiIcon" size={20} strokeWidth={1.5} color="black" />
-      {hasUnread && <View style={styles.badge}></View>}
+        <Icon name="notiIcon" size={20} strokeWidth={1.5} color="black" />
+        {hasUnread && <View style={styles.badge}></View>}
     </View>
   );
 };

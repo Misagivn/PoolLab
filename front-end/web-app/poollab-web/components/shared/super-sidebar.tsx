@@ -1,5 +1,4 @@
 "use client";
-
 import { 
   Box, 
   Flex, 
@@ -14,17 +13,57 @@ import {
 } from '@chakra-ui/react';
 import { ChevronDownIcon } from '@chakra-ui/icons';
 import NextLink from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { superManagerRoutes } from '@/config/super-manager-routes';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { decodeJWT } from '@/helpers/jwt.helper';
 
 export default function SuperSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const bgColor = useColorModeValue('white', 'gray.800');
   const [openMenus, setOpenMenus] = useState<{ [key: string]: boolean }>({});
 
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      router.push('/');
+      return;
+    }
+
+    try {
+      const decodedToken = decodeJWT(token);
+      const role = decodedToken['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+      
+      if (role !== 'Super Manager') {
+        switch (role) {
+          case 'Admin':
+            router.push('/dashboard/dashpage');
+            break;
+          case 'Manager':
+            router.push('/manager/dashpage');
+            break;
+          case 'Staff':
+            router.push('/booktable/dashpage');
+            break;
+          default:
+            router.push('/');
+        }
+      }
+    } catch (error) {
+      console.error('Token decode error:', error);
+      router.push('/');
+    }
+  }, [router]);
+
   const toggleMenu = (label: string) => {
     setOpenMenus(prev => ({ ...prev, [label]: !prev[label] }));
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    sessionStorage.clear();
+    router.push('/');
   };
 
   return (
@@ -44,7 +83,7 @@ export default function SuperSidebar() {
             <Link as={NextLink} href="/supermanager/dashpage" width="full">
               <Image
                 src="/logo/logo01.png" 
-                alt="PoolLab Logo"
+                alt="Logo"
                 h="full"
                 mx="full"
                 objectFit="contain"
@@ -60,6 +99,28 @@ export default function SuperSidebar() {
             const isActive = pathname === route.path;
             const hasSubRoutes = route.subRoutes && route.subRoutes.length > 0;
             const isOpen = openMenus[route.label];
+
+            if (route.path === '/') {
+              return (
+                <Box
+                  key={route.path}
+                  onClick={handleLogout}
+                  cursor="pointer"
+                >
+                  <Flex
+                    align="center"
+                    p="2"
+                    mx="2"
+                    borderRadius="md"
+                    color="gray.600"
+                    _hover={{ bg: 'blue.50', color: 'blue.500' }}
+                  >
+                    <Icon fontSize="14" as={route.icon} mr="3" />
+                    <Text fontSize="sm">{route.label}</Text>
+                  </Flex>
+                </Box>
+              );
+            }
 
             return (
               <Box key={route.path}>

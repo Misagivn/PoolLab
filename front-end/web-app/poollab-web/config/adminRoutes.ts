@@ -28,11 +28,6 @@ export const adminRoutes: RouteConfig[] = [
     icon: FiUsers,
   },
   {
-    path: '/dashboard/transactions',
-    label: 'Giao dịch',
-    icon: FiDollarSign,
-  },
-  {
     path: '/dashboard/transaction',
     label: 'Giao dịch',
     icon: FiDollarSign,

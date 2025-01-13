@@ -1,48 +1,36 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useToast } from '@chakra-ui/react';
-import { Transaction } from '@/utils/types/transaction.type';
+import { Transaction, OrderTransaction } from '@/utils/types/transaction.type';
 import { OrderDetail } from '@/utils/types/order.types';
 import { transactionApi } from '@/apis/transaction.api';
 import { orderApi } from '@/apis/order.api';
 
 export const useTransactions = () => {
+  // General transactions state
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [orderCodes, setOrderCodes] = useState<Record<string, string>>({});
-  const [searchUsername, setSearchUsername] = useState('');
-  const [selectedOrder, setSelectedOrder] = useState<OrderDetail | null>(null);
-  const [detailLoading, setDetailLoading] = useState(false);
-  const [pagination, setPagination] = useState({
+  const [transactionPagination, setTransactionPagination] = useState({
     totalItems: 0,
     pageSize: 10,
     totalPages: 1,
     currentPage: 1
   });
-  const [loading, setLoading] = useState(true);
+  const [transactionLoading, setTransactionLoading] = useState(true);
+
+  // Order transactions state
+  const [orderTransactions, setOrderTransactions] = useState<OrderTransaction[]>([]);
+  const [orderPagination, setOrderPagination] = useState({
+    totalItems: 0,
+    pageSize: 10,
+    totalPages: 1,
+    currentPage: 1
+  });
+  const [orderLoading, setOrderLoading] = useState(true);
+
+  // Common state
+  const [searchUsername, setSearchUsername] = useState('');
+  const [selectedOrder, setSelectedOrder] = useState<OrderDetail | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
   const toast = useToast();
-
-  const fetchOrderDetails = async (orderIds: string[]) => {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) return;
-
-      const uniqueOrderIds = [...new Set(orderIds)].filter(Boolean);
-      const orderDetailsPromises = uniqueOrderIds.map(orderId => 
-        orderApi.getOrderById(orderId, token)
-      );
-
-      const orders = await Promise.all(orderDetailsPromises);
-      const newOrderCodes = orders.reduce((acc, order) => {
-        if (order.status === 200 && order.data) {
-          acc[order.data.id] = order.data.orderCode;
-        }
-        return acc;
-      }, {} as Record<string, string>);
-
-      setOrderCodes(prev => ({ ...prev, ...newOrderCodes }));
-    } catch (error) {
-      console.error('Error fetching order details:', error);
-    }
-  };
 
   const handleViewOrder = async (orderId: string) => {
     try {
@@ -67,33 +55,23 @@ export const useTransactions = () => {
     }
   };
 
-  const fetchTransactions = useCallback(async (page: number = 1, username: string = '') => {
+  const fetchAllTransactions = useCallback(async (page: number = 1, username: string = '') => {
     try {
-      setLoading(true);
+      setTransactionLoading(true);
       const response = await transactionApi.getAllTransactions({
         pageNumber: page,
-        pageSize: pagination.pageSize,
+        pageSize: transactionPagination.pageSize,
         username
       });
       
       if (response.status === 200) {
-        const transactions = response.data.items;
-        setTransactions(transactions);
-        setPagination({
+        setTransactions(response.data.items);
+        setTransactionPagination({
           totalItems: response.data.totalItem,
           pageSize: response.data.pageSize,
           totalPages: response.data.totalPages,
           currentPage: response.data.pageNumber
         });
-
-        // Get orderIds from transactions
-        const orderIds = transactions
-          .map(t => t.orderId)
-          .filter(Boolean) as string[];
-
-        if (orderIds.length > 0) {
-          await fetchOrderDetails(orderIds);
-        }
       }
     } catch (err) {
       toast({
@@ -105,29 +83,70 @@ export const useTransactions = () => {
       });
       setTransactions([]);
     } finally {
-      setLoading(false);
+      setTransactionLoading(false);
     }
-  }, [pagination.pageSize, toast]);
+  }, [transactionPagination.pageSize, toast]);
 
-  // Debounce search
+  const fetchOrderTransactions = useCallback(async (page: number = 1, username: string = '') => {
+    try {
+      setOrderLoading(true);
+      const response = await transactionApi.getAllOrderTransactions({
+        pageNumber: page,
+        pageSize: orderPagination.pageSize,
+        username
+      });
+      
+      if (response.status === 200) {
+        setOrderTransactions(response.data.items);
+        setOrderPagination({
+          totalItems: response.data.totalItem,
+          pageSize: response.data.pageSize,
+          totalPages: response.data.totalPages,
+          currentPage: response.data.pageNumber
+        });
+      }
+    } catch (err) {
+      toast({
+        title: 'Lỗi',
+        description: 'Không thể tải danh sách giao dịch đơn hàng',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+      setOrderTransactions([]);
+    } finally {
+      setOrderLoading(false);
+    }
+  }, [orderPagination.pageSize, toast]);
+
+  // Fetch both types of transactions when search changes
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      fetchTransactions(1, searchUsername);
+      fetchAllTransactions(1, searchUsername);
+      fetchOrderTransactions(1, searchUsername);
     }, 500);
 
     return () => clearTimeout(timeoutId);
-  }, [searchUsername, fetchTransactions]);
+  }, [searchUsername, fetchAllTransactions, fetchOrderTransactions]);
 
   return {
-    data: transactions,
-    loading,
-    pagination,
+    // General transactions
+    transactions,
+    transactionPagination,
+    transactionLoading,
+    fetchAllTransactions,
+
+    // Order transactions
+    orderTransactions,
+    orderPagination,
+    orderLoading,
+    fetchOrderTransactions,
+
+    // Common
     searchUsername,
     setSearchUsername,
-    fetchTransactions,
-    orderCodes,
     selectedOrder,
     detailLoading,
-    handleViewOrder
+    handleViewOrder,
   };
 };

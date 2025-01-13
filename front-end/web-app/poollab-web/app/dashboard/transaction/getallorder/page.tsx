@@ -26,25 +26,24 @@ import {
   Tooltip,
 } from '@chakra-ui/react';
 import { FiSearch, FiRefreshCcw, FiExternalLink } from 'react-icons/fi';
-import { useTransactions } from '@/hooks/useTransactions';
+import { useOrderTransactions } from '@/hooks/usegetallOrderTransaction';
 import { ProductPagination } from '@/components/common/paginations';
 import { formatCurrency, formatDateTime } from '@/utils/format';
 import { OrderDetailModal } from '@/components/order/OrderDetailModal';
 
-export default function TransactionPage() {
+export default function OrderTransactionPage() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { 
-    data: transactions, 
+    transactions,
     loading,
     pagination,
     searchUsername,
     setSearchUsername,
     fetchTransactions,
-    orderCodes,
     selectedOrder,
     detailLoading,
     handleViewOrder
-  } = useTransactions();
+  } = useOrderTransactions();
 
   const handleRefresh = () => {
     setSearchUsername('');
@@ -62,7 +61,7 @@ export default function TransactionPage() {
   return (
     <Box p={6}>
       <Stack spacing={6}>
-        <Heading size="lg">Quản lý giao dịch</Heading>
+        <Heading size="lg">Quản lý giao dịch đơn hàng</Heading>
 
         <HStack>
           <InputGroup maxW="320px">
@@ -70,7 +69,7 @@ export default function TransactionPage() {
               <Icon as={FiSearch} color="gray.400" />
             </InputLeftElement>
             <Input
-              placeholder="Tìm kiếm"
+              placeholder="Tìm kiếm theo tên người dùng"
               value={searchUsername}
               onChange={(e) => setSearchUsername(e.target.value)}
             />
@@ -93,6 +92,7 @@ export default function TransactionPage() {
                   <Th>THỜI GIAN</Th>
                   <Th>SỐ TIỀN</Th>
                   <Th>THÔNG TIN</Th>
+                  <Th>MÃ ĐƠN HÀNG</Th>
                   <Th>TRẠNG THÁI</Th>
                 </Tr>
               </Thead>
@@ -116,11 +116,11 @@ export default function TransactionPage() {
                     <Td>
                       <Text>{transaction.paymentInfo}</Text>
                       <Text fontSize="sm" color="gray.600">{transaction.paymentMethod}</Text>
-                      {transaction.orderId && orderCodes[transaction.orderId] && (
-                        <HStack spacing={1} mt={1}>
-                          <Text fontSize="sm" color="blue.500">
-                            Mã đơn: {orderCodes[transaction.orderId]}
-                          </Text>
+                    </Td>
+                    <Td>
+                      {transaction.orderCode && (
+                        <HStack spacing={1}>
+                          <Text color="blue.500">{transaction.orderCode}</Text>
                           <Tooltip label="Xem chi tiết đơn hàng">
                             <IconButton
                               aria-label="View order details"

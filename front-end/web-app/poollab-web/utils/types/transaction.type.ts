@@ -1,4 +1,4 @@
-export interface Transaction {
+export interface BaseTransaction {
   id: string;
   orderId: string;
   accountId: string;
@@ -14,7 +14,17 @@ export interface Transaction {
   status: string;
 }
 
-export interface TransactionResponse {
+export interface Transaction extends BaseTransaction {
+  tableIssuesId: string | null;
+  subId: string | null;
+}
+
+export interface OrderTransaction extends BaseTransaction {
+  orderCode: string;
+  orderBy: string | null;
+}
+
+export interface BaseResponse<T> {
   status: number;
   message: string | null;
   data: {
@@ -25,3 +35,6 @@ export interface TransactionResponse {
     pageNumber: number;
   };
 }
+
+export interface TransactionResponse extends BaseResponse<Transaction> {}
+export interface OrderTransactionResponse extends BaseResponse<OrderTransaction> {}

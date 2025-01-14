@@ -1,21 +1,61 @@
 "use client";
 
 import { Box, Collapse, Container, Flex, Icon, Image, Link, Stack, Text, useColorModeValue } from "@chakra-ui/react";
-import { usePathname } from "next/navigation";
-import { use, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import NextLink from 'next/link';
 import { adminRoutes } from "@/config/adminRoutes";
 import { ChevronDownIcon } from "@chakra-ui/icons";
-
+import { decodeJWT } from "@/helpers/jwt.helper";
 
 export default function AdminSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const bgColor = useColorModeValue('while', 'gray.800');
   const [openMenus, setOpenMenus] = useState<{[key: string]: boolean}>({});
+
+  useEffect(() => {
+    // Check token and role
+    const token = localStorage.getItem('token');
+    if (!token) {
+      router.push('/');
+      return;
+    }
+
+    try {
+      const decodedToken = decodeJWT(token);
+      const role = decodedToken['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+      
+      if (role !== 'Admin') {
+        switch (role) {
+          case 'Manager':
+            router.push('/manager/dashpage');
+            break;
+          case 'Super Manager':
+            router.push('/supermanager/dashpage');
+            break;
+          case 'Staff':
+            router.push('/booktable/dashpage');
+            break;
+          default:
+            router.push('/');
+        }
+      }
+    } catch (error) {
+      console.error('Token decode error:', error);
+      router.push('/');
+    }
+  }, [router]);
 
   const toggleMenu = (label: string) => {
     setOpenMenus(prev => ({ ...prev, [label]: !prev[label]}));
   }
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    sessionStorage.clear();
+    router.push('/');
+  };
 
   return(
    <Box
@@ -50,6 +90,28 @@ export default function AdminSidebar() {
             const isActive = pathname === route.path;
             const hasSubRoutes = route.subRoutes && route.subRoutes.length > 0;
             const isOpen = openMenus[route.label];
+
+            if (route.path === '/') {
+              return (
+                <Box
+                  key={route.path}
+                  onClick={handleLogout}
+                  cursor="pointer"
+                >
+                  <Flex
+                    align="center"
+                    p="2"
+                    mx="2"
+                    borderRadius="md"
+                    color="gray.600"
+                    _hover={{ bg: 'blue.50', color: 'blue.500' }}
+                  >
+                    <Icon fontSize="14" as={route.icon} mr="3" />
+                    <Text fontSize="sm">{route.label}</Text>
+                  </Flex>
+                </Box>
+              );
+            }
 
             return (
               <Box key={route.path}>
@@ -126,8 +188,5 @@ export default function AdminSidebar() {
         </Stack>
       </Box>
    </Box>
-  
-
   );
 }
-

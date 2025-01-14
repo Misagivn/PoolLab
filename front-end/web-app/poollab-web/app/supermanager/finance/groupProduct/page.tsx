@@ -27,11 +27,14 @@ import {
 import { useEffect, useState, useRef } from 'react';
 import { FiPlus, FiEdit2, FiTrash2, FiRefreshCcw } from 'react-icons/fi';
 import { ProductGroup } from '@/utils/types/productGroup.types';
+import { ProductType } from '@/utils/types/productType.types';
 import { groupApi } from '@/apis/productGroup';
+import { typeApi } from '@/apis/productType.api';
 import { ProductGroupFormModal } from '@/components/productGTU/ProductGourpFrom';
 
 export default function ProductGroupPage() {
   const [groups, setGroups] = useState<ProductGroup[]>([]);
+  const [productTypes, setProductTypes] = useState<ProductType[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<ProductGroup | null>(null);
   const [loading, setLoading] = useState(true);
   const [groupToDelete, setGroupToDelete] = useState<ProductGroup | null>(null);
@@ -71,8 +74,28 @@ export default function ProductGroupPage() {
     }
   };
 
+  const fetchProductTypes = async () => {
+    try {
+      const response = await typeApi.getAllTypes();
+      if (response.status === 200) {
+        setProductTypes(response.data);
+      }
+    } catch (error) {
+      toast({
+        title: 'Lỗi',
+        description: 'Không thể tải danh sách loại sản phẩm',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
+
   useEffect(() => {
-    fetchGroups();
+    const fetchData = async () => {
+      await Promise.all([fetchGroups(), fetchProductTypes()]);
+    };
+    fetchData();
   }, []);
 
   const handleAddGroup = async (data: Omit<ProductGroup, 'id'>) => {
@@ -87,6 +110,7 @@ export default function ProductGroupPage() {
           isClosable: true,
         });
         fetchGroups();
+        onFormClose();
       }
     } catch (error) {
       toast({
@@ -112,6 +136,7 @@ export default function ProductGroupPage() {
           isClosable: true,
         });
         fetchGroups();
+        onFormClose();
       }
     } catch (error) {
       toast({
@@ -173,6 +198,7 @@ export default function ProductGroupPage() {
           <Thead bg="gray.50">
             <Tr>
               <Th>TÊN NHÓM</Th>
+              <Th>LOẠI SẢN PHẨM</Th>
               <Th>MÔ TẢ</Th>
               <Th width="100px" textAlign="right">THAO TÁC</Th>
             </Tr>
@@ -181,6 +207,7 @@ export default function ProductGroupPage() {
             {groups.map((group) => (
               <Tr key={group.id}>
                 <Td fontWeight="medium">{group.name}</Td>
+                <Td>{productTypes.find(type => type.id === group.productTypeId)?.name || '-'}</Td>
                 <Td>{group.descript || '-'}</Td>
                 <Td>
                   <Flex justify="flex-end" gap={2}>
@@ -212,7 +239,7 @@ export default function ProductGroupPage() {
 
             {groups.length === 0 && !loading && (
               <Tr>
-                <Td colSpan={3}>
+                <Td colSpan={4}>
                   <Flex 
                     direction="column" 
                     align="center" 
@@ -275,6 +302,7 @@ export default function ProductGroupPage() {
         onSubmit={selectedGroup ? handleUpdateGroup : handleAddGroup}
         initialData={selectedGroup}
         title={selectedGroup ? 'Chỉnh sửa nhóm sản phẩm' : 'Thêm nhóm sản phẩm mới'}
+        productTypes={productTypes}
       />
     </Box>
   );

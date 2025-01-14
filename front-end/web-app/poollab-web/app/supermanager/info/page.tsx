@@ -116,14 +116,14 @@ export default function InfoPage() {
                 >
                   Đổi mật khẩu
                 </Button>
-                <Button
+                {/* <Button
                   leftIcon={<Icon as={FiEdit} />}
                   size="sm"
                   colorScheme="blue"
                   onClick={() => setIsEditModalOpen(true)}
                 >
                   Chỉnh sửa
-                </Button>
+                </Button> */}
               </HStack>
             </Flex>
           </CardHeader>
@@ -222,12 +222,12 @@ export default function InfoPage() {
         </Card>
       </Stack>
 
-      <EditInfoModal
+      {/* <EditInfoModal
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
         currentInfo={managerData}
         onSubmit={updateInfo}
-      />
+      /> */}
       <ChangePasswordModal
         isOpen={isPasswordModalOpen}
         onClose={() => setIsPasswordModalOpen(false)}

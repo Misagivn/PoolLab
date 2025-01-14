@@ -1,159 +1,220 @@
-import { ApiResponse, TableDetail, UpdateTableData } from "@/utils/types/table.types";
+import { JWTPayload } from "@/helpers/jwt.helper";
+import { BilliardTableFormData } from "@/utils/types/table.types";
+import { jwtDecode } from "jwt-decode";
 
 const BASE_URL = 'https://poollabwebapi20241008201316.azurewebsites.net/api';
 
 export const billiardTableApi = {
-  getAllTables: async (params: {
-    pageNumber?: number;
-    pageSize?: number;
-    token: string;
-  }) => {
+  getAllTables: async (page: number = 1, pageSize: number = 10) => {
     try {
-      const { pageNumber = 1, pageSize = 10, token } = params;
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error('No token found');
+
+      const decoded = jwtDecode(token) as { storeId: string };
       
-      const response = await fetch(
-        `${BASE_URL}/BilliardTable/GetAllBilliardTable?PageNumber=${pageNumber}&PageSize=${pageSize}`,
-        {
-          headers: { 
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
+      // Đảm bảo gửi đúng các tham số pagination
+      const url = `${BASE_URL}/billiardtable/getallbilliardtable?` + 
+                 `StroreID=${decoded.storeId}&` +
+                 `PageNumber=${page}&` +
+                 `PageSize=${pageSize}&` +
+                 `SortBy=createdDate&` +
+                 `SortAscending=false`;
+
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
-      );
-      
-      if (!response.ok) throw new Error('Network response was not ok');
-      return await response.json();
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch tables');
+      }
+
+      return response.json();
     } catch (error) {
-      throw new Error('Failed to fetch tables');
+      console.error('Error in getAllTables:', error);
+      throw error;
     }
   },
 
-  createTable: async (tableData: any, token: string) => {
+  getTableById: async (tableId: string) => {
     try {
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error('No token found');
+
       const response = await fetch(
-        `${BASE_URL}/BilliardTable/CreateNewTable`,
+        `${BASE_URL}/billiardtable/getbilliardtablebyid/${tableId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      return response.json();
+    } catch (error) {
+      console.error('Error in getTableById:', error);
+      throw error;
+    }
+  },
+
+  createTable: async (data: BilliardTableFormData): Promise<any> => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error('No token found');
+
+      // Lấy storeId từ token
+      const decoded = jwtDecode(token) as { storeId: string };
+
+      const response = await fetch(
+        `${BASE_URL}/billiardtable/createnewtable`,
         {
           method: 'POST',
           headers: {
             Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/json'
           },
-          body: JSON.stringify(tableData),
+          body: JSON.stringify({
+            ...data,
+            storeId: decoded.storeId
+          })
         }
       );
-
-      if (!response.ok) throw new Error('Failed to create table');
-      return await response.json();
+      return response.json();
     } catch (error) {
-      throw new Error('Error creating table');
+      console.error('Error in createTable:', error);
+      throw error;
     }
   },
 
-  uploadImage: async (file: File, token: string) => {
+  updateTable: async (tableId: string, data: BilliardTableFormData): Promise<any> => {
     try {
-      const formData = new FormData();
-      formData.append('file', file);
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error('No token found');
 
       const response = await fetch(
-        `${BASE_URL}/BilliardTable/UploadFileBidaTable`,
+        `${BASE_URL}/billiardtable/updateinfotable/${tableId}`,
         {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${token}` },
-          body: formData,
+          method: 'PUT',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
         }
       );
-
-      if (!response.ok) throw new Error('Failed to upload image');
-      return await response.json();
+      return response.json();
     } catch (error) {
-      throw new Error('Error uploading image');
+      console.error('Error in updateTable:', error);
+      throw error;
     }
   },
 
-  deleteTable: async (tableId: string, token: string) => {
+  deleteTable: async (tableId: string): Promise<any> => {
     try {
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error('No token found');
+
       const response = await fetch(
-        `${BASE_URL}/BilliardTable/DeleteTable/${tableId}`,
+        `${BASE_URL}/billiardtable/deletetable/${tableId}`,
         {
           method: 'DELETE',
           headers: {
             Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-
-      if (!response.ok) throw new Error('Failed to delete table');
-      return await response.json();
-    } catch (error) {
-      throw new Error('Error deleting table');
-    }
-  },
-
-  getTableById: async (tableId: string, token: string): Promise<ApiResponse<TableDetail>> => {
-    try {
-      const response = await fetch(
-        `${BASE_URL}/BilliardTable/GetBilliardTableByID/${tableId}`,
-        {
-          method: 'GET',
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
+            'Content-Type': 'application/json'
+          }
         }
       );
 
       if (!response.ok) {
-        throw new Error('Failed to fetch table detail');
+        throw new Error('Failed to delete table');
       }
-      const data = await response.json();
-      return data;
+
+      return response.json();
     } catch (error) {
-      console.error('API Error:', error);
-      throw new Error('Error fetching table detail');
+      console.error('Error in deleteTable:', error);
+      throw error;
     }
   },
 
-  updateTable: async (tableId: string, data: UpdateTableData, token: string): Promise<ApiResponse<any>> => {
+  uploadImage: async (file: File): Promise<any> => {
     try {
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error('No token found');
+
+      const formData = new FormData();
+      formData.append('file', file);
+
       const response = await fetch(
-        `${BASE_URL}/BilliardTable/UpdateInfoTable/${tableId}`,
+        `${BASE_URL}/billiardtable/uploadfilebidatable`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`
+          },
+          body: formData
+        }
+      );
+      return response.json();
+    } catch (error) {
+      console.error('Error in uploadImage:', error);
+      throw error;
+    }
+  },
+
+  inactiveTable: async (tableId: string): Promise<any> => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error('No token found');
+  
+      const response = await fetch(
+        `${BASE_URL}/billiardtable/inactivetable/${tableId}`,
         {
           method: 'PUT',
           headers: {
             Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(data),
+            'Content-Type': 'application/json'
+          }
         }
       );
-
-      if (!response.ok) throw new Error('Failed to update table');
-      return await response.json();
+  
+      if (!response.ok) {
+        throw new Error('Failed to inactive table');
+      }
+  
+      return response.json();
     } catch (error) {
-      throw new Error('Error updating table');
-    }
-  },
-
-  updateTableStatus: async (tableId: string, status: string, token: string): Promise<ApiResponse<any>> => {
-    try {
-      const response = await fetch(
-        `${BASE_URL}/BilliardTable/UpdateStatusTable/${tableId}`,
-        {
-          method: 'PUT',
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ status }),
-        }
-      );
-
-      if (!response.ok) throw new Error('Failed to update table status');
-      return await response.json();
-    } catch (error) {
-      throw new Error('Error updating table status');
+      console.error('Error in inactiveTable:', error);
+      throw error;
     }
   },
   
+  updateTableStatus: async (tableId: string, status: string): Promise<any> => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error('No token found');
+  
+      const response = await fetch(
+        `${BASE_URL}/billiardtable/updatestatustable/${tableId}`,
+        {
+          method: 'PUT',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ status })
+        }
+      );
+  
+      if (!response.ok) {
+        throw new Error('Failed to update table status');
+      }
+  
+      return response.json();
+    } catch (error) {
+      console.error('Error in updateTableStatus:', error);
+      throw error;
+    }
+  },
 };

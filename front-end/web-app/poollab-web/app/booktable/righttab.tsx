@@ -528,12 +528,19 @@ function RightTab({
           title: "Thất Bại",
           description: data.message,
         });
+        setIsIssuesDialogOpen(true);
       } else {
         toast({
           status: "success",
           title: "Thành Công",
           description: data.message,
         });
+        setCusId(null);
+        setReason(null);
+        setEstimateCost(null);
+        setIssuesStatus(null);
+        setIssuesRepairStatus(null);
+        setIsIssuesDialogOpen(false);
       }
     } catch (error) {
       console.error(error);
@@ -754,7 +761,7 @@ function RightTab({
                       value={customerPaid === 0 ? "" : customerPaid}
                       onChange={(e) => {
                         const paid = parseFloat(e.target.value) || 0;
-                        const price = order?.totalPrice ?? 0;
+                        const price = order?.finalPrice ?? 0;
                         setCustomerPaid(paid);
                         setChange(paid - price);
                       }}
@@ -970,9 +977,9 @@ function RightTab({
         </div>
       )} */}
 
-      {showSuccessMessage && (
+      {/* {showSuccessMessage && (
         <div className={styles.success_message}>Đặt món thành công</div>
-      )}
+      )} */}
     </div>
   );
 }

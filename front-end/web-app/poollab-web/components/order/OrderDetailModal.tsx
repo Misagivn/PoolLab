@@ -81,6 +81,9 @@ export const OrderDetailModal = ({
             <VStack align="stretch" spacing={2}>
               <Text fontWeight="bold">Thông tin khách hàng</Text>
               <Text>{order.username}</Text>
+              {order.orderBy && (
+                <Text color="gray.600">Nhân viên phục vụ: {order.orderBy}</Text>
+              )}
             </VStack>
 
             <Divider />
@@ -145,6 +148,14 @@ export const OrderDetailModal = ({
               <HStack justify="space-between">
                 <Text>Giảm giá:</Text>
                 <Text>{formatCurrency(order.discount)}</Text>
+              </HStack>
+              <HStack justify="space-between">
+                <Text>Phí phát sinh:</Text>
+                <Text>{formatCurrency(order.additionalFee || 0)}</Text>
+              </HStack>
+              <HStack justify="space-between">
+                <Text>Số tiền cần trả:</Text>
+                <Text fontWeight="bold">{formatCurrency(order.finalPrice || 0)}</Text>
               </HStack>
               <HStack justify="space-between">
                 <Text>Khách trả:</Text>

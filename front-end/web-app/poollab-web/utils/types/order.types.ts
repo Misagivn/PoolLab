@@ -35,8 +35,11 @@ export interface OrderDetail {
   orderBy: string | null;
   discount: number;
   totalPrice: number;
+  finalPrice: number | null;
   customerPay: number;
   excessCash: number;
+  additionalFee: number | null;
+  paymentMethod: string | null;
   status: string;
 }
 

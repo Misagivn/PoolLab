@@ -62,9 +62,27 @@ export const useArea = () => {
     }
   };
 
-  const updateArea = async (areaId: string, data: Omit<Area, 'id'>) => {
+  const updateArea = async (areaId: string, data: Partial<Area>) => {
     try {
-      const response = await areaApi.updateArea(areaId, data);
+      // Validate required fields
+      if (!data.name?.trim()) {
+        throw new Error('Tên khu vực là bắt buộc');
+      }
+      
+      if (!data.storeId) {
+        throw new Error('StoreId is required');
+      }
+  
+      // Ensure all fields are properly formatted
+      const updateData: Omit<Area, 'id'> = {
+        name: data.name.trim(),
+        descript: data.descript?.trim() ?? '',
+        areaImg: data.areaImg ?? '',
+        storeId: data.storeId
+      };
+  
+      const response = await areaApi.updateArea(areaId, updateData);
+      
       if (response.status === 200) {
         toast({
           title: 'Thành công',
@@ -73,12 +91,15 @@ export const useArea = () => {
           duration: 3000,
           isClosable: true,
         });
-        await fetchAreas();
+        await fetchAreas(); // Refresh the list
+      } else {
+        throw new Error(response.message || 'Cập nhật thất bại');
       }
     } catch (err) {
+      console.error('Update area error:', err);
       toast({
         title: 'Lỗi',
-        description: 'Không thể cập nhật khu vực',
+        description: err instanceof Error ? err.message : 'Không thể cập nhật khu vực',
         status: 'error',
         duration: 3000,
         isClosable: true,

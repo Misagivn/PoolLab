@@ -70,33 +70,21 @@ export const AreaFormModal = ({
     try {
       setLoading(true);
       
-      // Nếu là update, chỉ gửi các trường đã thay đổi
-      if (initialData) {
-        const updatedFields: Partial<Area> = {
-          storeId: initialData.storeId
-        };
-
-        // So sánh và chỉ thêm vào các trường đã thay đổi
-        if (formData.name !== initialData.name) {
-          updatedFields.name = formData.name;
-        }
-        if (formData.descript !== initialData.descript) {
-          updatedFields.descript = formData.descript;
-        }
-        if (formData.areaImg !== initialData.areaImg) {
-          updatedFields.areaImg = formData.areaImg;
-        }
-
-        await onSubmit(updatedFields);
-      } else {
-        // Nếu là thêm mới, kiểm tra tên bắt buộc
-        if (!formData.name?.trim()) {
-          setErrors({ name: 'Tên khu vực là bắt buộc' });
-          return;
-        }
-        await onSubmit(formData);
+      // Basic validation
+      if (!formData.name?.trim()) {
+        setErrors({ name: 'Tên khu vực là bắt buộc' });
+        return;
       }
-
+  
+      // Prepare data for submission
+      const submitData: Partial<Area> = {
+        name: formData.name.trim(),
+        descript: formData.descript?.trim() || '',
+        areaImg: formData.areaImg || '',
+        storeId: initialData?.storeId || formData.storeId
+      };
+  
+      await onSubmit(submitData);
       onClose();
       setFormData({
         name: '',
@@ -105,6 +93,7 @@ export const AreaFormModal = ({
       });
       setErrors({});
     } catch (error) {
+      console.error('Form submission error:', error);
       toast({
         title: 'Lỗi',
         description: 'Không thể lưu thông tin khu vực',

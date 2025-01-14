@@ -26,9 +26,12 @@ import {
 } from '@chakra-ui/react';
 import { useEffect, useState, useRef } from 'react';
 import { FiPlus, FiEdit2, FiTrash2, FiRefreshCcw } from 'react-icons/fi';
-import { Unit } from '@/utils/types/productUnit.types';
+
+import { ProductUnitFormModal } from '@/components/productGTU/ProductUnitForm';
 import { unitApi } from '@/apis/productUnit.api';
-import { ProductGroupFormModal } from '@/components/productGTU/ProductGourpFrom';
+import { Unit } from '@/utils/types/productUnit.types';
+
+
 
 
 export default function ProductUnitPage() {
@@ -267,7 +270,7 @@ export default function ProductUnitPage() {
       </AlertDialog>
 
       {/* Form Modal */}
-      <ProductGroupFormModal
+      <ProductUnitFormModal
         isOpen={isFormOpen}
         onClose={() => {
           onFormClose();

@@ -14,8 +14,11 @@ import {
   Button,
   VStack,
   FormErrorMessage,
+  Select,
 } from '@chakra-ui/react';
 import { ProductGroup } from '@/utils/types/productGroup.types';
+import { ProductType } from '@/utils/types/productType.types';
+import { typeApi } from '@/apis/productType.api';
 
 interface ProductGroupFormModalProps {
   isOpen: boolean;
@@ -34,21 +37,42 @@ export const ProductGroupFormModal = ({
 }: ProductGroupFormModalProps) => {
   const [formData, setFormData] = useState<Omit<ProductGroup, 'id'>>({
     name: '',
-    descript: ''
+    descript: '',
+    productTypeId: null
   });
   const [errors, setErrors] = useState<{[key: string]: string}>({});
   const [loading, setLoading] = useState(false);
+  const [productTypes, setProductTypes] = useState<ProductType[]>([]);
+
+  useEffect(() => {
+    const fetchProductTypes = async () => {
+      try {
+        const response = await typeApi.getAllTypes();
+        if (response.status === 200) {
+          setProductTypes(response.data);
+        }
+      } catch (error) {
+        console.error('Error fetching product types:', error);
+      }
+    };
+
+    if (isOpen) {
+      fetchProductTypes();
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     if (initialData) {
       setFormData({
         name: initialData.name,
-        descript: initialData.descript
+        descript: initialData.descript,
+        productTypeId: initialData.productTypeId
       });
     } else {
       setFormData({
         name: '',
-        descript: ''
+        descript: '',
+        productTypeId: null
       });
     }
   }, [initialData, isOpen]);
@@ -73,7 +97,8 @@ export const ProductGroupFormModal = ({
       onClose();
       setFormData({
         name: '',
-        descript: ''
+        descript: '',
+        productTypeId: null
       });
       setErrors({});
     } catch (error) {
@@ -102,6 +127,24 @@ export const ProductGroupFormModal = ({
                 placeholder="Nhập tên nhóm sản phẩm"
               />
               <FormErrorMessage>{errors.name}</FormErrorMessage>
+            </FormControl>
+
+            <FormControl>
+              <FormLabel>Loại sản phẩm</FormLabel>
+              <Select
+                placeholder="Chọn loại sản phẩm"
+                value={formData.productTypeId || ''}
+                onChange={(e) => setFormData(prev => ({
+                  ...prev,
+                  productTypeId: e.target.value || null
+                }))}
+              >
+                {productTypes.map(type => (
+                  <option key={type.id} value={type.id}>
+                    {type.name}
+                  </option>
+                ))}
+              </Select>
             </FormControl>
 
             <FormControl>

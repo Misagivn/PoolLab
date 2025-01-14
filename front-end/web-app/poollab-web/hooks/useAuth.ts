@@ -30,18 +30,10 @@ export const useAuth = () => {
         }
         break;
       case 'Super Manager':
-        if (decodedToken.companyId) {
           router.push(AUTH_ROUTES.SUPER_MANAGER);
-        } else {
-          throw new Error(AUTH_MESSAGES.INVALID_COMPANY_SUPER);
-        }
         break;
       case 'Admin':
-        if (decodedToken.companyId) {
           router.push(AUTH_ROUTES.ADMIN);
-        } else {
-          throw new Error(AUTH_MESSAGES.INVALID_COMPANY_ADMIN);
-        }
         break;
       default:
         throw new Error(AUTH_MESSAGES.INVALID_ROLE);

@@ -28,6 +28,7 @@ import {
   AlertDialogContent,
   AlertDialogOverlay,
   useToast,
+  Image,
 } from '@chakra-ui/react';
 import { useState, useEffect, useRef } from 'react';
 import { 
@@ -128,8 +129,8 @@ export default function AreaPage() {
   };
 
   const filteredAreas = areas.filter(area => 
-    area.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    area.descript.toLowerCase().includes(searchQuery.toLowerCase())
+    (area?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false) ||
+    (area?.descript?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false)
   );
 
   if (loading) {
@@ -195,7 +196,28 @@ export default function AreaPage() {
               <Tr key={area.id}>
                 <Td>
                   <HStack spacing={3}>
-                    <Icon as={FiMapPin} color="blue.500" />
+                    {area.areaImg ? (
+                      <Image
+                        src={area.areaImg}
+                        alt={area.name}
+                        boxSize="32px"
+                        objectFit="cover"
+                        borderRadius="md"
+                        fallback={<Icon as={FiMapPin} color="blue.500" />}
+                      />
+                    ) : (
+                      <Box
+                        w="32px"
+                        h="32px"
+                        bg="gray.100"
+                        borderRadius="md"
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="center"
+                      >
+                        <Icon as={FiMap} color="gray.400" />
+                      </Box>
+                    )}
                     <Text fontWeight="medium">{area.name}</Text>
                   </HStack>
                 </Td>
@@ -240,6 +262,7 @@ export default function AreaPage() {
           </Tbody>
         </Table>
 
+
         {/* Empty State */}
         {filteredAreas.length === 0 && (
           <Flex 
@@ -280,8 +303,8 @@ export default function AreaPage() {
             setSelectedArea(null);
           }}
           onSubmit={selectedArea ? handleEditArea : handleAddArea}
-          initialData={selectedArea}
-          title={selectedArea ? 'Chỉnh sửa khu vực' : 'Thêm khu vực mới'}
+          initialData={selectedArea ?? undefined}
+          title={selectedArea != null ?'Chỉnh sửa khu vực' : 'Thêm khu vực mới'}
         />
 
         {/* Delete Confirmation Dialog */}

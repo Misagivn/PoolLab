@@ -62,7 +62,7 @@ export default function DashboardPage() {
   const [totalOrders, setTotalOrders] = useState("0");
   const [totalBookings, setTotalBookings] = useState("0");
   const [totalStaff, setTotalStaff] = useState("0");
-  const [selectedYear, setSelectedYear] = useState(2024);
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
   const [showTotal, setShowTotal] = useState(true);
   const [chartData, setChartData] = useState<any[]>([]);
@@ -138,11 +138,11 @@ export default function DashboardPage() {
         const yearlyData = [{
           branchName: 'Doanh thu',
           total: stores.reduce((sum, store) => 
-            sum + (store.revenueByMonth[0]?.totalRevenue || 0), 0
+            sum + store.revenueByMonth.reduce((monthSum, month) => monthSum + month.totalRevenue, 0), 0
           ),
           ...stores.reduce((acc, store) => ({
             ...acc,
-            [store.branchName]: store.revenueByMonth[0]?.totalRevenue || 0
+            [store.branchName]: store.revenueByMonth.reduce((monthSum, month) => monthSum + month.totalRevenue, 0)
           }), {})
         }];
         setChartData(yearlyData);
@@ -188,6 +188,18 @@ export default function DashboardPage() {
       </Flex>
     );
   }
+
+  const calculateTotalRevenueForStore = (store: StoreRevenue) => {
+    return store.revenueByMonth.reduce((sum, month) => sum + month.totalRevenue, 0);
+  };
+
+  const calculateTotalOrderRevenueForStore = (store: StoreRevenue) => {
+    return store.revenueByMonth.reduce((sum, month) => sum + month.orderRevenue, 0);
+  };
+
+  const calculateTotalDepositRevenueForStore = (store: StoreRevenue) => {
+    return store.revenueByMonth.reduce((sum, month) => sum + month.depositRevenue, 0);
+  };
 
   return (
     <Stack spacing={6} p={6}>
@@ -304,8 +316,12 @@ export default function DashboardPage() {
                 value={selectedYear}
                 onChange={(e) => setSelectedYear(Number(e.target.value))}
               >
-                <option value={2024}>2024</option>
-                <option value={2023}>2023</option>
+                {Array.from({length: 2}, (_, i) => {
+                  const year = new Date().getFullYear() - i;
+                  return (
+                    <option key={year} value={year}>{year}</option>
+                  );
+                })}
               </Select>
 
               <FormControl display='flex' alignItems='center'>
@@ -376,9 +392,9 @@ export default function DashboardPage() {
               {storeRevenues.map((store) => (
                 <Tr key={store.branchId}>
                   <Td fontWeight="medium">{store.branchName}</Td>
-                  <Td isNumeric>{formatCurrency(store.revenueByMonth[0]?.totalRevenue || 0)}</Td>
-                  <Td isNumeric>{formatCurrency(store.revenueByMonth[0]?.orderRevenue || 0)}</Td>
-                  <Td isNumeric>{formatCurrency(store.revenueByMonth[0]?.depositRevenue || 0)}</Td>
+                  <Td isNumeric>{formatCurrency(calculateTotalRevenueForStore(store))}</Td>
+                  <Td isNumeric>{formatCurrency(calculateTotalOrderRevenueForStore(store))}</Td>
+                  <Td isNumeric>{formatCurrency(calculateTotalDepositRevenueForStore(store))}</Td>
                 </Tr>
               ))}
               <Tr fontWeight="bold" bg="gray.50">
@@ -386,7 +402,7 @@ export default function DashboardPage() {
                 <Td isNumeric>
                   {formatCurrency(
                     storeRevenues.reduce(
-                      (sum, store) => sum + (store.revenueByMonth[0]?.totalRevenue || 0),
+                      (sum, store) => sum + calculateTotalRevenueForStore(store),
                       0
                     )
                   )}
@@ -394,7 +410,7 @@ export default function DashboardPage() {
                 <Td isNumeric>
                   {formatCurrency(
                     storeRevenues.reduce(
-                      (sum, store) => sum + (store.revenueByMonth[0]?.orderRevenue || 0),
+                      (sum, store) => sum + calculateTotalOrderRevenueForStore(store),
                       0
                     )
                   )}
@@ -402,7 +418,7 @@ export default function DashboardPage() {
                 <Td isNumeric>
                   {formatCurrency(
                     storeRevenues.reduce(
-                      (sum, store) => sum + (store.revenueByMonth[0]?.depositRevenue || 0),
+                      (sum, store) => sum + calculateTotalDepositRevenueForStore(store),
                       0
                     )
                   )}

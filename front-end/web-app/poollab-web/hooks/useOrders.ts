@@ -27,15 +27,12 @@ export const useOrder = () => {
       const response = await orderApi.getAllOrders({
         token,
         pageNumber,
-        pageSize: pagination.pageSize
+        pageSize: pagination.pageSize,
+        username
       });
 
       if (response.status === 200) {
-        const storeOrders = response.data.items.filter(
-          order => order.storeId === decoded.storeId
-        );
-
-        setOrders(storeOrders);
+        setOrders(response.data.items);
         setPagination({
           currentPage: response.data.pageNumber,
           totalPages: response.data.totalPages,

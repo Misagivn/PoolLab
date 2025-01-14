@@ -1,4 +1,3 @@
-// pages/billiard-type/page.tsx
 'use client';
 
 import {

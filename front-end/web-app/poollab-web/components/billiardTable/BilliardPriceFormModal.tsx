@@ -37,7 +37,6 @@ export const BilliardPriceFormModal = ({
     name: '',
     descript: '',
     oldPrice: 0,
-    newPrice: 0,
     timeStart: new Date().toISOString(),
     timeEnd: new Date().toISOString(),
   });
@@ -50,7 +49,6 @@ export const BilliardPriceFormModal = ({
         name: initialData.name,
         descript: initialData.descript || '',
         oldPrice: initialData.oldPrice,
-        newPrice: initialData.newPrice,
         timeStart: initialData.timeStart,
         timeEnd: initialData.timeEnd,
       });
@@ -59,7 +57,6 @@ export const BilliardPriceFormModal = ({
         name: '',
         descript: '',
         oldPrice: 0,
-        newPrice: 0,
         timeStart: new Date().toISOString(),
         timeEnd: new Date().toISOString(),
       });
@@ -74,9 +71,6 @@ export const BilliardPriceFormModal = ({
     }
     if (formData.oldPrice < 0) {
       newErrors.oldPrice = 'Giá không thể âm';
-    }
-    if (formData.newPrice < 0) {
-      newErrors.newPrice = 'Giá không thể âm';
     }
 
     setErrors(newErrors);
@@ -94,7 +88,6 @@ export const BilliardPriceFormModal = ({
         name: '',
         descript: '',
         oldPrice: 0,
-        newPrice: 0,
         timeStart: new Date().toISOString(),
         timeEnd: new Date().toISOString(),
       });
@@ -151,20 +144,6 @@ export const BilliardPriceFormModal = ({
                 placeholder="Nhập giá tiền"
               />
               <FormErrorMessage>{errors.oldPrice}</FormErrorMessage>
-            </FormControl>
-
-            <FormControl isInvalid={!!errors.newPrice}>
-              <FormLabel>Giá chọn</FormLabel>
-              <Input
-                type="number"
-                value={formData.newPrice}
-                onChange={(e) => setFormData(prev => ({
-                  ...prev,
-                  newPrice: Number(e.target.value)
-                }))}
-                placeholder="Nhập giá chọn"
-              />
-              <FormErrorMessage>{errors.newPrice}</FormErrorMessage>
             </FormControl>
 
             <FormControl>

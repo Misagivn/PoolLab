@@ -3,7 +3,7 @@ export interface Course {
   title: string;
   descript: string;
   price: number;
-  schedule: string;
+  schedule: string[];  
   startDate: string;
   endDate: string;
   startTime: string;
@@ -16,26 +16,48 @@ export interface Course {
   address: string;
   accountId: string;
   accountName: string;
-  accountAvatar: string;
+  accountAvatar: string | null;
   mentorId: string | null;
   createdDate: string;
   updatedDate: string | null;
   status: string;
 }
 
-export interface Member {
-  id: string;
-  email: string;
-  avatarUrl: string;
-  userName: string;
-  fullName: string;
-  phoneNumber: string;
-  roleId: string;
-  roleName: string;
+export interface CreateCourseDTO {
+  title: string;
+  descript: string;
+  price: number;
+  schedule: string[];  
+  courseMonth: string; 
+  startTime: string;   
+  endTime: string;    
+  level: string;       
+  quantity: number;    
+  storeId: string;     
+  accountId: string;   
+}
+
+
+export interface UpdateCourseRequest {
+  title: string;
+  descript: string;
+  price: number;
+  schedule: string;
+  startDate: string;
+  level: string;
+  quantity: number;
+  storeId: string;
+  accountId: string;
   status: string;
 }
 
-export interface CourseApiResponse {
+export interface CourseResponse {
+  status: number;
+  message: string | null;
+  data: Course;
+}
+
+export interface PaginatedCourseResponse {
   status: number;
   message: string | null;
   data: {
@@ -46,3 +68,4 @@ export interface CourseApiResponse {
     pageNumber: number;
   };
 }
+

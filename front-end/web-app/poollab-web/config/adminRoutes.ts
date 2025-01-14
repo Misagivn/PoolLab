@@ -1,6 +1,8 @@
 import { Icon } from "next/dist/lib/metadata/types/metadata-types";
 import { IconType } from "react-icons";
 import { FiDollarSign, FiHome, FiLogOut, FiSettings, FiUsers } from "react-icons/fi";
+import { MdEmojiEvents } from "react-icons/md";
+import { RiBilliardsLine } from "react-icons/ri";
 import { VscAccount } from "react-icons/vsc";
 
 
@@ -28,9 +30,30 @@ export const adminRoutes: RouteConfig[] = [
     icon: FiUsers,
   },
   {
-    path: '/dashboard/transactions',
+    path: '/dashboard/course',
+    label: 'Khóa học',
+    icon: RiBilliardsLine,
+  },
+  {
+    path: '/dashboard/events',
+    label: 'Sự kiện',
+    icon: MdEmojiEvents,
+  },
+  {
+    path: '/dashboard/transaction',
     label: 'Giao dịch',
     icon: FiDollarSign,
+    subRoutes: [
+      {
+        path: '/dashboard/transaction/getalltransaction',
+        label: 'Tài khoản'
+      },
+      {
+        path: '/dashboard/transaction/getallorder',
+        label: 'Hóa đơn'
+      },
+
+    ],
   },
   {
     path: '/dashboard/config',

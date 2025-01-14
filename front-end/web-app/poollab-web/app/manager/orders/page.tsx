@@ -89,7 +89,7 @@ export default function OrdersPage() {
               <Icon as={FiSearch} color="gray.400" />
             </InputLeftElement>
             <Input
-              placeholder="Tìm kiếm đơn hàng..."
+              placeholder="Tìm kiếm"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />

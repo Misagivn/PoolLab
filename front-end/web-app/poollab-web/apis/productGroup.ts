@@ -36,7 +36,11 @@ export const groupApi = {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(data)
+        body: JSON.stringify({
+          name: data.name,
+          descript: data.descript,
+          productTypeId: data.productTypeId
+        })
       }
     );
     return response.json();
@@ -54,7 +58,11 @@ export const groupApi = {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(data)
+        body: JSON.stringify({
+          name: data.name,
+          descript: data.descript,
+          productTypeId: data.productTypeId
+        })
       }
     );
     return response.json();

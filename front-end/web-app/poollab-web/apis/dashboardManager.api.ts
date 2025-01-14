@@ -1,17 +1,6 @@
+import { ApiResponse, DailyStats } from "@/utils/types/dashboardMana.types";
+
 const BASE_URL = 'https://poollabwebapi20241008201316.azurewebsites.net/api/dashboard';
-
-interface ApiResponse<T> {
-  status: number;
-  message: string;
-  data: T;
-}
-
-interface DailyStats {
-  date: string;
-  totalIncome: number;
-  totalOrder: number;
-  totalBooking: number;
-}
 
 export const managerDashboardApi = {
   getStoreIncome: async (storeId: string): Promise<ApiResponse<string>> => {

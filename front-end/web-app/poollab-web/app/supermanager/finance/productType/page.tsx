@@ -27,7 +27,6 @@ import {
 import { useEffect, useState, useRef } from 'react';
 import { FiPlus, FiEdit2, FiTrash2, FiRefreshCcw } from 'react-icons/fi';
 import { ProductType } from '@/utils/types/productType.types';
-import { groupApi } from '@/apis/productGroup';
 import { ProductTypeFormModal } from '@/components/productGTU/ProductTypeForm';
 import { typeApi } from '@/apis/productType.api';
 
@@ -79,7 +78,7 @@ export default function ProductGroupPage() {
 
   const handleAddGroup = async (data: Omit<ProductType, 'id'>) => {
     try {
-      const response = await groupApi.createGroup(data);
+      const response = await typeApi.createType(data);
       if (response.status === 200) {
         toast({
           title: 'Thành công',
@@ -104,7 +103,7 @@ export default function ProductGroupPage() {
   const handleUpdateGroup = async (data: Omit<ProductType, 'id'>) => {
     if (!selectedGroup) return;
     try {
-      const response = await groupApi.updateGroup(selectedGroup.id, data);
+      const response = await typeApi.updateType(selectedGroup.id, data);
       if (response.status === 200) {
         toast({
           title: 'Thành công',
@@ -129,7 +128,7 @@ export default function ProductGroupPage() {
   const handleDeleteGroup = async () => {
     if (!groupToDelete) return;
     try {
-      const response = await groupApi.deleteGroup(groupToDelete.id);
+      const response = await typeApi.deleteType(groupToDelete.id);
       if (response.status === 200) {
         toast({
           title: 'Thành công',

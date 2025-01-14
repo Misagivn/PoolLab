@@ -36,6 +36,7 @@ import { BilliardTable, BilliardTableFormData } from '@/utils/types/table.types'
 import { billiardTableApi } from '@/apis/table.api';
 import { BilliardTableFormModal } from '@/components/billiardTablesupdate/BilliardTableFormModal';
 import { BilliardTableDetailModal } from '@/components/billiardTablesupdate/BilliardTableDetailModal';
+import { TableStatusModal } from '@/components/billiardTablesupdate/tableStatusModal';
 import { ProductPagination } from '@/components/common/paginations';
 import { useBilliardTable } from '@/hooks/useTable';
 import { useArea } from '@/hooks/useArea';
@@ -60,6 +61,12 @@ export default function BilliardTablePage() {
   const { areas, fetchAreas } = useArea();
   const { types, fetchTypes } = useBilliardType();
   const { prices, fetchPrices } = useBilliardPrice();
+
+  const {
+    isOpen: isStatusOpen,
+    onOpen: onStatusOpen,
+    onClose: onStatusClose
+  } = useDisclosure();
 
   const { 
     isOpen: isFormOpen, 
@@ -287,7 +294,17 @@ export default function BilliardTablePage() {
                 <Td>{table.bidaTypeName}</Td>
                 <Td>{formatPrice(table.oldPrice)}</Td>
                 <Td>
-                  <Badge colorScheme="green">{table.status}</Badge>
+                  <Badge
+                    colorScheme={
+                      table.status === 'Có Khách'
+                        ? 'red'
+                        : table.status === 'Bàn Trống'
+                        ? 'green'
+                        : 'yellow'
+                    }
+                  >
+                    {table.status}
+                  </Badge>
                 </Td>
                 <Td>{formatDateTime(table.createdDate)}</Td>
                 <Td>
@@ -310,6 +327,17 @@ export default function BilliardTablePage() {
                       onClick={() => {
                         setSelectedTable(table);
                         onFormOpen();
+                      }}
+                    />
+                    <IconButton
+                      aria-label="Change status"
+                      icon={<Icon as={FiRefreshCcw} />}
+                      size="sm"
+                      variant="ghost"
+                      colorScheme={table.status === 'Có Khách' ? 'red' : 'green'}
+                      onClick={() => {
+                        setSelectedTable(table);
+                        onStatusOpen();
                       }}
                     />
                     <IconButton
@@ -413,6 +441,16 @@ export default function BilliardTablePage() {
         isOpen={isDetailOpen}
         onClose={onDetailClose}
         table={selectedDetailTable}
+      />
+
+      <TableStatusModal
+        isOpen={isStatusOpen}
+        onClose={() => {
+          onStatusClose();
+          setSelectedTable(null);
+        }}
+        table={selectedTable}
+        onStatusUpdate={() => fetchTables(pagination.currentPage)}
       />
     </Box>
   );

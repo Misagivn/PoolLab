@@ -161,5 +161,60 @@ export const billiardTableApi = {
       console.error('Error in uploadImage:', error);
       throw error;
     }
-  }
+  },
+
+  inactiveTable: async (tableId: string): Promise<any> => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error('No token found');
+  
+      const response = await fetch(
+        `${BASE_URL}/billiardtable/inactivetable/${tableId}`,
+        {
+          method: 'PUT',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+  
+      if (!response.ok) {
+        throw new Error('Failed to inactive table');
+      }
+  
+      return response.json();
+    } catch (error) {
+      console.error('Error in inactiveTable:', error);
+      throw error;
+    }
+  },
+  
+  updateTableStatus: async (tableId: string, status: string): Promise<any> => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error('No token found');
+  
+      const response = await fetch(
+        `${BASE_URL}/billiardtable/updatestatustable/${tableId}`,
+        {
+          method: 'PUT',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ status })
+        }
+      );
+  
+      if (!response.ok) {
+        throw new Error('Failed to update table status');
+      }
+  
+      return response.json();
+    } catch (error) {
+      console.error('Error in updateTableStatus:', error);
+      throw error;
+    }
+  },
 };

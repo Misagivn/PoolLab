@@ -9,6 +9,8 @@ import {
   FiMessageSquare,
   FiLogOut
 } from 'react-icons/fi';
+import { FaRegFileExcel } from "react-icons/fa";
+import { TfiBolt } from "react-icons/tfi";
 import { PiMapPinAreaBold } from "react-icons/pi";
 import { VscAccount } from "react-icons/vsc";
 
@@ -38,6 +40,16 @@ export const routes: RouteConfig[] = [
     path: '/manager/tables',
     label: 'Bàn',
     icon: FiBox,
+  },
+  {
+    path: '/manager/tableissue',
+    label: 'Sự cố',
+    icon: FaRegFileExcel,
+  },
+  {
+    path: '/manager/tablemaintenance',
+    label: 'Bảo trì',
+    icon: TfiBolt,
   },
   {
     path: '/manager/products',

@@ -31,7 +31,7 @@ import {
   InputLeftElement,
 } from '@chakra-ui/react';
 import { useEffect, useState, useRef } from 'react';
-import { FiPlus, FiEdit2, FiTrash2, FiRefreshCcw, FiSearch, FiEye } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiTrash2, FiRefreshCcw, FiSearch, FiEye, FiInfo } from 'react-icons/fi';
 import { BilliardTable, BilliardTableFormData } from '@/utils/types/table.types';
 import { billiardTableApi } from '@/apis/table.api';
 import { BilliardTableFormModal } from '@/components/billiardTablesupdate/BilliardTableFormModal';
@@ -311,7 +311,7 @@ export default function BilliardTablePage() {
                   <Flex justify="flex-end" gap={2}>
                     <IconButton
                       aria-label="View details"
-                      icon={<Icon as={FiEye} />}
+                      icon={<Icon as={FiInfo} />}
                       size="sm"
                       variant="ghost"
                       onClick={() => {

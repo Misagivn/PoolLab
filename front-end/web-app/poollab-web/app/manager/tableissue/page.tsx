@@ -3,31 +3,38 @@
 import {
   Box,
   Flex,
+  Text,
   Heading,
-  Icon,
+  Badge,
+  Spinner,
+  Input,
+  InputGroup,
+  InputLeftElement,
+  Stack,
   Table,
   Thead,
   Tbody,
   Tr,
   Th,
   Td,
-  IconButton,
-  useDisclosure,
-  Stack,
-  Text,
-  Badge,
   HStack,
-  Input,
-  InputGroup,
-  InputLeftElement,
+  IconButton,
+  Icon,
+  useDisclosure,
 } from '@chakra-ui/react';
-import { useEffect, useState } from 'react';
-import { FiSearch, FiRefreshCcw, FiEye, FiTool } from 'react-icons/fi';
+import { useState, useEffect } from 'react';
+import { 
+  FiSearch, 
+  FiRefreshCcw,
+  FiEye,
+  FiTool, 
+  FiInfo
+} from 'react-icons/fi';
 import { useTableIssues } from '@/hooks/useTableIssues';
 import { TableIssueDetailModal } from '@/components/tableIssues/TableIssueDetailModal';
+import { CreateMaintenanceFormModal } from '@/components/tableMaintenance/CreateMaintenanceStatusModal';
 import { ProductPagination } from '@/components/common/paginations';
 import { TableIssue } from '@/utils/types/tableIssues.types';
-
 
 export default function TableIssuesPage() {
   const {
@@ -68,19 +75,17 @@ export default function TableIssuesPage() {
     fetchIssues(1);
   };
 
-  
   const handleOpenMaintenance = (issue: TableIssue) => {
     selectIssue(issue);
     onMaintenanceOpen();
   };
-  
 
   const handleOpenDetail = (issue: TableIssue) => {
     selectIssue(issue);
     onDetailOpen();
   };
 
-  const filteredIssues = issues.filter(issue => 
+  const filteredIssues = issues.filter(issue =>
     issue.tableIssuesCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
     issue.billiardName.toLowerCase().includes(searchQuery.toLowerCase()) ||
     issue.reportedBy.toLowerCase().includes(searchQuery.toLowerCase())
@@ -96,6 +101,14 @@ export default function TableIssuesPage() {
       currency: 'VND'
     }).format(price);
   };
+
+  if (loading && issues.length === 0) {
+    return (
+      <Flex h="100%" align="center" justify="center" p={6}>
+        <Spinner size="xl" color="blue.500" />
+      </Flex>
+    );
+  }
 
   return (
     <Box p={6}>
@@ -153,27 +166,25 @@ export default function TableIssuesPage() {
                 </Td>
                 <Td>{formatDateTime(issue.createdDate)}</Td>
                 <Td>
-                  <Flex justify="flex-end">
-                    <HStack spacing={2}>
+                  <HStack spacing={2} justify="flex-end">
+                    <IconButton
+                      aria-label="View details"
+                      icon={<Icon as={FiInfo} />}
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => handleOpenDetail(issue)}
+                    />
+                    {issue.repairStatus !== 'Hoàn Thành' && (
                       <IconButton
-                        aria-label="View details"
-                        icon={<Icon as={FiEye} />}
+                        aria-label="Create maintenance"
+                        icon={<Icon as={FiTool} />}
                         size="sm"
                         variant="ghost"
-                        onClick={() => handleOpenDetail(issue)}
+                        colorScheme="blue"
+                        onClick={() => handleOpenMaintenance(issue)}
                       />
-                      {/* {issue.repairStatus !== 'Hoàn Thành' && (
-                        <IconButton
-                          aria-label="Create maintenance"
-                          icon={<Icon as={FiTool} />}
-                          size="sm"
-                          variant="ghost"
-                          colorScheme="blue"
-                          onClick={() => handleOpenMaintenance(issue)}
-                        />
-                      )} */}
-                    </HStack>
-                  </Flex>
+                    )}
+                  </HStack>
                 </Td>
               </Tr>
             ))}
@@ -213,10 +224,11 @@ export default function TableIssuesPage() {
         issue={selectedIssue}
       />
 
-      {/* <CreateMaintenanceFormModal
+      <CreateMaintenanceFormModal
         isOpen={isMaintenanceOpen}
         onClose={onMaintenanceClose}
-      /> */}
+        issue={selectedIssue}
+      />
     </Box>
   );
 }

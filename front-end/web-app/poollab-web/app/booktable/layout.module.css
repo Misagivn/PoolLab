@@ -1,5 +1,9 @@
 .container {
-  background-color: #017d49;
+  background: linear-gradient(
+    90deg,
+    rgba(103, 230, 161, 1) 0%,
+    rgba(1, 206, 209, 1) 100%
+  );
   width: 100vw; /* Chiếm toàn bộ chiều rộng màn hình */
   min-height: 100vh;
   display: flex;
@@ -38,12 +42,12 @@
 }
 
 .tabs .active {
-  background-color: #fafafa;
+  background-color: rgba(255, 255, 255, 0.9);
   color: #017d49;
 }
 
 .left_content {
-  background-color: #fafafa;
+  background: rgba(255, 255, 255, 0.9);
   width: auto;
   height: 100%;
   border-radius: 0px 20px 20px 20px;
@@ -69,17 +73,15 @@
   padding: 0 15px;
 }
 
-
 .table_filter > div {
   position: relative;
-  width: 24%; 
+  width: 24%;
 }
-
 
 .table_filter select {
   width: 100%;
-  height: 40px; 
-  padding: 0 30px 0 10px; 
+  height: 40px;
+  padding: 0 30px 0 10px;
   font-size: 14px;
   border: 1.9px solid lightgray;
   border-radius: 5px;
@@ -90,10 +92,9 @@
   background: #fff;
 }
 
-
 .filter_btn {
   width: 24%;
-  height: 40px; 
+  height: 40px;
   border-radius: 5px;
   font-size: 14px;
   cursor: pointer;
@@ -104,17 +105,15 @@
   padding: 0 15px;
 }
 
-
 .table_filter i {
   position: absolute;
-  right: 10px; 
+  right: 10px;
   top: 50%;
   transform: translateY(-50%);
   font-size: 12px;
   color: #908d92;
   pointer-events: none;
 }
-
 
 .filter_bidaType::before,
 .filter_area::before,
@@ -137,12 +136,10 @@
   content: "Trạng thái";
 }
 
-
 .filter_btn:hover {
   background-color: #015d35;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
-
 
 @media (max-width: 768px) {
   .table_filter {
@@ -175,11 +172,12 @@
 }
 
 .card.selected {
-  outline: 3px solid #00ffa9;
+  outline: 3px solid #017d49;
   outline-offset: 3px;
 }
 
 .card:hover {
+  background: none;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
@@ -214,9 +212,9 @@
   height: 25px;
   width: 62%;
   background-color: #017d49;
-  border-top: 4px solid #fff;
-  border-right: 4px solid #fff;
-  border-left: 4px solid #fff;
+  border-top: 4px solid rgba(255, 255, 255, 0.9);
+  border-right: 4px solid rgba(255, 255, 255, 0.9);
+  border-left: 4px solid rgba(255, 255, 255, 0.9);
   border-top-right-radius: 15px;
   border-top-left-radius: 15px;
 }
@@ -270,7 +268,7 @@
 
 .right_btn {
   padding: 10px 20px;
-  background-color: #fafafa;
+  background-color: rgba(255, 255, 255, 0.9);
   color: #017d49;
   font-weight: 700;
   border: none;
@@ -279,7 +277,7 @@
 }
 
 .right_content {
-  background-color: #fafafa;
+  background-color: rgba(255, 255, 255, 0.9);
   width: auto;
   height: 100%;
   border-radius: 0px 20px 20px 20px;
@@ -290,45 +288,130 @@
 .right_main {
   width: auto;
   height: 100%;
-  padding: 20px;
+  padding: 10px;
   display: flex;
   flex-direction: column;
 }
 
 .table_info {
-  flex: 1;
+  background: rgba(255, 255, 255, 1);
+  height: 80px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .table_order {
   flex: 4;
+  background: rgba(255, 255, 255, 1);
+  border-radius: 10px;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  margin-bottom: 10px;
 }
 
 .table_btn {
-  flex: 1;
+  height: 60px;
 }
 
 .table_info2 {
+  height: 100%;
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
-  font-size: 18px;
+  gap: 10px 30px;
+  flex-wrap: wrap;
+  padding: 5px 10px;
+}
+
+.table_info2 img {
+  border-radius: 10px;
+  width: 66.8px;
+  height: 66.8px;
+}
+
+.table_info3 {
+  font-size: 15px;
+  padding-top: 10px;
+}
+
+.table_info3 h2 {
   font-weight: 700;
+  color: #213555;
+}
+
+.table_info3 button{
+  padding: 10px 15px;
+  font-size: 16px;
+  font-weight: 600;
+  color: white;
+  background-color: #ECE852;
+  border-radius: 10px;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+}
+
+.table_info3 button:hover{
+   background-color: #FCC737;
+}
+
+@media screen and (max-width: 1100px) {
+  .table_info2{
+    gap: 3px;
+    flex-wrap: nowrap;
+  }
+  
+  .table_info3 h2 {
+    font-size: 13px;
+  }
+
+  .table_info3 p {
+    font-size: 12px;
+  }
+
+  .table_info3 button {
+    font-size: 12px; /* Nhỏ lại nút khi màn hình hẹp */
+    padding: 1px 3px;
+  }
+}
+
+@media screen and (max-width: 1300px) {
+  .table_info2{
+    gap: 8px;
+    flex-wrap: nowrap;
+  }
+
+  .table_info3 h2 {
+    font-size: 16px;
+  }
+
+  .table_info3 p {
+    font-size: 15px;
+  }
+
+  .table_info3 button {
+    font-size: 15px;
+    padding: 5px 10px;
+  }
+
+  
 }
 
 .active1_btn {
-  color: #fafafa;
-  background-color: #00712d;
-  padding: 10px 20px;
-  text-align: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 5px;
+  font-size: 18px;
+  cursor: pointer;
+  background-color: #017d49;
+  color: #fff;
   font-weight: 700;
-  border-radius: 10px;
-  font-size: 20px;
-  font-weight: 700;
-  height: auto;
+  border: none;
+  padding: 0 15px;
 }
 
 .active1_btn:hover {
-  background-color: #56c596;
+  background-color: #015d35;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .stop_btn {
@@ -365,6 +448,20 @@
 
 .payment_btn:hover {
   background-color: #608bc1;
+}
+
+@media screen and (max-width: 1300px){
+  .stop_btn{
+    font-size: 15px;
+    width: 40%;
+    margin-right: 10px;
+ }
+
+ .payment_btn{
+  font-size: 15px;
+  width: 40%;
+  margin-right: 10px;
+}
 }
 
 .dialog_container {
@@ -405,13 +502,12 @@
 
 .content_table {
   border-collapse: collapse;
-  margin: 20px 0;
   font-size: 1em;
   font-family: "Poppins", sans-serif;
-  min-width: 800px;
+  min-width: 600px;
   border-radius: 5px 5px 0 0;
   overflow: hidden;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+  /* box-shadow: 0 0 20px rgba(0, 0, 0, 0.15); */
 }
 
 .content_table thead tr {
@@ -438,10 +534,116 @@
   border-bottom: 2px solid #686d76;
 }
 
+.payment_info{
+  padding-left: 20px;
+}
+
+.payment_info h2{
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center; 
+  margin: 0; 
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.payment_info_finalprice{
+  font-size: 18px;
+  color: #213555;
+  font-weight: 700;
+}
+
+.payment_input {
+  display: flex; /* Sử dụng Flexbox */
+  justify-content: space-between; /* Đưa label và input về 2 phía */
+  align-items: center; /* Căn giữa theo chiều dọc */
+  margin-bottom: 1rem; /* Khoảng cách giữa các thẻ div (tuỳ chỉnh) */
+}
+
+.payment_input label {
+  font-size: 16px; 
+  margin-right: 1rem; 
+}
+
+.payment_input input {
+  flex: 1; 
+  text-align: right; 
+  padding: 0.5rem; 
+  font-size: 16px; 
+  border-top: 1px solid #ccc; 
+  outline: none;
+}
+
+.payment_info h2 input{
+  text-align: right;
+  border: none;
+  outline: none;
+}
+
+.payment_info_cash2 {
+  display: flex; 
+  align-items: center; 
+  flex: 1; 
+  border-radius: 4px; 
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.payment_info_cash2 input {
+  flex: 1; 
+  text-align: right; 
+  border: none; 
+  outline: none; 
+  font-size: 16px; 
+  outline: none;
+}
+
+.payment_info_cash2 span {
+  margin-left: 0.2rem; 
+  font-size: 16px; 
+  color: #333; 
+}
+
+.payment_info_cash {
+  display: flex; 
+  align-items: center; 
+  flex: 1; 
+  border-radius: 4px; 
+}
+
+.payment_info_cash input {
+  flex: 1; 
+  text-align: right; 
+  border: none; 
+  outline: none; 
+  font-size: 16px; 
+  outline: none;
+}
+
+.payment_info_cash span {
+  margin-left: 0.2rem; 
+  font-size: 16px; 
+  color: #333; 
+}
+
+.payment_method{
+   margin-bottom: 20px;
+}
+
 .wrap_head {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
+  margin-bottom: 15px;
+}
+
+.wrap_head h2{
+  position: absolute; 
+  left: 50%; 
+  transform: translateX(-50%);
+  margin: 0; 
+  font-size: 23px; 
+  color: #213555;
+  font-weight: 700;
 }
 
 .wrap_head button {
@@ -450,9 +652,13 @@
   color: white;
   font-size: 10px;
   border-radius: 5px;
+  margin-left: auto;
 }
 
 .payment1_btn {
+  display: flex; /* Sử dụng Flexbox */
+  justify-content: flex-end; /* Đẩy nút sang phải */
+  padding: 0.5rem 0rem;
   margin-top: 10px;
 }
 
@@ -742,12 +948,14 @@
 }
 
 .profile_button {
-  background: transparent;
+  background:  rgba(255, 255, 255, 0.9);
   border: none;
   color: #333;
   cursor: pointer;
-  padding: 8px 12px;
-  font-size: 14px;
+  font-size: 29px;
+  margin-right: 10px;
+  border-radius: 20px 0px 20px 20px;
+  padding: 2px 10px;
 }
 
 .dropdown_menu {
@@ -815,3 +1023,453 @@
   background-color: #eee;
   margin: 8px 0;
 }
+
+.profile_dialog{
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.profile_dialog_content{
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  min-width: 900px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+}
+
+.profile_content{
+  display: flex;
+  flex-direction: row;
+  min-width: 600px;
+  padding: 10px 10px;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.profile_avatar img{
+  width: 160px;
+  height: 160px;
+  border-radius: 10px;
+  border: 1px solid rgb(33, 53, 85);
+}
+
+.profile_info h2{
+  color: rgb(33, 53, 85);
+  font-weight: 700;
+  font-size: 30px;
+  margin-bottom: 1rem;
+}
+
+.profile_input {
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center; 
+  margin-bottom: 1rem; 
+}
+
+.profile_input label {
+  font-size: 16px; 
+  margin-right: 1rem; 
+  flex: 1;
+}
+
+.profile_input input {
+  flex: 1; 
+  text-align: right; 
+  padding: 0.5rem;
+  font-size: 16px; 
+  border: 1px solid #ccc; 
+  border-radius: 10px; 
+}
+
+.issues_content{
+  display: flex;
+  flex-direction: row;
+  min-width: 600px;
+  padding: 10px 10px;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.issues_input {
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center; 
+  margin-bottom: 1rem; 
+}
+
+.issues_input label {
+  font-size: 16px; 
+  margin-right: 1rem; 
+  padding: 0.5rem;
+  flex: 1;
+}
+
+.issues_input input {
+  flex: 1; 
+  text-align: right; 
+  padding: 0.5rem;
+  font-size: 16px; 
+  border: 1px solid #ccc; 
+  border-radius: 10px; 
+}
+
+.issues_input button{
+  padding: 5px 10px;
+  color: white;
+  font-size: 16px;
+  background-color: #017d49;
+  cursor: pointer;
+  margin-left: 10px;
+  border-radius: 10px;
+}
+
+.issues_card{
+  height: 200px;
+  overflow-y: auto;
+}
+
+.issues_card_info{
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  margin-bottom: 10px;
+}
+
+.issues_card_info img{
+  width: 80px;
+  height: 80px;
+  border-radius: 10px;
+}
+
+.issues_acc_info{
+  width: 180px;
+}
+
+.issues_acc_info h2{
+  font-size: 18px;
+  color: #213555;
+  font-weight: 700;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+}
+
+.issues_acc_info h2 svg{
+  margin-top: 4px;
+}
+
+.iss_acc_active{
+  margin-top: 5px;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 5px 5px;
+  border-radius: 10px;
+  color: #00712d;
+  border: 2px solid #00712d;
+  background: none;
+  text-align: center;
+  width: 76px;
+}
+
+.iss_acc_inactive{
+  margin-top: 5px;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 5px 5px;
+  border-radius: 10px;
+  color: #b8001f;
+  border: 2px solid #b8001f;
+  background: none;
+  text-align: center;
+  width: 76px;
+}
+
+.issues_acc_btn{
+  padding: 5px 10px;
+    font-size: 16px;
+    font-weight: 600;
+    color: white;
+    background-color: #00712d;
+    border-radius: 10px;
+    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+    cursor: pointer;
+    height: 33px;
+    text-align: center;
+}
+
+.issues_acc_btn:hover{
+  background-color: #015d35;
+}
+
+.issues_info_right{
+  flex: 1;
+  width: 450px;
+}
+
+.issues_right_content textarea{
+  width: 100%;
+  height: 100px;
+  resize: none;
+  border-radius: 10px;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  padding: 10px;
+}
+
+.issues_cost{
+  display: flex;
+  flex-direction: row;
+  margin-top: 10px;
+  justify-content: space-between;
+}
+
+.issues_cost label{
+  padding: 10px;
+  font-size: 16px;
+}
+.issues_cost input{
+  text-align: right;
+  padding: 10px;
+  border-radius: 10px;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  font-size: 16px;
+}
+
+.payment_method1{
+  margin-top:  20px;
+}
+
+.issues_btn_report{
+  margin-top: 40px;
+  display: flex;
+  float: right;
+}
+.issues_btn_report button{
+  padding: 10px 15px;
+  border-radius: 10px;
+  color: white;
+  background-color: #00712d;
+  text-align: right;
+}
+
+.content_table1 {
+  border-collapse: collapse;
+  font-size: 1em;
+  font-family: "Poppins", sans-serif;
+  min-width: 600px;
+  border-radius: 5px 5px 0 0;
+  overflow: hidden;
+  width: 100%;
+  /* box-shadow: 0 0 20px rgba(0, 0, 0, 0.15); */
+}
+
+.content_table1 thead tr {
+  background-color: #686d76;
+  color: #ffffff;
+  text-align: left;
+  font-weight: bold;
+  
+}
+
+.content_table1 th,
+.content_table1 td {
+  padding: 12px 15px;
+}
+
+.content_table1 tbody tr {
+  border-bottom: 1px solid #dddddd;
+}
+
+.content_table1 tbody tr:nth-of-type(even) {
+  background-color: #f3f3f3;
+}
+
+.content_table1 tbody tr:last-of-type {
+  border-bottom: 2px solid #686d76;
+}
+
+.profile_dialog1{
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.profile_dialog_content1{
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  min-width: 500px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+}
+
+.tableIssues_info textarea{
+  border-radius: 10px;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  resize: none;
+  padding: 10px;
+}
+
+.tableIssues_input_detail{
+   display: flex;
+   justify-content: space-between;
+   flex-direction: row;
+   margin-top: 10px;
+}
+.tableIssues_input_detail p{
+  padding: 5px;
+  flex: 2;
+}
+.tableIssues_input_detail h2{
+  flex: 1;
+  padding: 5px;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+  text-align: right;
+}
+
+.tableIssues_input_header{
+  display: flex;
+  justify-content: space-between;
+  flex-direction: row;
+  margin-top: 10px;
+}
+
+.tableIssues_input_header label{
+  padding: 5px;
+  flex: 1;
+}
+.tableIssues_input_header p{
+  flex: 1;
+  padding: 5px;
+  text-align: right;
+}
+
+.tableIssue_descript_info{
+  margin-top: 10px;
+}
+
+.tableIssue_descript_info p {
+  padding: 10px;
+}
+
+.tableIssues_filter{
+   display: flex;
+   flex-direction: row;
+   gap: 20px;
+   margin-bottom: 20px;
+   margin-top: 20px;
+}
+
+.tableIssues_filter input{
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    color: black;
+    padding: 5px;
+    text-align: left;
+}
+
+.tableIssues_filter_select select{
+  width: 200px;
+  height: 40px;
+  padding: 0 30px 0 10px;
+  font-size: 14px;
+  border: 1.9px solid lightgray;
+  border-radius: 5px;
+  color: #39325a;
+  outline: none;
+  cursor: pointer;
+  background: #fff;
+}
+
+.tableIssues_filter button{
+  padding: 5px 10px;
+  background-color: #00712d;
+  border-radius: 10px;
+  color: white;
+  font-size: 16px;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+}
+
+.tableIssues_filter button:hover{
+  background-color: #015d35;
+}
+
+.issues_paging{
+  margin-top: 20px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.issues_page_input{
+  width: 30px;
+}
+
+.issues_page_input_inactive{
+   color: #00712d;
+   width: 100%;
+   border: 2px solid #00712d;
+   text-align: center;
+   border-radius: 10px;
+   font-size: 16px;
+   font-weight: 700;
+   margin-top: 10px;
+   cursor: pointer;
+}
+
+.issues_page_input_active{
+  color: white;
+  width: 100%;
+  background-color: #00712d;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+  text-align: center;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 700;
+  margin-top: 10px;
+  cursor: pointer;
+}
+
+
+.update_profile_btn{
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  padding: 5px 10px;
+  margin-bottom: 20px;
+  background-color: #00712d;
+  color: white;
+  border-radius: 10px;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+}
+
+.update_password_btn button{
+  margin-top: 20px;
+  float: right;
+  padding: 5px 10px;
+  border-radius: 10px;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+  background-color: #00712d;
+  color: white;
+}
+

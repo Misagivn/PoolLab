@@ -60,12 +60,15 @@ export const useAuth = () => {
         
         try {
           const decodedToken = decodeJWT(data.data);
-          handleRoleNavigation(decodedToken);
 
+          sessionStorage.setItem("accountId", decodedToken.accountId);
           sessionStorage.setItem("username", decodedToken.username);
+          sessionStorage.setItem("role", decodedToken.role);
           if (decodedToken.storeId && decodedToken.storeId.trim() !== "") {
             sessionStorage.setItem("storeId", decodedToken.storeId);
           }
+          
+          handleRoleNavigation(decodedToken);
           
           toast({
             title: AUTH_MESSAGES.LOGIN_SUCCESS,

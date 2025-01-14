@@ -6,6 +6,9 @@ import RightTab from "./righttab";
 import { BidaType } from "@/utils/types/billiardType.types";
 import { Area } from "@/utils/types/area.types";
 import ProfileDropdown from "@/app/booktable/ProfileDropdown";
+import useNotification from "@/hooks/useNotification";
+import StaffNotification from "./staffNotiComponent";
+import { HubConnectionBuilder } from "@microsoft/signalr";
 
 interface Table {
   id: string;
@@ -19,6 +22,7 @@ interface Table {
   qrcode: string;
   bidaTypeName: string;
   areaName: string;
+  oldPrice: number;
   createdDate: string;
   updatedDate: string;
   status: string;
@@ -62,11 +66,14 @@ export default function StaffPage() {
   const [selectedArea, setSelectedArea] = useState<string>("");
   const [selectedStatus, setSelectedStatus] = useState<string>("");
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
+  const [storeId, setStore] = useState<string | null>("");
   const toast = useToast();
 
-  const storeId = sessionStorage.getItem("storeId");
-
   useEffect(() => {
+    const store = sessionStorage.getItem("storeId");
+    setStore(store);
+    console.log(store);
+    // signalRTable();
     if (activeLeftTab === "table") {
       fetchBidaType();
       fetchArea();
@@ -76,23 +83,16 @@ export default function StaffPage() {
     }
   }, [activeLeftTab]);
 
-  // Auto refresh data every 30 seconds
   useEffect(() => {
-    const intervalId = setInterval(() => {
-      if (activeLeftTab === "table") {
-        fetchTables();
-      }
-    }, 30000);
-
-    return () => clearInterval(intervalId);
-  }, [activeLeftTab]);
+    signalRTable();
+  }, [storeId, selectedTable]);
 
   const handleAddToOrder = (menu: Menu) => {
     if (!selectedTable) {
       toast({
         title: "Chưa chọn bàn",
         description: "Vui lòng chọn bàn trước khi đặt món",
-        status: "warning"
+        status: "warning",
       });
       return;
     }
@@ -101,46 +101,50 @@ export default function StaffPage() {
       toast({
         title: "Không thể đặt món",
         description: "Chỉ có thể đặt món cho bàn đang có khách",
-        status: "warning"
+        status: "warning",
       });
       return;
     }
 
-    const existingItem = orderItems.find(item => item.productId === menu.id);
+    const existingItem = orderItems.find((item) => item.productId === menu.id);
     if (existingItem) {
-      setOrderItems(orderItems.map(item =>
-        item.productId === menu.id
-          ? { ...item, quantity: item.quantity + 1 }
-          : item
-      ));
+      setOrderItems(
+        orderItems.map((item) =>
+          item.productId === menu.id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        )
+      );
     } else {
-      setOrderItems([...orderItems, {
-        productId: menu.id,
-        productName: menu.name,
-        quantity: 1,
-        price: menu.price
-      }]);
+      setOrderItems([
+        ...orderItems,
+        {
+          productId: menu.id,
+          productName: menu.name,
+          quantity: 1,
+          price: menu.price,
+        },
+      ]);
     }
 
     toast({
       title: "Đã thêm món",
       description: `Đã thêm ${menu.name} vào order`,
-      status: "success"
+      status: "success",
     });
   };
 
   const fetchBidaType = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(  
+      const token = localStorage.getItem("token");
+      const response = await fetch(
         `${process.env.NEXT_PUBLIC_LOCAL_URL}/billiardtype/getallbilliardtype`,
         {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-          
+            "Content-Type": "application/json",
+          },
         }
       );
 
@@ -160,15 +164,15 @@ export default function StaffPage() {
 
   const fetchArea = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_LOCAL_URL}/area/getallarea?StoreId=${storeId}`,
         {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
+            "Content-Type": "application/json",
+          },
         }
       );
 
@@ -188,16 +192,17 @@ export default function StaffPage() {
 
   const fetchTables = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
+      const stored = sessionStorage.getItem("storeId");
       console.log(token);
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_LOCAL_URL}/billiardtable/getallbilliardtable?StroreID=${storeId}`,
+        `${process.env.NEXT_PUBLIC_LOCAL_URL}/billiardtable/getallbilliardtableforstaff?StroreID=${stored}`,
         {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
+            "Content-Type": "application/json",
+          },
         }
       );
       console.log(storeId);
@@ -227,7 +232,7 @@ export default function StaffPage() {
 
   const fetchFoods = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       const status = "Thực đơn";
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_LOCAL_URL}/Product/GetAllProducts?StoreId=${storeId}&ProductTypeName=${status}`,
@@ -235,8 +240,8 @@ export default function StaffPage() {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
+            "Content-Type": "application/json",
+          },
         }
       );
 
@@ -256,15 +261,15 @@ export default function StaffPage() {
 
   const handleFilter = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_LOCAL_URL}/billiardtable/getallbilliardtable?StroreID=${storeId}&AreaID=${selectedArea}&BilliardTypeId=${selectedBidaType}&Status=${selectedStatus}`,
+        `${process.env.NEXT_PUBLIC_LOCAL_URL}/billiardtable/getallbilliardtableforstaff?StroreID=${storeId}&AreaID=${selectedArea}&BilliardTypeId=${selectedBidaType}&Status=${selectedStatus}`,
         {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
+            "Content-Type": "application/json",
+          },
         }
       );
 
@@ -282,6 +287,41 @@ export default function StaffPage() {
     }
   };
 
+  const signalRTable = () => {
+    const connect = new HubConnectionBuilder()
+      .withUrl(`${process.env.NEXT_PUBLIC_LOCAL_SIGNAL_URL}/notificationHub`) // Thay URL bằng địa chỉ backend của bạn
+      .withAutomaticReconnect()
+      .build();
+
+    connect
+      .start()
+      .then(() => {
+        console.log("SignalR Connected2!");
+        connect
+          .invoke("JoinBranchGroup", storeId)
+          .then(() => console.log("Successfully joined group2"))
+          .catch((err) => console.error(`Error joining group: ${err.message}`));
+        console.log("fdgdfgdfg");
+        connect.on("TableStatusChanged", (tableId: string, status: string) => {
+          console.log(`Table ${tableId} status changed to ${status}`);
+          setTables((prevTables) =>
+            prevTables.map((table) =>
+              table.id === tableId ? { ...table, status: status } : table
+            )
+          );
+          if (selectedTable?.id === tableId) {
+            setSelectedTable((prev) =>
+              prev ? { ...prev, status: status } : null
+            );
+          }
+        });
+      })
+      .catch((err) => console.error("SignalR Connection Error:", err));
+
+    return () => {
+      connect.stop();
+    };
+  };
   return (
     <div className={styles.container}>
       <div className={styles.left}>
@@ -294,7 +334,7 @@ export default function StaffPage() {
           </button>
 
           <button
-            onClick={() => setActiveLeftTab("food")} 
+            onClick={() => setActiveLeftTab("food")}
             className={activeLeftTab === "food" ? styles.active : ""}
           >
             Thực Đơn
@@ -305,10 +345,13 @@ export default function StaffPage() {
           <div className={styles.left_main}>
             <div className={styles.filter_container}>
               {activeLeftTab === "table" && (
-                <form className={styles.table_filter} onSubmit={(e) => {
-                  e.preventDefault();
-                  handleFilter();
-                }}>
+                <form
+                  className={styles.table_filter}
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    handleFilter();
+                  }}
+                >
                   <div className="">
                     <select
                       value={selectedBidaType}
@@ -324,7 +367,6 @@ export default function StaffPage() {
                         </option>
                       ))}
                     </select>
-                    <span className={styles.filter_bidaType}></span>
                     <i className="bx bxs-down-arrow"></i>
                   </div>
 
@@ -343,7 +385,6 @@ export default function StaffPage() {
                         </option>
                       ))}
                     </select>
-                    <span className={styles.filter_area}></span>
                     <i className="bx bxs-down-arrow"></i>
                   </div>
 
@@ -360,7 +401,6 @@ export default function StaffPage() {
                       <option value="Có Khách">Có Khách</option>
                       <option value="Bàn Đặt">Bàn Đặt</option>
                     </select>
-                    <span className={styles.filter_status}></span>
                     <i className="bx bxs-down-arrow"></i>
                   </div>
 
@@ -378,7 +418,9 @@ export default function StaffPage() {
                     tables.map((table) => (
                       <div
                         key={table.id}
-                        className={`${styles.card} ${selectedTable?.id === table.id ? styles.selected : ''}`}
+                        className={`${styles.card} ${
+                          selectedTable?.id === table.id ? styles.selected : ""
+                        }`}
                         onClick={() => setSelectedTable(table)}
                       >
                         <div>
@@ -457,14 +499,16 @@ export default function StaffPage() {
           <ProfileDropdown />
         </div>
         <div className={styles.right_content}>
-          <RightTab 
-            selectedTable={selectedTable} 
-            menus={menus} 
-            orderItems={orderItems} 
+          <RightTab
+            selectedTable={selectedTable}
+            menus={menus}
+            orderItems={orderItems}
             onUpdateOrderItems={setOrderItems}
           />
         </div>
       </div>
+
+      <StaffNotification></StaffNotification>
     </div>
   );
 }

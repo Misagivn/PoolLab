@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import {
   Box,
@@ -24,51 +24,51 @@ import {
   Avatar,
   Icon,
   useDisclosure,
-} from '@chakra-ui/react';
-import { useState, useEffect } from 'react';
-import { 
-  FiSearch, 
+} from "@chakra-ui/react";
+import { useState, useEffect } from "react";
+import {
+  FiSearch,
   FiRefreshCcw,
   FiUserPlus,
   FiInfo,
-  FiEdit2
-} from 'react-icons/fi';
-import { useStaff } from '@/hooks/useStaff';
-import { StaffFormModal } from '@/components/staff/StaffFormModal';
-import { StaffDetailModal } from '@/components/staff/StaffDetailModal';
-import { UpdateStaffModal } from '@/components/staff/UpdateStaffModal';
-import { ProductPagination } from '@/components/common/paginations';
+  FiEdit2,
+} from "react-icons/fi";
+import { useStaff } from "@/hooks/useStaff";
+import { StaffFormModal } from "@/components/staff/StaffFormModal";
+import { StaffDetailModal } from "@/components/staff/StaffDetailModal";
+import { UpdateStaffModal } from "@/components/staff/UpdateStaffModal";
+import { ProductPagination } from "@/components/common/paginations";
 
 export default function StaffPage() {
-  const { 
-    staff, 
+  const {
+    staff,
     loading,
     pagination,
     fetchStaff,
     selectedStaff,
     selectStaff,
-    getWorkingStatus 
+    getWorkingStatus,
   } = useStaff();
-  
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filter, setFilter] = useState('all');
-  
-  const { 
-    isOpen: isDetailOpen, 
-    onOpen: onDetailOpen, 
-    onClose: onDetailClose 
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filter, setFilter] = useState("all");
+
+  const {
+    isOpen: isDetailOpen,
+    onOpen: onDetailOpen,
+    onClose: onDetailClose,
   } = useDisclosure();
-  
-  const { 
-    isOpen: isFormOpen, 
-    onOpen: onFormOpen, 
-    onClose: onFormClose 
+
+  const {
+    isOpen: isFormOpen,
+    onOpen: onFormOpen,
+    onClose: onFormClose,
   } = useDisclosure();
 
   const {
     isOpen: isUpdateOpen,
     onOpen: onUpdateOpen,
-    onClose: onUpdateClose
+    onClose: onUpdateClose,
   } = useDisclosure();
 
   useEffect(() => {
@@ -85,8 +85,8 @@ export default function StaffPage() {
   };
 
   const handleRefresh = () => {
-    setSearchQuery('');
-    setFilter('all');
+    setSearchQuery("");
+    setFilter("all");
     fetchStaff(1);
   };
 
@@ -132,8 +132,8 @@ export default function StaffPage() {
             onChange={(e) => setFilter(e.target.value)}
           >
             <option value="all">Tất cả trạng thái</option>
-            <option value="đang làm việc">Đang làm việc</option>
-            <option value="đã nghỉ việc">Đã nghỉ việc</option>
+            <option value="Kích Hoạt">Đang làm việc</option>
+            <option value="Vô Hiệu">Đã nghỉ việc</option>
           </Select>
 
           <IconButton
@@ -149,30 +149,38 @@ export default function StaffPage() {
           <Table variant="simple" bg="white">
             <Thead bg="gray.50">
               <Tr>
-                <Th width="80px" textAlign="center">STT</Th>
+                <Th width="80px" textAlign="center">
+                  STT
+                </Th>
                 <Th>NHÂN VIÊN</Th>
                 <Th>EMAIL</Th>
                 <Th>SỐ ĐIỆN THOẠI</Th>
                 <Th>TRẠNG THÁI</Th>
-                <Th width="100px" textAlign="right">THAO TÁC</Th>
+                <Th width="100px" textAlign="right">
+                  THAO TÁC
+                </Th>
               </Tr>
             </Thead>
             <Tbody>
               {staff.map((member, index) => (
                 <Tr key={member.id}>
                   <Td textAlign="center">
-                    {(pagination.currentPage - 1) * pagination.pageSize + index + 1}
+                    {(pagination.currentPage - 1) * pagination.pageSize +
+                      index +
+                      1}
                   </Td>
                   <Td>
                     <HStack spacing={3}>
-                      <Avatar 
-                        size="sm" 
+                      <Avatar
+                        size="sm"
                         name={member.fullName}
                         src={member.avatarUrl || undefined}
                       />
                       <Box>
                         <Text fontWeight="medium">{member.fullName}</Text>
-                        <Text fontSize="sm" color="gray.500">{member.userName}</Text>
+                        <Text fontSize="sm" color="gray.500">
+                          {member.userName}
+                        </Text>
                       </Box>
                     </HStack>
                   </Td>
@@ -180,7 +188,9 @@ export default function StaffPage() {
                   <Td>{member.phoneNumber || "Chưa cập nhật"}</Td>
                   <Td>
                     <Badge
-                      colorScheme={member.status === 'Kích hoạt' ? 'green' : 'red'}
+                      colorScheme={
+                        member.status === "Kích hoạt" ? "green" : "red"
+                      }
                     >
                       {getWorkingStatus(member.status)}
                     </Badge>
@@ -216,22 +226,16 @@ export default function StaffPage() {
         </Box>
 
         {staff.length === 0 ? (
-          <Flex 
-            direction="column" 
-            align="center" 
-            justify="center" 
+          <Flex
+            direction="column"
+            align="center"
+            justify="center"
             py={10}
             bg="gray.50"
             borderRadius="lg"
           >
-            <Text color="gray.500">
-              Không tìm thấy nhân viên nào
-            </Text>
-            <Button
-              mt={4}
-              size="sm"
-              onClick={handleRefresh}
-            >
+            <Text color="gray.500">Không tìm thấy nhân viên nào</Text>
+            <Button mt={4} size="sm" onClick={handleRefresh}>
               Đặt lại bộ lọc
             </Button>
           </Flex>
@@ -245,10 +249,7 @@ export default function StaffPage() {
         )}
 
         {/* Modals */}
-        <StaffFormModal
-          isOpen={isFormOpen}
-          onClose={onFormClose}
-        />
+        <StaffFormModal isOpen={isFormOpen} onClose={onFormClose} />
 
         <StaffDetailModal
           isOpen={isDetailOpen}
@@ -256,7 +257,7 @@ export default function StaffPage() {
           staff={selectedStaff}
         />
 
-        <UpdateStaffModal 
+        <UpdateStaffModal
           isOpen={isUpdateOpen}
           onClose={onUpdateClose}
           staff={selectedStaff}

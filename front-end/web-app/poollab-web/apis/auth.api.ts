@@ -4,11 +4,10 @@ interface LoginResponse {
   data: string;
 }
 
-const AUTH_API_URL = 'https://poollabwebapi20241008201316.azurewebsites.net/api';
 
 export const authApi = {
   login: async (email: string, password: string): Promise<LoginResponse> => {
-    const response = await fetch(`${AUTH_API_URL}/Auth/LoginStaff`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_LOCAL_URL}/Auth/LoginStaff`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',  

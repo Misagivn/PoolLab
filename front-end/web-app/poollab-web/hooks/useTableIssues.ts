@@ -4,9 +4,18 @@ import { TableIssue } from '@/utils/types/tableIssues.types';
 import { tableIssuesApi } from '@/apis/tableIssues.api';
 import { jwtDecode } from 'jwt-decode';
 
+interface MaintenanceFormData {
+  tableIssuesId: string;
+  technicianId: string;
+  cost: number;
+  startDate: string;
+  endDate: string;
+}
+
 export const useTableIssues = () => {
   const [issues, setIssues] = useState<TableIssue[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedIssue, setSelectedIssue] = useState<TableIssue | null>(null);
   const [pagination, setPagination] = useState({
     currentPage: 1,
     totalPages: 1,
@@ -50,10 +59,45 @@ export const useTableIssues = () => {
     }
   }, [pagination.pageSize, toast]);
 
+  const createMaintenance = async (data: MaintenanceFormData) => {
+    try {
+      const response = await tableIssuesApi.createMaintenance(data);
+      
+      if (response.status === 200) {
+        toast({
+          title: 'Thành công',
+          description: 'Đã tạo lệnh bảo trì thành công',
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        });
+        await fetchIssues(pagination.currentPage);
+        return true;
+      }
+      throw new Error(response.message || 'Tạo lệnh bảo trì thất bại');
+    } catch (err) {
+      toast({
+        title: 'Lỗi',
+        description: err instanceof Error ? err.message : 'Không thể tạo lệnh bảo trì',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+      throw err;
+    }
+  };
+
+  const selectIssue = (issue: TableIssue | null) => {
+    setSelectedIssue(issue);
+  };
+
   return {
     issues,
     loading,
+    selectedIssue,
     pagination,
-    fetchIssues
+    fetchIssues,
+    createMaintenance,
+    selectIssue,
   };
 };

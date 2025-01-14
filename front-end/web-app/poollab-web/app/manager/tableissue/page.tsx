@@ -13,7 +13,6 @@ import {
   Td,
   IconButton,
   useDisclosure,
-  useToast,
   Stack,
   Text,
   Badge,
@@ -21,14 +20,14 @@ import {
   Input,
   InputGroup,
   InputLeftElement,
-  Button,
 } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
-import { FiSearch, FiRefreshCcw, FiEye } from 'react-icons/fi';
-import { TableIssue } from '@/utils/types/tableIssues.types';
+import { FiSearch, FiRefreshCcw, FiEye, FiTool } from 'react-icons/fi';
 import { useTableIssues } from '@/hooks/useTableIssues';
 import { TableIssueDetailModal } from '@/components/tableIssues/TableIssueDetailModal';
 import { ProductPagination } from '@/components/common/paginations';
+import { TableIssue } from '@/utils/types/tableIssues.types';
+
 
 export default function TableIssuesPage() {
   const {
@@ -36,10 +35,11 @@ export default function TableIssuesPage() {
     loading,
     pagination,
     fetchIssues,
+    selectedIssue,
+    selectIssue,
   } = useTableIssues();
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedIssue, setSelectedIssue] = useState<TableIssue | null>(null);
 
   const {
     isOpen: isDetailOpen,
@@ -47,18 +47,37 @@ export default function TableIssuesPage() {
     onClose: onDetailClose
   } = useDisclosure();
 
+  const {
+    isOpen: isMaintenanceOpen,
+    onOpen: onMaintenanceOpen,
+    onClose: onMaintenanceClose
+  } = useDisclosure();
+
   useEffect(() => {
     fetchIssues(1);
   }, [fetchIssues]);
 
-  // Fetch new data when search changes
   useEffect(() => {
-    fetchIssues(1);
+    if (searchQuery) {
+      fetchIssues(1);
+    }
   }, [searchQuery, fetchIssues]);
 
   const handleRefresh = () => {
     setSearchQuery('');
     fetchIssues(1);
+  };
+
+  
+  const handleOpenMaintenance = (issue: TableIssue) => {
+    selectIssue(issue);
+    onMaintenanceOpen();
+  };
+  
+
+  const handleOpenDetail = (issue: TableIssue) => {
+    selectIssue(issue);
+    onDetailOpen();
   };
 
   const filteredIssues = issues.filter(issue => 
@@ -81,12 +100,10 @@ export default function TableIssuesPage() {
   return (
     <Box p={6}>
       <Stack spacing={6}>
-        {/* Header */}
         <Flex justify="space-between" align="center">
           <Heading size="lg">Quản lý sự cố bàn</Heading>
         </Flex>
 
-        {/* Search */}
         <HStack spacing={4}>
           <InputGroup maxW="320px">
             <InputLeftElement>
@@ -106,7 +123,6 @@ export default function TableIssuesPage() {
           />
         </HStack>
 
-        {/* Issues Table */}
         <Table variant="simple" bg="white" boxShadow="sm" rounded="lg">
           <Thead bg="gray.50">
             <Tr>
@@ -115,7 +131,6 @@ export default function TableIssuesPage() {
               <Th>TÊN BÀN</Th>
               <Th>NGƯỜI BÁO CÁO</Th>
               <Th>CHI PHÍ</Th>
-              <Th>TRẠNG THÁI</Th>
               <Th>TRẠNG THÁI SỬA CHỮA</Th>
               <Th>NGÀY TẠO</Th>
               <Th width="100px" textAlign="right">THAO TÁC</Th>
@@ -131,13 +146,6 @@ export default function TableIssuesPage() {
                 <Td>{formatPrice(issue.estimatedCost)}</Td>
                 <Td>
                   <Badge
-                    colorScheme={issue.status === 'Thanh Toán' ? 'green' : 'yellow'}
-                  >
-                    {issue.status}
-                  </Badge>
-                </Td>
-                <Td>
-                  <Badge
                     colorScheme={issue.repairStatus === 'Hoàn Thành' ? 'green' : 'yellow'}
                   >
                     {issue.repairStatus}
@@ -146,16 +154,25 @@ export default function TableIssuesPage() {
                 <Td>{formatDateTime(issue.createdDate)}</Td>
                 <Td>
                   <Flex justify="flex-end">
-                    <IconButton
-                      aria-label="View details"
-                      icon={<Icon as={FiEye} />}
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => {
-                        setSelectedIssue(issue);
-                        onDetailOpen();
-                      }}
-                    />
+                    <HStack spacing={2}>
+                      <IconButton
+                        aria-label="View details"
+                        icon={<Icon as={FiEye} />}
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleOpenDetail(issue)}
+                      />
+                      {/* {issue.repairStatus !== 'Hoàn Thành' && (
+                        <IconButton
+                          aria-label="Create maintenance"
+                          icon={<Icon as={FiTool} />}
+                          size="sm"
+                          variant="ghost"
+                          colorScheme="blue"
+                          onClick={() => handleOpenMaintenance(issue)}
+                        />
+                      )} */}
+                    </HStack>
                   </Flex>
                 </Td>
               </Tr>
@@ -163,22 +180,16 @@ export default function TableIssuesPage() {
 
             {filteredIssues.length === 0 && (
               <Tr>
-                <Td colSpan={9}>
+                <Td colSpan={8}>
                   <Flex 
                     direction="column" 
                     align="center" 
                     justify="center" 
                     py={10}
                   >
-                    <Text color="gray.500" mb={4}>
+                    <Text color="gray.500">
                       Chưa có sự cố nào được báo cáo
                     </Text>
-                    <Button
-                      leftIcon={<Icon as={FiRefreshCcw} />}
-                      onClick={handleRefresh}
-                    >
-                      Tải lại
-                    </Button>
                   </Flex>
                 </Td>
               </Tr>
@@ -186,7 +197,6 @@ export default function TableIssuesPage() {
           </Tbody>
         </Table>
 
-        {/* Pagination */}
         {issues.length > 0 && (
           <ProductPagination
             currentPage={pagination.currentPage}
@@ -197,12 +207,16 @@ export default function TableIssuesPage() {
         )}
       </Stack>
 
-      {/* Detail Modal */}
       <TableIssueDetailModal
         isOpen={isDetailOpen}
         onClose={onDetailClose}
         issue={selectedIssue}
       />
+
+      {/* <CreateMaintenanceFormModal
+        isOpen={isMaintenanceOpen}
+        onClose={onMaintenanceClose}
+      /> */}
     </Box>
   );
 }
